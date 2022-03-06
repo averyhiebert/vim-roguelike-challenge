@@ -61,3 +61,4 @@ class Entity:
     def pos(self) -> Tuple[int,int]:
         """ The entity's position as a tuple. """
         return (self.x,self.y)
+
