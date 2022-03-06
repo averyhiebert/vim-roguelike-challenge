@@ -42,8 +42,11 @@ def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
     dungeon = GameMap(engine,map_width, map_height,entities=[player])
     player.place((15,15),dungeon)
 
+    entity_factories.nano.spawn(dungeon,25,11)
     entity_factories.nano.spawn(dungeon,16,16)
     entity_factories.ed.spawn(dungeon,16,20)
+    entity_factories.ed.spawn(dungeon,18,20)
+    entity_factories.ed.spawn(dungeon,27,22)
 
     room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
     room_2 = RectangularRoom(x=35,y=15,width=10,height=15)

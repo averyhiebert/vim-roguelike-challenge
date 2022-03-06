@@ -77,7 +77,7 @@ def parse_movement(command,engine:Engine) -> Path:
         base_path = engine.game_map.get_mono_path(player.pos,bottom)
         base_path.truncate_to_navigable(player)
         if n:
-            #TRY to go down by given value
+            #Try to move up by given value
             end = base_path.end
             x,y = end
             target = (x,y - (n - 1))
@@ -117,8 +117,10 @@ def parse_movement(command,engine:Engine) -> Path:
         ignore = []
         for i in range(n):
             start_pos = inflection_points[-1]
+            exclude_adjacent = (mode=="t")
             target_location = engine.game_map.get_nearest(start_pos,
-                target_char,ignore=inflection_points)
+                target_char,ignore=inflection_points,
+                exclude_adjacent=exclude_adjacent)
             if target_location:
                 inflection_points.append(target_location)
             else:
@@ -133,9 +135,12 @@ def parse_movement(command,engine:Engine) -> Path:
             target_location = inflection_points[-1]
             target_location = bump_destination(engine,inflection_points[-2],
                 target_location,mode)
+            inflection_points[-1] = target_location
+
+        path = engine.game_map.get_poly_path(inflection_points)
         
         # TODO: Proper polyline path
-        path = engine.game_map.get_mono_path(player.pos,target_location)
+        #path = engine.game_map.get_mono_path(player.pos,target_location)
         path.truncate_to_navigable(player)
         return path
     elif base[0] in "`'":

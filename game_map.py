@@ -70,9 +70,13 @@ class GameMap:
         return True
 
     def get_nearest(self,location:Tuple[int,int],char:str,
-            ignore:Option[List[Tuple[int,int]]]=None) -> Optional[Tuple[int,int]]:
+            ignore:Option[List[Tuple[int,int]]]=None,
+            exclude_adjacent=False) -> Optional[Tuple[int,int]]:
         """ Return the nearest tile (to the specified location)
         that is rendered as the given char.
+
+        If exclude_adjacent is true, then directly adjacent tiles are not
+        considered.
         
         Return None if no valid target found."""
         char_array = self.engine.char_array
@@ -84,6 +88,8 @@ class GameMap:
         candidates = list(zip(*np.nonzero(char_array==target_val)))
         if ignore:
             candidates = [(x,y) for x,y in candidates if (x,y) not in ignore]
+        if exclude_adjacent:
+            candidates = [c for c in candidates if np.linalg.norm(location - c) > np.sqrt(2) + 0.0000001]
         candidates.sort(key=lambda c: np.linalg.norm(location - c))
         if len(candidates) > 0:
             return candidates[0]
@@ -123,6 +129,15 @@ class GameMap:
         a single end point."""
         points = [(x,y) for x,y in tcod.los.bresenham(start,end)]
         return Path(points=points,game_map=self)
+
+    def get_poly_path(self,points:List[Tuple[int,int]]) -> Path:
+        """ Returns the path joining the points given."""
+        full_path = []
+        for p1,p2 in zip(points[:-1],points[1:]):
+            full_path.extend([(x,y) for x,y in tcod.los.bresenham(p1,p2)])
+        # Remove duplicates
+        full_path = list(dict.fromkeys(full_path))
+        return Path(points=full_path,game_map=self)
 
     def render(self,console: Console) -> None:
         """ Render the map.
