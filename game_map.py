@@ -71,7 +71,7 @@ class GameMap:
 
     def get_nearest(self,location:Tuple[int,int],char:str,
             ignore:Option[List[Tuple[int,int]]]=None,
-            exclude_adjacent=False) -> Optional[Tuple[int,int]]:
+            exclude_adjacent=False) -> List[Tuple[int,int]]:
         """ Return the nearest tile (to the specified location)
         that is rendered as the given char.
 
@@ -91,10 +91,7 @@ class GameMap:
         if exclude_adjacent:
             candidates = [c for c in candidates if np.linalg.norm(location - c) > np.sqrt(2) + 0.0000001]
         candidates.sort(key=lambda c: np.linalg.norm(location - c))
-        if len(candidates) > 0:
-            return candidates[0]
-        else:
-            return None
+        return candidates
 
     def get_blocking_entity_at_location(self,
             location:Tuple[int,int]) -> Optional[Entity]:

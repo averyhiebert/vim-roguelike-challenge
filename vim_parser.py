@@ -107,40 +107,31 @@ def parse_movement(command,engine:Engine) -> Path:
         path.truncate_to_navigable(player)
         return path
     elif base[0] in "tf":
+        # TODO: Instead of chaining, better to just return the
+        #  list in sorted order and then go through n elements of the list.
         if not n:
             n = 1
 
         mode = base[0] # should be t or f
         target_char = base[-1]
+        exclude_adjacent = (mode=="t")
 
-        inflection_points = [player.pos]
-        ignore = []
-        for i in range(n):
-            start_pos = inflection_points[-1]
-            exclude_adjacent = (mode=="t")
-            target_location = engine.game_map.get_nearest(start_pos,
-                target_char,ignore=inflection_points,
-                exclude_adjacent=exclude_adjacent)
-            if target_location:
-                inflection_points.append(target_location)
-            else:
-                break
+        possible_targets = engine.game_map.get_nearest(player.pos,
+            target_char,exclude_adjacent=exclude_adjacent)
 
-        if len(inflection_points) == 1:
+        # Closest n targets (to original starting location)
+        targets = [player.pos] + possible_targets[:n]
+    
+        if len(targets) == 1:
             # This is not an "error," exactly, it just goes nowhere.
-            target_location = inflection_points[0]
+            target_location = targets[0]
         else:
-            # Handle the details of whether to overshoot/undershoot a target,
-            #  based on "t" or "f" mode.
-            target_location = inflection_points[-1]
-            target_location = bump_destination(engine,inflection_points[-2],
-                target_location,mode)
-            inflection_points[-1] = target_location
+            # Handle the details of whether to overshoot/undershoot the
+            #  final target, based on "t" or "f" mode.
+            targets[-1] = bump_destination(engine,targets[-2],
+                targets[-1],mode)
 
-        path = engine.game_map.get_poly_path(inflection_points)
-        
-        # TODO: Proper polyline path
-        #path = engine.game_map.get_mono_path(player.pos,target_location)
+        path = engine.game_map.get_poly_path(targets)
         path.truncate_to_navigable(player)
         return path
     elif base[0] in "`'":
