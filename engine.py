@@ -22,8 +22,10 @@ class Engine:
         self.player = player
 
     def handle_enemy_turns(self) -> None:
+        print(".")
         for entity in self.game_map.entities - {self.player}:
-            print(f"The {entity.name} does nothing")
+            #print(f"The {entity.name} does nothing")
+            pass
 
     def update_fov(self) -> None:
         """ Recompute visible area based on player's POV."""

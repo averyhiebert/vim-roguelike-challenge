@@ -25,10 +25,36 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
         "l":(1,0),
     }
 
-    if command in directions:
-        # Simplest case
-        return BumpAction(engine.player,directions[command])
-    raise ValueError("Invalid command.")
+
+    # Matches something that can be parsed to give a movement
+    valid_movement_re = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|[tf].|[we]|[HML$]|[`'][a-zA-Z])"
+
+    # Matches a prefix for yank or delete
+    valid_pyd_re = r'(?P<register>"[a-z])?(?P<command>pp|yy|dd|[yd](?P<movement>' + valid_movement_re + '))'
+
+    # To understand wtf this is, see:
+    #  https://stackoverflow.com/questions/42461651/partial-matching-a-string-against-a-regex
+    partial_valid_movement_re = r"([0-9]|$)*(([hjkl]|$)|([tf]|$)(.|$)|([we|$])|([HML$]|$)|([`']|$)([a-zA-Z]|$))"
+
+    print(f"DEBUG partial: {command}")
+
+    if re.match(valid_movement_re,command):
+        print(f"Valid movement!")
+        if command in directions:
+            # Simplest case
+            return BumpAction(engine.player,directions[command])
+        else:
+            # TEMP just to reset
+            return BumpAction(engine.player,(0,1))
+    #elif re.match(valid_pyd_re,command):
+    #    pass
+    elif re.match(partial_valid_movement_re,command):
+        # TODO partial commands
+        # TODO Check for cases that we don't want to penalize with an
+        #  enemy turn; maybe selecting registers, for instance?
+        return None
+    else:
+        raise ValueError("Invalid command.")
 
 class VimCommandParser:
 
