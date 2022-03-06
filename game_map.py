@@ -54,10 +54,11 @@ class GameMap:
         yield from (e for e in self.entities 
             if isinstance(e,Actor) and e.is_alive)
 
-    def add_trace(self,points:List[Tuple[int,int]]) -> None:
+    def add_trace(self,points:List[Tuple[int,int]],
+            color:Tuple[int,int,int]=colors.default_trace) -> None:
         """ Add a trace to draw on the map. Points should be a list
         of (x,y) tuples to add a trace to."""
-        self.traces.append(MapTrace(points,fade_time=0.5))
+        self.traces.append(MapTrace(points,fade_time=0.5,color=color))
 
     def is_navigable(self,location:Tuple[int,int],
             entity:Entity=None) -> Optional[Entity]:
@@ -110,7 +111,7 @@ class GameMap:
     def get_actor_at_location(self,
             location:Tuple[int,int]) -> Optional[Actor]:
         for actor in self.actors:
-            if actor.x == x and actor.y == y:
+            if actor.pos == location:
                 return actor
         return None
 

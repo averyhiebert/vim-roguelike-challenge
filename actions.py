@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from typing import Optional, Tuple, TYPE_CHECKING
 
+from utils import roll_dice
+import colors
+
 if TYPE_CHECKING:
     from engine import Engine
-    from entity import Entity
+    from entity import Actor, Entity
 
 class Action:
-    def __init__(self, entity:Entity,skip_turn:bool=False) -> None:
+    def __init__(self, entity:Actor,skip_turn:bool=False) -> None:
         super().__init__()
         self.entity = entity
         self.skip_turn = skip_turn # True if action does not expend a turn
@@ -71,14 +74,44 @@ class ActionMoveAlongPath(ActionWithPath):
     def perform(self) -> None:
         self.path.truncate_to_navigable(self.entity)
         destination = self.path.last_occupiable_square(self.entity)
+        
+        if len(self.path.points) >= 2 and destination == self.path.points[-2]:
+            # Possibly a melee attack
+            target_x,target_y = self.path.points[-1]
+            direction = (target_x - self.entity.x, target_y - self.entity.y)
+            # Would be nicer if MeleeAction took a destination, not direction,
+            #  but oh well...
+            MeleeAction(self.entity,direction).perform()
+
         self.entity.move_to(*destination)
         if len(self.path.points) > 2:
             self.entity.gamemap.add_trace(self.path.points)
+
+class ActionDeleteAlongPath(ActionWithPath):
+    def perform(self) -> None:
+        self.path.truncate_to_navigable(self.entity)
+        destination = self.path.last_occupiable_square(self.entity)
+
+        # Move (TODO: Maybe this should be optional)
+        self.entity.move_to(*destination)
+
+        # Attack everything along path.
+        for point in self.path.points:
+            target = self.entity.gamemap.get_actor_at_location(point)
+            if target and not (target == self.entity):
+                target_x,target_y = point
+                direction = (target_x - self.entity.x, target_y - self.entity.y)
+                MeleeAction(self.entity,direction).perform()
+        
+        # Draw trace
+        if len(self.path.points) > 2:
+            self.entity.gamemap.add_trace(self.path.points,
+                color=colors.delete_trace)
     
     
 
 class ActionWithDirection(Action):
-    def __init__(self, entity:Entity, direction: Tuple[int,int]):
+    def __init__(self, entity:Actor, direction: Tuple[int,int]):
         # Note: action with direction never skips a turn
         super().__init__(entity)
         self.direction = direction
@@ -104,6 +137,11 @@ class ActionWithDirection(Action):
         """ Return the blocking entity at this action's destination."""
         return self.engine.game_map.get_blocking_entity_at_location(self.dest)
 
+    @property
+    def target_actor(self) -> Optional[Actor]:
+        """Return the actor at this action's destination."""
+        return self.engine.game_map.get_actor_at_location(self.dest)
+
 class MovementAction(ActionWithDirection):
     def perform(self) -> None:
 
@@ -117,14 +155,23 @@ class MovementAction(ActionWithDirection):
 
 class MeleeAction(ActionWithDirection):
     def perform(self) -> None:
-        target = self.blocking_entity
-        if target:
-            print(f"{self.entity.name} attacked {target.name}")
+        target = self.target_actor
+
+        if not target:
+            return # Nothing to attack
+
+        to_hit = roll_dice(self.entity.fighter.to_hit)
+        if to_hit > target.fighter.AC:
+            damage = roll_dice(self.entity.fighter.damage)
+            print(f"{self.entity.name} attacked {target.name} for {damage} hp")
+            target.fighter.hp -= damage
+        else:
+            print(f"{self.entity.name} missed {target.name}")
 
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:
 
-        if self.blocking_entity:
+        if self.target_actor:
             return MeleeAction(self.entity,self.direction).perform()
         else:
             return MovementAction(self.entity,self.direction).perform()

@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 import tcod
 
-from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark
+from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -33,6 +33,10 @@ class VimCommandParser:
         raise NotImplementedError(message)
 
     def reset(self):
+        """ Only resets us back to able to receive new commands.
+
+        Does not reset the last_tf_command or other similar state that may
+        be stored in the future."""
         self.partial_command = "" # i.e. command so far
 
     def next_key(self,char:str) -> Optional[Action]:
@@ -247,7 +251,6 @@ class VimCommandParser:
             return final_hope
         else:
             return target
-        
 
     def parse_partial_command(self) -> Optional[Action]:
         """ 
@@ -296,14 +299,25 @@ class VimCommandParser:
 
         if re.match(valid_movement_re,command):
             # Basic movement
-            match = re.match(valid_movement_re, command)
-            path = self.parse_movement(command)
             self.reset()
+            path = self.parse_movement(command)
             return ActionMoveAlongPath(engine.player,path)
         elif re.match(valid_pyd_re, command):
             # A yank, pull, or delete
             self.reset()
-            raise NotImplementedError("This command not implemented")
+            match = re.match(valid_pyd_re,command)
+            main_command = match.group("command")
+            if main_command == "dd":
+                # I guess in retrospect this doesn't do much
+                # TODO Area of effect or something?
+                return WaitAction(engine.player)
+            elif main_command[0] == "d":
+                movement = match.group("movement")
+                path = self.parse_movement(movement)
+                return ActionDeleteAlongPath(engine.player,path)
+            else:
+                print(main_command)
+                raise NotImplementedError("This command not implemented")
         elif re.match("m.",command):
             # Set a mark in register .
             register = command[-1]
