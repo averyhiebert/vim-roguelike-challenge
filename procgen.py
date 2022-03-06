@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Tuple
 
+import entity_factories
 from game_map import GameMap
 import tile_types
 
@@ -31,12 +32,18 @@ class RectangularRoom:
             and self.y2 >= other.y1
         )
 
-def generate_dungeon(map_width,map_height) -> GameMap:
+def generate_dungeon(map_width,map_height,player) -> GameMap:
     """ Not gonna bother with random generation until I have
     most of the vim commands/movement/etc. dealt with, since
     that's the core priority for this game.
     """
-    dungeon = GameMap(map_width, map_height)
+
+    dungeon = GameMap(map_width, map_height,entities=[player])
+    player.x = 15
+    player.y = 15
+
+    entity_factories.nano.spawn(dungeon,16,16)
+    entity_factories.ed.spawn(dungeon,16,20)
 
     room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
     room_2 = RectangularRoom(x=35,y=15,width=10,height=15)
@@ -44,6 +51,7 @@ def generate_dungeon(map_width,map_height) -> GameMap:
     dungeon.tiles[room_1.inner] = tile_types.floor
     dungeon.tiles[room_2.inner] = tile_types.floor
     dungeon.tiles[15:36,18] = tile_types.floor
+
 
     return dungeon
 
