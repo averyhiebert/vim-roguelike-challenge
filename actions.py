@@ -33,9 +33,15 @@ class EscapeAction(Action):
     def perform(self) -> None:
         raise SystemExit()
 
+class WaitAction(Action):
+    def perform(self) -> None:
+        pass
+
 class DummyAction(Action):
     """ An action that does nothing, but can potentially signal that
-    no enemy turn is to be performed in response to the latest event."""
+    no enemy turn is to be performed in response to the latest event.
+    
+    Currently the same as WaitAction, I guess."""
 
     def perform(self) -> None:
         pass
@@ -113,7 +119,7 @@ class MeleeAction(ActionWithDirection):
     def perform(self) -> None:
         target = self.blocking_entity
         if target:
-            print(f"You attacked {target.name}")
+            print(f"{self.entity.name} attacked {target.name}")
 
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:

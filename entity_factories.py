@@ -1,11 +1,31 @@
-from entity import Entity
+from components.ai import HostileEnemy
+from components.fighter import Fighter
+from entity import Entity, Actor
 import colors
 
-player = Entity(char="@",color=colors.default_fg,name="Player",
-    summary="A daring rogue.",blocks_movement=True)
+player = Actor(
+    char="@",
+    color=colors.default_fg,
+    name="Player",
+    summary="A daring rogue.",
+    ai_cls=HostileEnemy,
+    fighter=Fighter(hp=30,AC=10,to_hit="1d20",damage="1d20")
+)
 
 # Define enemy types here
-nano = Entity(char="n",color=colors.default_fg,name="nano",
-    summary="A harmless text editor.",blocks_movement=True)
-ed = Entity(char="e",color=colors.default_fg,name="ed",
-    summary="An ? known for ? and ?",blocks_movement=True)
+nano = Actor(
+    char="n",
+    color=colors.default_fg,
+    name="nano",
+    summary="A harmless text editor.",
+    ai_cls=HostileEnemy,
+    fighter=Fighter(hp=8,AC=8,to_hit="1d20",damage="1d4")
+)
+ed = Actor(
+    char="e",
+    color=colors.default_fg,
+    name="ed",
+    summary="An ? known for ? and ?",
+    ai_cls=HostileEnemy,
+    fighter=Fighter(hp=8,AC=8,to_hit="1d12",damage="1d6")
+)

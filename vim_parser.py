@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 import tcod
 
-from actions import BumpAction, DummyAction, ActionMoveAlongPath, ActionMakeMark
+from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -64,14 +64,13 @@ class VimCommandParser:
                 raise NotImplementedError(f"{char} mode not yet implemented")
             elif char == " ":
                 # Do nothing, but DO perform an enemy turn
-                return DummyAction(self.engine.player)
+                self.reset()
+                return WaitAction(self.engine.player)
         
         self.partial_command += char
 
         try:
             action = self.parse_partial_command() 
-            if action:
-                self.reset()
         except VimError as err:
             self.reset()
             raise err
@@ -299,25 +298,29 @@ class VimCommandParser:
             # Basic movement
             match = re.match(valid_movement_re, command)
             path = self.parse_movement(command)
+            self.reset()
             return ActionMoveAlongPath(engine.player,path)
         elif re.match(valid_pyd_re, command):
             # A yank, pull, or delete
+            self.reset()
             raise NotImplementedError("This command not implemented")
         elif re.match("m.",command):
             # Set a mark in register .
             register = command[-1]
+            self.reset()
             return ActionMakeMark(engine.player,register)
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an
         #   enemy turn; maybe selecting registers, for instance?
+        #   In those cases, do not return an action.
         elif re.match(partial_valid_movement_re,command):
-            return None
+            return WaitAction(engine.player)
         elif re.match(partial_valid_pyd_re,command):
-            return None
+            return WaitAction(engine.player)
         elif command in "m":
             # Some straggler/singleton possibilities
-            return None
+            return WaitAction(engine.player)
         else:
             raise VimError("Invalid command.")
 

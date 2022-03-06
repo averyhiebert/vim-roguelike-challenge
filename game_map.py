@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Iterable, TYPE_CHECKING
+from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 import re
 
 import numpy as np # type: ignore
 import tcod
 from tcod.console import Console
 
+from entity import Actor
 import tile_types
 import colors
 
@@ -46,6 +47,12 @@ class GameMap:
     @property
     def center(self):
         return (self.width//2, self.height//2)
+
+    @property
+    def actors(self) -> Iterator[Actor]:
+        """Iterate over the map's living actors."""
+        yield from (e for e in self.entities 
+            if isinstance(e,Actor) and e.is_alive)
 
     def add_trace(self,points:List[Tuple[int,int]]) -> None:
         """ Add a trace to draw on the map. Points should be a list
@@ -98,6 +105,13 @@ class GameMap:
         for entity in self.entities:
             if entity.blocks_movement and entity.pos == location:
                 return entity
+        return None
+
+    def get_actor_at_location(self,
+            location:Tuple[int,int]) -> Optional[Actor]:
+        for actor in self.actors:
+            if actor.x == x and actor.y == y:
+                return actor
         return None
 
     def in_bounds(self, position:Tuple[int,int]) -> bool:
