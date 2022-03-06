@@ -63,6 +63,7 @@ class ActionMoveAlongPath(ActionWithPath):
     """ Move to end of path."""
 
     def perform(self) -> None:
+        self.path.truncate_to_navigable(self.entity)
         destination = self.path.last_occupiable_square(self.entity)
         self.entity.move_to(*destination)
         if len(self.path.points) > 2:

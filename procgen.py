@@ -43,6 +43,8 @@ def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
     player.place((15,15),dungeon)
 
     entity_factories.nano.spawn(dungeon,25,11)
+    entity_factories.nano.spawn(dungeon,29,19)
+    entity_factories.ed.spawn(dungeon,28,19)
     entity_factories.nano.spawn(dungeon,16,16)
     entity_factories.ed.spawn(dungeon,16,20)
     entity_factories.ed.spawn(dungeon,18,20)

@@ -35,19 +35,23 @@ class Path:
         else:
             raise ValueError("Path must contain at least one valid location.")
 
-    def truncate_to_navigable(self,entity:Entity) -> None:
+    def truncate_to_navigable(self,entity:Entity,
+            include_barrier:bool=True) -> None:
         """Remove any areas from the path that are beyond the reach of
         the given entity.
+
+        If include_barrier is True, one additional position on the path
+        may also be included (e.g. to attack something that you attempted
+        to move on to).
 
         TODO: Make an exception for if the player lands directly on top of
         an enemy (e.g. from w or fe) and thus can't occupy the square, but
         still should be allowed to attack enemy.
         """
         endpoint = self.last_occupiable_square(entity)
-        new_points = []
-        for location in self.points:
-            new_points.append(location)
-            if location == endpoint:
-                self.points = new_points
-                return
-        raise RuntimeError("Problem truncating path (this should never happen)")
+        index = self.points.index(endpoint)
+        if include_barrier:
+            sliced = self.points[:index+2]
+        else:
+            sliced = self.points[:index+1]
+        self.points = sliced

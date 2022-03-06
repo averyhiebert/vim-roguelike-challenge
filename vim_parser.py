@@ -22,6 +22,8 @@ def parse_movement(command,engine:Engine) -> Path:
     """ Given the re match for a valid movement,
     return a Path corresponding to the given movement.
 
+    Note: I assume path truncation is the job of the movement Action.
+
     In cases where the player goes nowhere, returns a length 1 path.
     """
     match = re.match(MOVEMENT_RE,command)
@@ -38,7 +40,7 @@ def parse_movement(command,engine:Engine) -> Path:
         # Move all the way to the left.
         far_left = (0,player.y)
         path = engine.game_map.get_mono_path(player.pos,far_left)
-        path.truncate_to_navigable(player)
+        #path.truncate_to_navigable(player)
         return path
     
     n:Optional[int] = None # Note: n will never be 0, so "if n:" is fine
@@ -54,7 +56,7 @@ def parse_movement(command,engine:Engine) -> Path:
         player = engine.player
         target = (player.x + n*dx, player.y + n*dy)
         path = engine.game_map.get_mono_path(player.pos,target)
-        path.truncate_to_navigable(player)
+        #path.truncate_to_navigable(player)
         return path
     elif base == "H":
         # TODO More "dry" for 0HML$
@@ -63,13 +65,9 @@ def parse_movement(command,engine:Engine) -> Path:
         base_path.truncate_to_navigable(player)
         if n:
             #TRY to go down by given value
-            end = base_path.end
-            x,y = end
+            x,y = base_path.end
             target = (x,y + (n - 1))
-            sub_path = engine.game_map.get_mono_path(end,target)
-            sub_path.truncate_to_navigable(player)
-            final_dest = sub_path.end
-            return engine.game_map.get_mono_path(player.pos,final_dest)
+            return engine.game_map.get_mono_path(player.pos,target)
         else:
             return base_path
     elif base == "L":
@@ -78,13 +76,9 @@ def parse_movement(command,engine:Engine) -> Path:
         base_path.truncate_to_navigable(player)
         if n:
             #Try to move up by given value
-            end = base_path.end
-            x,y = end
+            x,y = base_path.end
             target = (x,y - (n - 1))
-            sub_path = engine.game_map.get_mono_path(end,target)
-            sub_path.truncate_to_navigable(player)
-            final_dest = sub_path.end
-            return engine.game_map.get_mono_path(player.pos,final_dest)
+            return engine.game_map.get_mono_path(player.pos,target)
         else:
             return base_path
     elif base == "$":
@@ -97,7 +91,7 @@ def parse_movement(command,engine:Engine) -> Path:
             pass
         right = (engine.game_map.width,start[1])
         path = engine.game_map.get_mono_path(start,right)
-        path.truncate_to_navigable(player)
+        #path.truncate_to_navigable(player)
         return path
     elif base == "M":
         # Note: numbers do nothing here
@@ -107,8 +101,6 @@ def parse_movement(command,engine:Engine) -> Path:
         path.truncate_to_navigable(player)
         return path
     elif base[0] in "tf":
-        # TODO: Instead of chaining, better to just return the
-        #  list in sorted order and then go through n elements of the list.
         if not n:
             n = 1
 
@@ -132,7 +124,7 @@ def parse_movement(command,engine:Engine) -> Path:
                 targets[-1],mode)
 
         path = engine.game_map.get_poly_path(targets)
-        path.truncate_to_navigable(player)
+        #path.truncate_to_navigable(player) #Redundant? (handled by move action)
         return path
     elif base[0] in "`'":
         # Move to mark
@@ -145,11 +137,6 @@ def parse_movement(command,engine:Engine) -> Path:
         return path
 
     elif base[0] in "we":
-        # TODO: Find nearest word-character and then just call self with
-        #  the equivalent "t" or "f" command.
-        # Not ideal, but it'll be good enough.
-        #  (Actually, not good enough, because we need to be able to
-        #   chain multiple different types of character.  Never mind.)
         raise NotImplementedError()
     else:
         # TODO implement
@@ -276,7 +263,7 @@ class VimCommandParser:
     def reset(self):
         self.partial_command = "" # i.e. command so far
 
-    def next_key(self,char:str) -> Tuple[Optional[Action],bool]:
+    def next_key(self,char:str) -> Optional[Action]:
         """ 
         Take a *single* character and continue parsing the vim command being
         entered.
