@@ -1,5 +1,8 @@
 # TODO Pick a palette in a more principled manner
 
+
+test_bg = (0,80,0)  # Useful for testing stuff
+
 # Basic background colours (for lighting)
 default_bg = (0,0,0)        # Used by default in background
 default_FOV_bg = (25,25,25) # Used by default in background where visible

@@ -35,6 +35,8 @@ def new_tile(
     # Automatically generate the "unseen" graphic
     """Helper for defining individual tile types."""
     unseen = (dark[0],colors.default_bg,colors.default_bg)
+    # Possibly useful when designing UI (makes map boundary visible):
+    #unseen = (dark[0],colors.test_bg,colors.test_bg)
     return np.array((walkable,transparent,dark,light,unseen),dtype=tile_dt)
 
 # Define tiles here =========================
