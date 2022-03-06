@@ -32,15 +32,15 @@ class RectangularRoom:
             and self.y2 >= other.y1
         )
 
-def generate_dungeon(map_width,map_height,player) -> GameMap:
+def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
     """ Not gonna bother with random generation until I have
     most of the vim commands/movement/etc. dealt with, since
     that's the core priority for this game.
     """
 
-    dungeon = GameMap(map_width, map_height,entities=[player])
-    player.x = 15
-    player.y = 15
+    player = engine.player
+    dungeon = GameMap(engine,map_width, map_height,entities=[player])
+    player.place((15,15),dungeon)
 
     entity_factories.nano.spawn(dungeon,16,16)
     entity_factories.ed.spawn(dungeon,16,20)
