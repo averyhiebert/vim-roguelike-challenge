@@ -91,14 +91,12 @@ def parse_movement(command,engine:Engine) -> Path:
             pass
         right = (engine.game_map.width,start[1])
         path = engine.game_map.get_mono_path(start,right)
-        #path.truncate_to_navigable(player)
         return path
     elif base == "M":
         # Note: numbers do nothing here
         # Also, I have made the executive decision to go to the center of
         #  the map, not just centered vertically.
         path = engine.game_map.get_mono_path(player.pos,engine.game_map.center)
-        path.truncate_to_navigable(player)
         return path
     elif base[0] in "tf":
         if not n:
@@ -124,7 +122,6 @@ def parse_movement(command,engine:Engine) -> Path:
                 targets[-1],mode)
 
         path = engine.game_map.get_poly_path(targets)
-        #path.truncate_to_navigable(player) #Redundant? (handled by move action)
         return path
     elif base[0] in "`'":
         # Move to mark
@@ -133,7 +130,6 @@ def parse_movement(command,engine:Engine) -> Path:
             # A non-moving movement
             target = player.pos
         path = engine.game_map.get_mono_path(player.pos,target)
-        path.truncate_to_navigable(player)
         return path
 
     elif base[0] in "we":

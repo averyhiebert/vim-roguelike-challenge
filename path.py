@@ -43,10 +43,6 @@ class Path:
         If include_barrier is True, one additional position on the path
         may also be included (e.g. to attack something that you attempted
         to move on to).
-
-        TODO: Make an exception for if the player lands directly on top of
-        an enemy (e.g. from w or fe) and thus can't occupy the square, but
-        still should be allowed to attack enemy.
         """
         endpoint = self.last_occupiable_square(entity)
         index = self.points.index(endpoint)
