@@ -21,16 +21,15 @@ class VimCommandParser:
 
     def __init__(self,engine:Engine):
         self.engine = engine
+        self.reset()
 
-        self.command_type = VimCommandType.INIT
-        self.number = "" # i.e. used for tracking 4l et cetera
-
-    def fail(self,message="Invalid command."):
+    def invalid(self,message="Invalid command."):
+        self.reset()
         raise NotImplementedError(message)
 
     def reset(self):
         self.command_type = VimCommandType.INIT
-        self.number = ""
+        self.number = "" # i.e. used for tracking 4l et cetera
 
     def next_key(self,char:str) -> Tuple[Optional[Action],bool]:
         """ 
@@ -51,7 +50,13 @@ class VimCommandParser:
 
         if self.command_type == VimCommandType.INIT:
             # We are starting a brand-new command
-            if char in direction:
+            if char in "io:/":
+                # TODO these all need to trigger special modes
+                self.invalid(f"{char} mode not yet implemented")
+            elif char == " ":
+                # No action, but DO perform an enemy turn
+                return (None,True)
+            elif char in direction:
                 # Just basic movement
                 self.reset()
                 return (BumpAction(self.engine.player,direction[char]),True)
@@ -62,6 +67,6 @@ class VimCommandParser:
                 return (None,True)
             else:
                 # TODO d,y,p, and others
-                self.fail()
+                self.invalid()
         else:
-            self.fail()
+            self.invalid()

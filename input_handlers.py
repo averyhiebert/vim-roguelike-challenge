@@ -16,6 +16,7 @@ class EventHandler(tcod.event.EventDispatch[Action]):
     def __init__(self, engine:Engine):
         self.engine = engine
         self.command_parser = VimCommandParser(engine=engine)
+        self.do_enemy_turn = False
     
     @staticmethod
     def keydown_to_char(event:tcod.event.KeyDown) -> Optional[str]:
@@ -29,8 +30,8 @@ class EventHandler(tcod.event.EventDispatch[Action]):
         
         TODO Is it worth also supporting capslock?  Probably not.
         """
-        symbols = "`1234567890-=[]\;',./ "
-        shift_symbols = '~!@#$%^&*()_+{}|:"<>? '
+        symbols = "`1234567890-=[]\;',./"
+        shift_symbols = '~!@#$%^&*()_+{}|:"<>?'
         letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         unshifted_letters = "abcdefghijklmnopqrstuvwxyz"
         arrow_to_letter = {
@@ -40,7 +41,9 @@ class EventHandler(tcod.event.EventDispatch[Action]):
         shift_pressed = (event.mod & tcod.event.Modifier.SHIFT)
         label = event.sym.label
 
-        if label in arrow_to_letter:
+        if label == "Space":
+            return " "
+        elif label in arrow_to_letter:
             return arrow_to_letter[label]
         elif label in symbols:
             if shift_pressed:
@@ -59,32 +62,33 @@ class EventHandler(tcod.event.EventDispatch[Action]):
         for event in tcod.event.wait():
             action = self.dispatch(event)
 
-            if action is None:
-                continue
+            if action:
+                action.perform()
 
-            action.perform()
+            if self.do_enemy_turn:
+                # We only do this for certain actions.
+                #  (e.g. checking inventory does not trigger enemy turn)
+                self.engine.handle_enemy_turns()
+                self.do_enemy_turn = False
 
-            self.engine.handle_enemy_turns()
             self.engine.update_fov() # Update FOV before player's next turn
 
-    def ev_quit(self, event: tcod.event.Quit) -> Optional[Action]:
+    def ev_quit(self, event: tcod.event.Quit) -> Tuple[Optional[Action],bool]:
         raise SystemExit()
 
-    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[Action]:
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
         action: Optional[Action] = None
-
         player = self.engine.player
 
-        usable_key = self.keydown_to_char(event)
+        key = event.sym
+        usable_key = self.keydown_to_char(event) # i.e. an ascii char
 
-        if usable_key == "i":
-            # TODO
-            print("TODO Open the inventory")
-        elif usable_key == "o":
-            print("TODO Observe/look around")
-        elif usable_key:
-            action, do_turn = self.command_parser.next_key(usable_key)
-
+        if usable_key:
+            try:
+                action, self.do_enemy_turn = self.command_parser.next_key(usable_key)
+            except Exception as err:
+                # TODO Better error handling
+                print(err)
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction(player)
 
