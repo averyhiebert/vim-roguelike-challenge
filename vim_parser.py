@@ -3,21 +3,34 @@ and identifiying the appropriate resulting action."""
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
-from enum import auto, Enum
+import re
 
 from actions import BumpAction
 
-class VimCommandType(Enum):
-    """ For keeping track of the type of command being constructed."""
-    INIT = auto()
-    MOVEMENT = auto()
-    DELETE = auto()
-    YANK = auto()
-    PUT = auto()
+if TYPE_CHECKING:
+    from engine import Engine
 
+def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
+    """ 
+    Parse the given partial vim command.
+    
+    If it is a complete command, return an appropriate Action.  
+    If a valid (but incomplete) command, return None.
+    Otherwise, raise "invalid command" exception.
+    """
+    directions = {
+        "j":(0,1),
+        "k":(0,-1),
+        "h":(-1,0),
+        "l":(1,0),
+    }
+
+    if command in directions:
+        # Simplest case
+        return BumpAction(engine.player,directions[command])
+    raise ValueError("Invalid command.")
 
 class VimCommandParser:
-
 
     def __init__(self,engine:Engine):
         self.engine = engine
@@ -28,8 +41,7 @@ class VimCommandParser:
         raise NotImplementedError(message)
 
     def reset(self):
-        self.command_type = VimCommandType.INIT
-        self.number = "" # i.e. used for tracking 4l et cetera
+        self.partial_command = "" # i.e. command so far
 
     def next_key(self,char:str) -> Tuple[Optional[Action],bool]:
         """ 
@@ -48,25 +60,25 @@ class VimCommandParser:
             "l":(1,0),
         }
 
-        if self.command_type == VimCommandType.INIT:
+        if self.partial_command == "":
             # We are starting a brand-new command
             if char in "io:/":
                 # TODO these all need to trigger special modes
-                self.invalid(f"{char} mode not yet implemented")
+                self.reset()
+                raise NotImplementedError(f"{char} mode not yet implemented")
             elif char == " ":
                 # No action, but DO perform an enemy turn
                 return (None,True)
-            elif char in direction:
-                # Just basic movement
+        
+        self.partial_command += char
+
+        try:
+            action = parse_partial_command(self.partial_command,self.engine) 
+            if action:
                 self.reset()
-                return (BumpAction(self.engine.player,direction[char]),True)
-            elif char in "123456789":
-                # Number + movement
-                self.number += char
-                self.command_type = VimCommandType.MOVEMENT
-                return (None,True)
-            else:
-                # TODO d,y,p, and others
-                self.invalid()
-        else:
-            self.invalid()
+        except Exception as err:
+            # TODO check for correct exception
+            self.reset()
+            raise err
+
+        return (action,True)
