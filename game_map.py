@@ -118,14 +118,17 @@ class GameMap:
             default=self.tiles["unseen"]
         )
 
-
+    
+        # Draw map traces
         # TODO Make this more vectorized, somehow
         for trace in self.traces:
-            color = trace.get_color()
-            console.bg[tuple(zip(*trace.points))] = color
+            for point in trace.points:
+                color = trace.get_color(console.bg[point])
+                console.bg[point] = color
+            #color = trace.get_color()
+            #console.bg[tuple(zip(*trace.points))] = color
         # Remove expired traces
         self.traces = [t for t in self.traces if not t.expired]
-        #self.traces = []
 
         for entity in self.entities:
             # Only print entities that are in the FOV

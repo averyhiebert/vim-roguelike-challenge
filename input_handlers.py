@@ -59,7 +59,8 @@ class EventHandler(tcod.event.EventDispatch[Action]):
         return None
 
     def handle_events(self) -> None:
-        for event in tcod.event.wait():
+        for event in tcod.event.wait(timeout=0.1):
+            # Note: timeout allows us to do some mild animation
             action = self.dispatch(event)
 
             if action:

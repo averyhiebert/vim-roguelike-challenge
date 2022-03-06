@@ -22,12 +22,22 @@ class MapTrace:
 
     @property
     def expired(self):
-        return (time.time() - self.creation_time > self.fade_time)
+        return self.elapsed_time > self.fade_time
 
-    def get_color(self):
+    @property
+    def elapsed_time(self):
+        return time.time() - self.creation_time
+
+
+    def get_color(self,bg:Tuple[int,int,int]) -> Tuple[int,int,int]:
         """Get the bg color for the trace.
 
         (This could maybe involve lerping at some point, once I figure out
          how I want to handle animations, but for now it's just this.)"""
-        return self.start_color
-            
+        if self.expired:
+            return bg
+        else:
+            dt = self.elapsed_time/self.fade_time
+            bg = np.array(bg)
+            r,g,b = self.start_color + dt*(bg - self.start_color)
+            return (int(r),int(g),int(b))

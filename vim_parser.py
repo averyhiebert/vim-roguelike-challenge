@@ -83,13 +83,11 @@ def parse_movement(match,engine:Engine) -> Path:
     elif base == "$":
         start = player.pos
         if n:
-            # Go down by n-1 lines and *then* go right.
-            #  Note: must start from left and pick first valid spot from right
-            #  (Chance of no valid option on that line; in this rare case, 
-            #    raise an error even though technically there is still a way
-            #    to interpret this validly. TODO Do it properly.)
-            start = (player.x, player.y + (n-1))
-
+            # Implementing this properly will be annoying and it doesn't
+            #  seem like a very important feature, so I just won't bother.
+            # 
+            # TODO Proper behavour: Go down by n-1 lines and *then* go right.
+            pass
         right = (engine.game_map.width,start[1])
         path = engine.game_map.get_mono_path(start,right)
         path.truncate_to_navigable(player)
