@@ -29,6 +29,10 @@ class GameMap:
         # Have been seen before:
         self.explored = np.full((width,height),fill_value=False,order="F")
 
+    @property
+    def center(self):
+        return (self.width//2, self.height//2)
+
     def is_navigable(self,location:Tuple[int,int],
             entity:Entity=None) -> Optional[Entity]:
         """ Return true if given entity (usually the player)

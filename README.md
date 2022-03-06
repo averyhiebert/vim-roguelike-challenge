@@ -4,6 +4,4 @@ An old-school roguelike inspired by the best text editor.  Explore dungeons usin
 
 Made for the 7 Day Roguelike Challenge.
 
-Engine architecture largely copied from this tutorial:
-https://rogueliketutorials.com/tutorials/tcod/v2/
-(If it ain't broke, don't fix it.)
+Engine architecture largely copied from [this tutorial.](https://rogueliketutorials.com/tutorials/tcod/v2/)  (If it ain't broke, don't fix it.)

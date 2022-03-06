@@ -90,6 +90,13 @@ def parse_movement(match,engine:Engine) -> Path:
         path = engine.game_map.get_mono_path(start,right)
         path.truncate_to_navigable(player)
         return path
+    elif base == "M":
+        # Note: numbers do nothing here
+        # Also, I have made the executive decision to go to the center of
+        #  the map, not just centered vertically.
+        path = engine.game_map.get_mono_path(player.pos,engine.game_map.center)
+        path.truncate_to_navigable(player)
+        return path
     else:
         # TODO implement
         raise NotImplementedError("This movement not implemented")
