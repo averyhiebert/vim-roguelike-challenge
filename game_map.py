@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Iterable, TYPE_CHECKING
+import re
 
 import numpy as np # type: ignore
 import tcod
@@ -35,6 +36,9 @@ class GameMap:
         # TODO Use proper enum/type
         # For now, format is (x,y,type), where 0 = nothing, 1 = movement
         self.traces:List[MapTrace] = [] 
+
+        # Set of location markers
+        self.marks = {}
 
         # Used as hack for finding nearby chars
         self.console:Optional[Console] = None
@@ -97,6 +101,22 @@ class GameMap:
         """ Return true if position is in bounds. """
         x, y = position
         return 0 <= x < self.width and 0 <= y < self.height
+
+    def make_mark(self,register:str,position:Tuple[int,int]) -> None:
+        if re.match("[a-z]",register):
+            self.marks[register] = position
+            print(f"Set mark {register}")
+        else:
+            print("Invalid register")
+            raise NotImplementedError("TODO: Replace with user error")
+
+    def get_mark(self,register:str) -> Optional[Tuple[int,int]]:
+        """" Return the position associated with the given
+        mark (if it exists)."""
+        if register in self.marks:
+            return self.marks[register]
+        else:
+            return None
 
     def get_mono_path(self,start:Tuple[int,int],end:Tuple[int,int]) -> Path:
         """ Returns the straight-line path from a given start point to

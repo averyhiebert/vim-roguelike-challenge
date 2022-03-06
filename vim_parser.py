@@ -4,20 +4,27 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
 import re
+import traceback
 
 import numpy as np
+import tcod
 
-from actions import BumpAction, DummyAction, ActionMoveAlongPath
+from actions import BumpAction, DummyAction, ActionMoveAlongPath, ActionMakeMark
 
 if TYPE_CHECKING:
     from engine import Engine
 
-def parse_movement(match,engine:Engine) -> Path:
+# TODO Maybe compile this
+MOVEMENT_RE = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|[tf].|[we]|[HML$]|[`'].)"
+
+
+def parse_movement(command,engine:Engine) -> Path:
     """ Given the re match for a valid movement,
     return a Path corresponding to the given movement.
 
     In cases where the player goes nowhere, returns a length 1 path.
     """
+    match = re.match(MOVEMENT_RE,command)
     directions = {
         "j":(0,1),
         "k":(0,-1),
@@ -100,26 +107,57 @@ def parse_movement(match,engine:Engine) -> Path:
         path.truncate_to_navigable(player)
         return path
     elif base[0] in "tf":
-        if n:
-            raise NotImplementedError()
+        if not n:
+            n = 1
+
         mode = base[0] # should be t or f
         target_char = base[-1]
-        target_location = engine.game_map.get_nearest(player.pos,target_char)
-        if not target_location:
+
+        inflection_points = [player.pos]
+        ignore = []
+        for i in range(n):
+            start_pos = inflection_points[-1]
+            target_location = engine.game_map.get_nearest(start_pos,
+                target_char,ignore=inflection_points)
+            if target_location:
+                inflection_points.append(target_location)
+            else:
+                break
+
+        if len(inflection_points) == 1:
             # This is not an "error," exactly, it just goes nowhere.
-            target_location = player.pos
+            target_location = inflection_points[0]
         else:
             # Handle the details of whether to overshoot/undershoot a target,
             #  based on "t" or "f" mode.
-            target_location = bump_destination(engine,player.pos,
+            target_location = inflection_points[-1]
+            target_location = bump_destination(engine,inflection_points[-2],
                 target_location,mode)
-            
+        
+        # TODO: Proper polyline path
         path = engine.game_map.get_mono_path(player.pos,target_location)
         path.truncate_to_navigable(player)
         return path
+    elif base[0] in "`'":
+        # Move to mark
+        target = engine.game_map.get_mark(base[1])
+        if not target:
+            # A non-moving movement
+            target = player.pos
+        path = engine.game_map.get_mono_path(player.pos,target)
+        path.truncate_to_navigable(player)
+        return path
+
+    elif base[0] in "we":
+        # TODO: Find nearest word-character and then just call self with
+        #  the equivalent "t" or "f" command.
+        # Not ideal, but it'll be good enough.
+        #  (Actually, not good enough, because we need to be able to
+        #   chain multiple different types of character.  Never mind.)
+        raise NotImplementedError()
     else:
         # TODO implement
-        raise NotImplementedError("This movement not implemented")
+        raise NotImplementedError()
 
 def bump_destination(engine:Engine,source:Tuple[int,int],
         target:Tuple[int,int],mode:str) -> Tuple[int,int]:
@@ -131,23 +169,34 @@ def bump_destination(engine:Engine,source:Tuple[int,int],
     With "f", we overshoot IF it's blocked, unless the overshoot
      location is also blocked, in which case we just land directly on target
      and let the subsequent move action figure out what to do with that.
-
-    However, TODO: The overshoot for "f" shouldn't be the furthest tile,
-    but rather a tile that also includes the target in the path (if possible).
     """
     if source == target:
         return target
     if mode == "f" and engine.game_map.is_navigable(target,engine.player):
         return target
     
-    source = np.array(source)
     tx, ty = target
     candidates = [(tx + x,ty + y) for x in [-1,0,1] for y in [-1,0,1]
                     if (x,y) != (0,0)]
     # sort closest-to-furthest
-    candidates.sort(key=lambda c:np.linalg.norm(source-c))
+    candidates.sort(key=lambda c:np.linalg.norm(np.array(source)-c))
 
-    return candidates[0] if mode=="t" else candidates[-1]
+    if mode=="t":
+        # Return closest
+        return candidates[0]
+
+    # Note: remaining cases are all f
+    for c in candidates:
+        # Can return any target that includes target in the path.
+        if target in [(x,y) for x,y in tcod.los.bresenham(source,c)]:
+            final_hope = c
+            break
+    else:
+        final_hope = candidates[-1]
+    if engine.game_map.is_navigable(final_hope,engine.player):
+        return final_hope
+    else:
+        return target
     
 
 def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
@@ -170,7 +219,7 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     }
 
     # Matches something that can be parsed to give a movement
-    valid_movement_re = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|[tf].|[we]|[HML$]|[`'].)"
+    valid_movement_re = MOVEMENT_RE
 
     # Matches a prefix for yank or delete (or put)
     #  (For now I'm not allowing "put" with movement, since that's not a thing
@@ -193,18 +242,27 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     partial_valid_pyd_re = r'(("|$)(.|$))?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
 
     if re.match(valid_movement_re,command):
-        match = re.match(valid_movement_re,command)
-        path = parse_movement(match,engine)
+        # Basic movement
+        match = re.match(valid_movement_re, command)
+        path = parse_movement(command,engine)
         return ActionMoveAlongPath(engine.player,path)
-    elif re.match(valid_pyd_re,command):
+    elif re.match(valid_pyd_re, command):
+        # A yank, pull, or delete
         raise NotImplementedError("This command not implemented")
+    elif re.match("m.",command):
+        # Set a mark in register .
+        register = command[-1]
+        return ActionMakeMark(engine.player,register)
+
+    # Checks for valid partial commands (which don't do anything):
+    #   TODO Check for cases that we don't want to penalize with an
+    #   enemy turn; maybe selecting registers, for instance?
     elif re.match(partial_valid_movement_re,command):
-        # TODO Check for cases that we don't want to penalize with an
-        #  enemy turn; maybe selecting registers, for instance?
         return None
     elif re.match(partial_valid_pyd_re,command):
-        # Note: the different forms of partial command are separate cases
-        #  solely to maintain SOME level of readability.
+        return None
+    elif command in "m":
+        # Some straggler/singleton possibilities
         return None
     else:
         raise ValueError("Invalid command.")
@@ -261,6 +319,7 @@ class VimCommandParser:
                 self.reset()
         except Exception as err:
             # TODO check for correct exception
+            traceback.print_exc()
             self.reset()
             raise err
 

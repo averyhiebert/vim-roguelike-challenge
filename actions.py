@@ -40,6 +40,16 @@ class DummyAction(Action):
     def perform(self) -> None:
         pass
 
+class ActionMakeMark(Action):
+    """ Make a mark (as in commands m and `)  on the current gamemap."""
+    def __init__(self,entity:Entity,register:str):
+        super().__init__(entity)
+        self.register = register
+
+    def perform(self) -> None:
+        self.entity.gamemap.make_mark(self.register,self.entity.pos)
+        
+
 class ActionWithPath(Action):
     """ An action that acts along a path of player movement."""
     def __init__(self, entity:Entity, path:Path):
