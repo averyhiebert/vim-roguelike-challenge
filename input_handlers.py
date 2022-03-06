@@ -64,6 +64,7 @@ class EventHandler(tcod.event.EventDispatch[Action]):
 
             if action:
                 action.perform()
+                self.do_enemy_turn = not action.skip_turn
 
             if self.do_enemy_turn:
                 # We only do this for certain actions.
@@ -85,7 +86,7 @@ class EventHandler(tcod.event.EventDispatch[Action]):
 
         if usable_key:
             try:
-                action, self.do_enemy_turn = self.command_parser.next_key(usable_key)
+                action = self.command_parser.next_key(usable_key)
             except Exception as err:
                 # TODO Better error handling
                 print(err)

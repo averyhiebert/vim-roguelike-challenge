@@ -7,9 +7,10 @@ if TYPE_CHECKING:
     from entity import Entity
 
 class Action:
-    def __init__(self, entity:Entity) -> None:
+    def __init__(self, entity:Entity,skip_turn:bool=False) -> None:
         super().__init__()
         self.entity = entity
+        self.skip_turn = skip_turn # True if action does not expend a turn
 
     @property
     def engine(self) -> Engine:
@@ -32,8 +33,35 @@ class EscapeAction(Action):
     def perform(self) -> None:
         raise SystemExit()
 
+class DummyAction(Action):
+    """ An action that does nothing, but can potentially signal that
+    no enemy turn is to be performed in response to the latest event."""
+
+    def perform(self) -> None:
+        pass
+
+class ActionWithPath(Action):
+    """ An action that acts along a path of player movement."""
+    def __init__(self, entity:Entity, path:Path):
+        super().__init__(entity)
+        self.path = path
+
+    def perform(self) -> None:
+        raise NotImplementedError()
+
+class ActionMoveAlongPath(ActionWithPath):
+    """ Move to end of path."""
+
+    def perform(self) -> None:
+        destination = self.path.last_occupiable_square(self.entity)
+        self.entity.move_to(*destination)
+        # TODO highlight path on map?
+    
+    
+
 class ActionWithDirection(Action):
     def __init__(self, entity:Entity, direction: Tuple[int,int]):
+        # Note: action with direction never skips a turn
         super().__init__(entity)
         self.direction = direction
 

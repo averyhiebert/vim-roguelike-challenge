@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 import re
 
-from actions import BumpAction
+from actions import BumpAction, DummyAction, ActionMoveAlongPath
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -14,8 +14,9 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     """ 
     Parse the given partial vim command.
     
-    If it is a complete command, return an appropriate Action.  
-    If a valid (but incomplete) command, return None.
+    For completed commands, return an appropriate Action.
+    For incomplete (but potentially valid) commands, return None.
+
     Otherwise, raise "invalid command" exception.
 
     To anyone (including me) who has to debug these regexes in the future:
@@ -52,20 +53,27 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     partial_valid_movement_re = r"([0-9]|$)*(([hjkl]|$)|([tf]|$)(.|$)|([we]|$)|([HML$]|$)|([`']|$)(.|$))"
     partial_valid_pyd_re = r'(("|$)(.|$))?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
 
-    #print(f"DEBUG partial: {command}")
-
     if re.match(valid_movement_re,command):
-        #print(f"Valid movement!")
         if command in directions:
             # Simplest case
             return BumpAction(engine.player,directions[command])
         else:
-            # TEMP just to reset
-            return BumpAction(engine.player,(0,1))
+            match = re.match(valid_movement_re,command)
+            if match.group("zero"):
+                # Command is just 0
+                # Move all the way to the left.
+                player = engine.player
+                far_left = (0,player.y)
+                path = engine.game_map.get_mono_path(player.pos,far_left)
+                path.truncate_to_navigable(player)
+                return ActionMoveAlongPath(player,path)
+            else:
+                # TODO implement
+                raise NotImplementedError("This movement not implemented")
+                #return DummyAction(engine.player)
     elif re.match(valid_pyd_re,command):
-        print(f"Valid command!")
-        # TEMP just to reset
-        return BumpAction(engine.player,(0,1))
+        raise NotImplementedError("This command not implemented")
+        #return DummyAction(engine.player)
     elif re.match(partial_valid_movement_re,command):
         # TODO Check for cases that we don't want to penalize with an
         #  enemy turn; maybe selecting registers, for instance?
@@ -118,8 +126,8 @@ class VimCommandParser:
                 self.reset()
                 raise NotImplementedError(f"{char} mode not yet implemented")
             elif char == " ":
-                # No action, but DO perform an enemy turn
-                return (None,True)
+                # Do nothing, but DO perform an enemy turn
+                return DummyAction(self.engine.player)
         
         self.partial_command += char
 
@@ -132,4 +140,4 @@ class VimCommandParser:
             self.reset()
             raise err
 
-        return (action,True)
+        return action
