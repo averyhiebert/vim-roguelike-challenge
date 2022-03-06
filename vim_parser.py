@@ -137,17 +137,11 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     partial_valid_pyd_re = r'(("|$)(.|$))?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
 
     if re.match(valid_movement_re,command):
-        """
-        if command in directions:
-            # Simplest case
-            return BumpAction(engine.player,directions[command])
-        else:"""
         match = re.match(valid_movement_re,command)
         path = parse_movement(match,engine)
         return ActionMoveAlongPath(engine.player,path)
     elif re.match(valid_pyd_re,command):
         raise NotImplementedError("This command not implemented")
-        #return DummyAction(engine.player)
     elif re.match(partial_valid_movement_re,command):
         # TODO Check for cases that we don't want to penalize with an
         #  enemy turn; maybe selecting registers, for instance?
