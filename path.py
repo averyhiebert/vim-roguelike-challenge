@@ -15,9 +15,14 @@ class Path:
         self.game_map = game_map
 
     @property
-    def start_point(self):
+    def start(self):
         """ Return starting point of the path. """
         return self.points[0]
+
+    @property
+    def end(self):
+        """ Return final point on path. """
+        return self.points[-1]
 
     def last_occupiable_square(self,entity:Entity):
         """Returns the last location the given entity can legally occupy.

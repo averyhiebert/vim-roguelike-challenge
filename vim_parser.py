@@ -14,6 +14,13 @@ def parse_movement(match,engine:Engine) -> Path:
     """ Given the re match for a valid movement,
     return a Path corresponding to the given movement.
     """
+    directions = {
+        "j":(0,1),
+        "k":(0,-1),
+        "h":(-1,0),
+        "l":(1,0),
+    }
+
     player = engine.player
     if match.group("zero"):
         # Command is just 0
@@ -22,27 +29,66 @@ def parse_movement(match,engine:Engine) -> Path:
         path = engine.game_map.get_mono_path(player.pos,far_left)
         path.truncate_to_navigable(player)
         return path
-    elif match.group("base") == "H":
+    
+    n:Optional[int] = None # Note: n will never be 0, so "if n:" is fine
+    if match.group("repeat"):
+        n = int(match.group("repeat"))
+
+    base = match.group("base")
+
+    if base in directions:
+        if not n:
+            n = 1
+        dx,dy = directions[base]
+        player = engine.player
+        target = (player.x + n*dx, player.y + n*dy)
+        path = engine.game_map.get_mono_path(player.pos,target)
+        path.truncate_to_navigable(player)
+        return path
+    elif base == "H":
         # TODO More "dry" for 0HML$
         top = (player.x,0)
-        path = engine.game_map.get_mono_path(player.pos,top)
-        path.truncate_to_navigable(player)
-        if match.group("repeat"):
-            raise NotImplementedError()
-        return path
-    elif match.group("base") == "L":
+        base_path = engine.game_map.get_mono_path(player.pos,top)
+        base_path.truncate_to_navigable(player)
+        if n:
+            #TRY to go down by given value
+            end = base_path.end
+            x,y = end
+            target = (x,y + (n - 1))
+            sub_path = engine.game_map.get_mono_path(end,target)
+            sub_path.truncate_to_navigable(player)
+            final_dest = sub_path.end
+            return engine.game_map.get_mono_path(player.pos,final_dest)
+        else:
+            return base_path
+    elif base == "L":
         bottom = (player.x,engine.game_map.height)
-        path = engine.game_map.get_mono_path(player.pos,bottom)
+        base_path = engine.game_map.get_mono_path(player.pos,bottom)
+        base_path.truncate_to_navigable(player)
+        if n:
+            #TRY to go down by given value
+            end = base_path.end
+            x,y = end
+            target = (x,y - (n - 1))
+            sub_path = engine.game_map.get_mono_path(end,target)
+            sub_path.truncate_to_navigable(player)
+            final_dest = sub_path.end
+            return engine.game_map.get_mono_path(player.pos,final_dest)
+        else:
+            return base_path
+    elif base == "$":
+        start = player.pos
+        if n:
+            # Go down by n-1 lines and *then* go right.
+            #  Note: must start from left and pick first valid spot from right
+            #  (Chance of no valid option on that line; in this rare case, 
+            #    raise an error even though technically there is still a way
+            #    to interpret this validly. TODO Do it properly.)
+            start = (player.x, player.y + (n-1))
+
+        right = (engine.game_map.width,start[1])
+        path = engine.game_map.get_mono_path(start,right)
         path.truncate_to_navigable(player)
-        if match.group("repeat"):
-            raise NotImplementedError()
-        return path
-    elif match.group("base") == "$":
-        right = (engine.game_map.width,player.y)
-        path = engine.game_map.get_mono_path(player.pos,right)
-        path.truncate_to_navigable(player)
-        if match.group("repeat"):
-            raise NotImplementedError()
         return path
     else:
         # TODO implement
@@ -91,13 +137,14 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     partial_valid_pyd_re = r'(("|$)(.|$))?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
 
     if re.match(valid_movement_re,command):
+        """
         if command in directions:
             # Simplest case
             return BumpAction(engine.player,directions[command])
-        else:
-            match = re.match(valid_movement_re,command)
-            path = parse_movement(match,engine)
-            return ActionMoveAlongPath(engine.player,path)
+        else:"""
+        match = re.match(valid_movement_re,command)
+        path = parse_movement(match,engine)
+        return ActionMoveAlongPath(engine.player,path)
     elif re.match(valid_pyd_re,command):
         raise NotImplementedError("This command not implemented")
         #return DummyAction(engine.player)
