@@ -164,7 +164,7 @@ class GameMap:
             choicelist=[self.tiles["light"],self.tiles["dark"]],
             default=self.tiles["unseen"]
         )
-    
+
         # Draw map traces
         # TODO Make this more vectorized, somehow
         for trace in self.traces:
@@ -173,11 +173,16 @@ class GameMap:
                 console.bg[point] = color
         # Remove expired traces
         self.traces = [t for t in self.traces if not t.expired]
-
-        for entity in self.entities:
+    
+        # Render entities (in correct order)
+        entities_sorted_for_rendering = sorted(
+            self.entities, key=lambda x: x.render_order.value
+        )
+        for entity in entities_sorted_for_rendering:
             # Only print entities that are in the FOV
             if self.visible[entity.pos]:
-                console.print(x=entity.x,y=entity.y,string=entity.char,fg=entity.color)
+                console.print(x=entity.x,y=entity.y,
+                    string=entity.char,fg=entity.color)
             else:
                 # Technically, I do print invisible entites, I just print
                 #  them in black on black. (This means they are stil t/f-able)

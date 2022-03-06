@@ -15,6 +15,18 @@ class EventHandler(tcod.event.EventDispatch[Action]):
 
     def __init__(self, engine:Engine):
         self.engine = engine
+        #self.command_parser = VimCommandParser(engine=engine)
+        #self.do_enemy_turn = False
+
+    def handle_events(self) -> None:
+        raise NotImplementedError()
+
+    def ev_quit(self,event:tcod.event.Quit) -> Optional[Action]:
+        raise SystemExit()
+
+class MainGameEventHandler(EventHandler):
+    def __init__(self, engine:Engine):
+        super().__init__(engine)
         self.command_parser = VimCommandParser(engine=engine)
         self.do_enemy_turn = False
     
@@ -75,9 +87,6 @@ class EventHandler(tcod.event.EventDispatch[Action]):
 
             self.engine.update_fov() # Update FOV before player's next turn
 
-    def ev_quit(self, event: tcod.event.Quit) -> Tuple[Optional[Action],bool]:
-        raise SystemExit()
-
     def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
         action: Optional[Action] = None
         player = self.engine.player
@@ -93,5 +102,24 @@ class EventHandler(tcod.event.EventDispatch[Action]):
                 print(err)
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction(player)
+
+        return action
+
+class GameOverEventHandler(EventHandler):
+    def handle_events(self) -> None:
+        for event in tcod.event.wait():
+            action = self.dispatch(event)
+            
+            if action is None:
+                continue
+
+            action.perform()
+
+    def ev_keydown(self, event:tcod.event.KeyDown) -> Optional[Action]:
+        action: Optional[Action] = None
+        key = event.sym
+
+        if key == tcod.event.K_ESCAPE:
+            action = EscapeAction(self.engine.player)
 
         return action
