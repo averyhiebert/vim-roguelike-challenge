@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+import copy
 
 import tcod
 from tcod.context import Context
@@ -20,6 +21,7 @@ class Engine:
     def __init__(self,player:Entity):
         self.event_handler: EventHandler = EventHandler(self)
         self.player = player
+        self.char_array = None # TODO Figure out type
 
     def handle_enemy_turns(self) -> None:
         print(".")
@@ -40,6 +42,10 @@ class Engine:
 
     def render(self, console:Console, context:Context):
         self.game_map.render(console)
+
+        # A bit of a hack
+        # TODO Update this if I add any offset to the game map
+        self.char_array = console.ch[0:self.game_map.width,0:self.game_map.height].copy()
 
         context.present(console)
         console.clear()

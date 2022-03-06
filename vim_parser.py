@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 import re
 
+import numpy as np
+
 from actions import BumpAction, DummyAction, ActionMoveAlongPath
 
 if TYPE_CHECKING:
@@ -13,6 +15,8 @@ if TYPE_CHECKING:
 def parse_movement(match,engine:Engine) -> Path:
     """ Given the re match for a valid movement,
     return a Path corresponding to the given movement.
+
+    In cases where the player goes nowhere, returns a length 1 path.
     """
     directions = {
         "j":(0,1),
@@ -97,9 +101,56 @@ def parse_movement(match,engine:Engine) -> Path:
         path = engine.game_map.get_mono_path(player.pos,engine.game_map.center)
         path.truncate_to_navigable(player)
         return path
+    elif base[0] in "tf":
+        if n:
+            raise NotImplementedError()
+        mode = base[0] # should be t or f
+        target_char = base[-1]
+        target_location = engine.game_map.get_nearest(player.pos,target_char)
+        if not target_location:
+            # This is not an "error," exactly, it just goes nowhere.
+            target_location = player.pos
+        else:
+            # Handle the details of whether to overshoot/undershoot a target,
+            #  based on "t" or "f" mode.
+            target_location = bump_destination(engine,player.pos,
+                target_location,mode)
+            
+        path = engine.game_map.get_mono_path(player.pos,target_location)
+        path.truncate_to_navigable(player)
+        return path
     else:
         # TODO implement
         raise NotImplementedError("This movement not implemented")
+
+def bump_destination(engine:Engine,source:Tuple[int,int],
+        target:Tuple[int,int],mode:str) -> Tuple[int,int]:
+    """ Decide whether to "overshoot", "undershoot", or land exactly
+    on target, based on mode "t" or "f".
+
+    With "t", we always undershoot (unless source == target)
+
+    With "f", we overshoot IF it's blocked, unless the overshoot
+     location is also blocked, in which case we just land directly on target
+     and let the subsequent move action figure out what to do with that.
+
+    However, TODO: The overshoot for "f" shouldn't be the furthest tile,
+    but rather a tile that also includes the target in the path (if possible).
+    """
+    if source == target:
+        return target
+    if mode == "f" and engine.game_map.is_navigable(target,engine.player):
+        return target
+    
+    source = np.array(source)
+    tx, ty = target
+    candidates = [(tx + x,ty + y) for x in [-1,0,1] for y in [-1,0,1]
+                    if (x,y) != (0,0)]
+    # sort closest-to-furthest
+    candidates.sort(key=lambda c:np.linalg.norm(source-c))
+
+    return candidates[0] if mode=="t" else candidates[-1]
+    
 
 def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     """ 

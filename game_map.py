@@ -7,8 +7,10 @@ import tcod
 from tcod.console import Console
 
 import tile_types
+import colors
 
 from path import Path
+from map_traces import MapTrace
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -29,9 +31,22 @@ class GameMap:
         # Have been seen before:
         self.explored = np.full((width,height),fill_value=False,order="F")
 
+        # Used to add fade-out colours.
+        # TODO Use proper enum/type
+        # For now, format is (x,y,type), where 0 = nothing, 1 = movement
+        self.traces:List[MapTrace] = [] 
+
+        # Used as hack for finding nearby chars
+        self.console:Optional[Console] = None
+
     @property
     def center(self):
         return (self.width//2, self.height//2)
+
+    def add_trace(self,points:List[Tuple[int,int]]) -> None:
+        """ Add a trace to draw on the map. Points should be a list
+        of (x,y) tuples to add a trace to."""
+        self.traces.append(MapTrace(points,fade_time=0.5))
 
     def is_navigable(self,location:Tuple[int,int],
             entity:Entity=None) -> Optional[Entity]:
@@ -49,6 +64,27 @@ class GameMap:
             # Note: entity does not block self.
             return False
         return True
+
+    def get_nearest(self,location:Tuple[int,int],char:str,
+            ignore:Option[List[Tuple[int,int]]]=None) -> Optional[Tuple[int,int]]:
+        """ Return the nearest tile (to the specified location)
+        that is rendered as the given char.
+        
+        Return None if no valid target found."""
+        char_array = self.engine.char_array
+        if type(char_array) == type(None):
+            raise RuntimeError("Error: console not found (shouldn't happen, knock on wood).")
+
+        location = np.array(location)
+        target_val = ord(char)
+        candidates = list(zip(*np.nonzero(char_array==target_val)))
+        if ignore:
+            candidates = [(x,y) for x,y in candidates if (x,y) not in ignore]
+        candidates.sort(key=lambda c: np.linalg.norm(location - c))
+        if len(candidates) > 0:
+            return candidates[0]
+        else:
+            return None
 
     def get_blocking_entity_at_location(self,
             location:Tuple[int,int]) -> Optional[Entity]:
@@ -82,7 +118,23 @@ class GameMap:
             default=self.tiles["unseen"]
         )
 
+
+        # TODO Make this more vectorized, somehow
+        for trace in self.traces:
+            color = trace.get_color()
+            console.bg[tuple(zip(*trace.points))] = color
+        # Remove expired traces
+        self.traces = [t for t in self.traces if not t.expired]
+        #self.traces = []
+
         for entity in self.entities:
             # Only print entities that are in the FOV
             if self.visible[entity.pos]:
                 console.print(x=entity.x,y=entity.y,string=entity.char,fg=entity.color)
+            else:
+                # Technically, I do print invisible entites, I just print
+                #  them in black on black. (This means they are stil t/f-able)
+                r,g,b = console.bg[entity.x,entity.y]
+                bg = (r,g,b) # Converting np to tuple
+                console.print(x=entity.x,y=entity.y,string=entity.char,fg=bg)
+        self.console = console # (somewhat) sorry about this

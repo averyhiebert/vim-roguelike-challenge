@@ -55,7 +55,8 @@ class ActionMoveAlongPath(ActionWithPath):
     def perform(self) -> None:
         destination = self.path.last_occupiable_square(self.entity)
         self.entity.move_to(*destination)
-        # TODO highlight path on map?
+        if len(self.path.points) > 2:
+            self.entity.gamemap.add_trace(self.path.points)
     
     
 
