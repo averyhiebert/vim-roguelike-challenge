@@ -10,6 +10,44 @@ from actions import BumpAction, DummyAction, ActionMoveAlongPath
 if TYPE_CHECKING:
     from engine import Engine
 
+def parse_movement(match,engine:Engine) -> Path:
+    """ Given the re match for a valid movement,
+    return a Path corresponding to the given movement.
+    """
+    player = engine.player
+    if match.group("zero"):
+        # Command is just 0
+        # Move all the way to the left.
+        far_left = (0,player.y)
+        path = engine.game_map.get_mono_path(player.pos,far_left)
+        path.truncate_to_navigable(player)
+        return path
+    elif match.group("base") == "H":
+        # TODO More "dry" for 0HML$
+        top = (player.x,0)
+        path = engine.game_map.get_mono_path(player.pos,top)
+        path.truncate_to_navigable(player)
+        if match.group("repeat"):
+            raise NotImplementedError()
+        return path
+    elif match.group("base") == "L":
+        bottom = (player.x,engine.game_map.height)
+        path = engine.game_map.get_mono_path(player.pos,bottom)
+        path.truncate_to_navigable(player)
+        if match.group("repeat"):
+            raise NotImplementedError()
+        return path
+    elif match.group("base") == "$":
+        right = (engine.game_map.width,player.y)
+        path = engine.game_map.get_mono_path(player.pos,right)
+        path.truncate_to_navigable(player)
+        if match.group("repeat"):
+            raise NotImplementedError()
+        return path
+    else:
+        # TODO implement
+        raise NotImplementedError("This movement not implemented")
+
 def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
     """ 
     Parse the given partial vim command.
@@ -28,7 +66,6 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
         "h":(-1,0),
         "l":(1,0),
     }
-
 
     # Matches something that can be parsed to give a movement
     valid_movement_re = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|[tf].|[we]|[HML$]|[`'].)"
@@ -59,18 +96,8 @@ def parse_partial_command(command:str,engine:Engine) -> Optional[Action]:
             return BumpAction(engine.player,directions[command])
         else:
             match = re.match(valid_movement_re,command)
-            if match.group("zero"):
-                # Command is just 0
-                # Move all the way to the left.
-                player = engine.player
-                far_left = (0,player.y)
-                path = engine.game_map.get_mono_path(player.pos,far_left)
-                path.truncate_to_navigable(player)
-                return ActionMoveAlongPath(player,path)
-            else:
-                # TODO implement
-                raise NotImplementedError("This movement not implemented")
-                #return DummyAction(engine.player)
+            path = parse_movement(match,engine)
+            return ActionMoveAlongPath(engine.player,path)
     elif re.match(valid_pyd_re,command):
         raise NotImplementedError("This command not implemented")
         #return DummyAction(engine.player)
