@@ -40,7 +40,7 @@ def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
 
     player = engine.player
     dungeon = GameMap(engine,map_width, map_height,entities=[player])
-    player.place((15,15),dungeon)
+    player.place((40,26),dungeon)
 
     entity_factories.nano.spawn(dungeon,25,11)
     entity_factories.nano.spawn(dungeon,29,19)

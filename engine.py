@@ -10,7 +10,7 @@ from tcod.map import compute_fov
 
 from input_handlers import MainGameEventHandler
 from message_log import MessageLog
-from render_functions import render_bar
+from render_functions import render_stat_box
 
 if TYPE_CHECKING:
     from entity import Entity, Actor
@@ -57,6 +57,12 @@ class Engine:
             x=self.game_map.width + 1,y=1 + top_box_space,
             width=23, height=self.game_map.height - 2 - top_box_space
         )
+        render_stat_box(console,
+            health=self.player.fighter.hp,
+            max_health=self.player.fighter.max_hp,
+            gold=100
+        )
+        """
         render_bar(
             console=console,
             map_dims=(self.game_map.width,self.game_map.height),
@@ -64,6 +70,7 @@ class Engine:
             maximum_value=self.player.fighter.max_hp,
             total_width=20
         )
+        """
 
         context.present(console)
         console.clear()

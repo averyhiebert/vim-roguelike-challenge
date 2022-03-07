@@ -23,6 +23,6 @@ yank_trace = (0,100,0)  # To be used when yanking
 # UI
 
 ui_fg = (255,255,255)   # Plain light colour, presumably white
-bar_filled = (50,200,50)
+bar_filled = (50,100,50)
 bar_empty = (50,50,50)
 
