@@ -126,7 +126,9 @@ class GameMap:
             print(f"Set mark {register}")
         else:
             print("Invalid register")
-            raise NotImplementedError("TODO: Replace with user error")
+            # TODO VERY IMPORTANT: This needs to do something better (show
+            #  error message to user), currently it just doesn't.
+            raise NotImplementedError("TODO: Replace with user error message")
 
     def get_mark(self,register:str) -> Optional[Tuple[int,int]]:
         """" Return the position associated with the given

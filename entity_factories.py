@@ -6,7 +6,7 @@ import colors
 player = Actor(
     char="@",
     color=colors.default_fg,
-    name="Player",
+    name="player",
     summary="A daring rogue.",
     ai_cls=HostileEnemy,
     fighter=Fighter(hp=30,AC=10,to_hit="1d20",damage="1d20")
@@ -15,7 +15,7 @@ player = Actor(
 # Define enemy types here
 nano = Actor(
     char="n",
-    color=colors.default_fg,
+    color=colors.nano,
     name="nano",
     summary="A harmless text editor.",
     ai_cls=HostileEnemy,
@@ -23,7 +23,7 @@ nano = Actor(
 )
 ed = Actor(
     char="e",
-    color=colors.default_fg,
+    color=colors.ed,
     name="ed",
     summary="An ? known for ? and ?",
     ai_cls=HostileEnemy,

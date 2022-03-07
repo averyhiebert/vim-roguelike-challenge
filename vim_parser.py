@@ -133,7 +133,7 @@ class VimCommandParser:
             if n:
                 #TRY to go down by given value
                 x,y = base_path.end
-                target = (x,y + (n - 1))
+                target = (x,y + n)
                 return engine.game_map.get_mono_path(player.pos,target)
             else:
                 return base_path
@@ -144,7 +144,7 @@ class VimCommandParser:
             if n:
                 #Try to move up by given value
                 x,y = base_path.end
-                target = (x,y - (n - 1))
+                target = (x,y - n)
                 return engine.game_map.get_mono_path(player.pos,target)
             else:
                 return base_path
@@ -181,7 +181,7 @@ class VimCommandParser:
         
             if len(targets) == 1:
                 # This is not an "error," exactly, it just goes nowhere.
-                target_location = targets[0]
+                targets.append(targets[0])
             else:
                 # Handle the details of whether to overshoot/undershoot the
                 #  final target, based on "t" or "f" mode.
@@ -267,12 +267,12 @@ class VimCommandParser:
         engine = self.engine
         command = self.partial_command
 
-        directions = {
-            "j":(0,1),
-            "k":(0,-1),
-            "h":(-1,0),
-            "l":(1,0),
-        }
+        #directions = {
+        #    "j":(0,1),
+        #    "k":(0,-1),
+        #    "h":(-1,0),
+        #    "l":(1,0),
+        #}
 
         # Matches something that can be parsed to give a movement
         valid_movement_re = MOVEMENT_RE

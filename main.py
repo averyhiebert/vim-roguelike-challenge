@@ -3,15 +3,16 @@ import copy
 
 import tcod
 
+import colors
 from engine import Engine
 import entity_factories
 from procgen import generate_dungeon
 
 def main() -> None:
-    screen_width = 70
+    screen_width = 75
     screen_height = 40
 
-    map_width = screen_width - 20
+    map_width = screen_width - 25
     map_height = screen_height - 2
 
     tileset = tcod.tileset.load_tilesheet("images/dejavu_wide16x16_gs_tc.png",32,8,
@@ -23,6 +24,10 @@ def main() -> None:
     engine = Engine(player=player)
     engine.game_map = generate_dungeon(map_width, map_height,engine=engine)
     engine.update_fov()
+
+    engine.message_log.add_message(
+        "Welcome to the Vim Roguelike Challenge (VimRC)."
+    )
 
 
     with tcod.context.new_terminal(screen_width,screen_height,

@@ -38,7 +38,7 @@ class Fighter(BaseComponent):
         else:
             death_message = f"{self.entity.name} is dead!"
 
-        # TODO Replace with corpse object
+        # TODO Replace with a yankable, consumable corpse object
         self.entity.char = "%"
         self.entity.color = (191,0,0)
         self.entity.blocks_movement = False
@@ -46,4 +46,4 @@ class Fighter(BaseComponent):
         self.entity.ai = None
         self.entity.summary = f"The consumable remains of the {self.entity.name}"
         self.entity.render_order = RenderOrder.CORPSE
-        print(death_message)
+        self.engine.message_log.add_message(death_message)

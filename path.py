@@ -33,9 +33,10 @@ class Path:
             if self.game_map.is_navigable(location,entity=entity):
                 return location
         else:
-            # Not sure how this happens, but just stay at starting point
-            return self.points[0]
-            #raise ValueError("Path must contain at least one valid location.")
+            # Sometimes occurs when path has length 0, although this really
+            #  isn't supposed to happen.
+            # Just return current location instead, a reasonably safe fallback
+            return self.entity.pos
 
     def truncate_to_navigable(self,entity:Entity,
             include_barrier:bool=True) -> None:

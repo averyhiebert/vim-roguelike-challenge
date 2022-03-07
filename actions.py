@@ -163,10 +163,14 @@ class MeleeAction(ActionWithDirection):
         to_hit = roll_dice(self.entity.fighter.to_hit)
         if to_hit > target.fighter.AC:
             damage = roll_dice(self.entity.fighter.damage)
-            print(f"{self.entity.name} attacked {target.name} for {damage} hp")
+            self.engine.message_log.add_message(
+                f"{self.entity.name} attacked {target.name} ({damage} hp)."
+            )
             target.fighter.hp -= damage
         else:
-            print(f"{self.entity.name} missed {target.name}")
+            self.engine.message_log.add_message(
+                f"{self.entity.name} missed {target.name}."
+            )
 
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:
