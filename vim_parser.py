@@ -10,6 +10,7 @@ import numpy as np
 import tcod
 
 from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath
+from path import Path
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -267,13 +268,6 @@ class VimCommandParser:
         engine = self.engine
         command = self.partial_command
 
-        #directions = {
-        #    "j":(0,1),
-        #    "k":(0,-1),
-        #    "h":(-1,0),
-        #    "l":(1,0),
-        #}
-
         # Matches something that can be parsed to give a movement
         valid_movement_re = MOVEMENT_RE
 
@@ -308,9 +302,16 @@ class VimCommandParser:
             match = re.match(valid_pyd_re,command)
             main_command = match.group("command")
             if main_command == "dd":
-                # I guess in retrospect this doesn't do much
-                # TODO Area of effect or something?
-                return WaitAction(engine.player)
+                # A little area of effect attack for tight situations.
+                #return WaitAction(engine.player)
+                offsets = [(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1)]
+                start = engine.player.pos
+                sx,sy = start
+                aoe_path = Path(
+                    [(sx+x,sy+y) for x,y in offsets] + [start],
+                    game_map = engine.game_map
+                )
+                return ActionDeleteAlongPath(engine.player,aoe_path)
             elif main_command[0] == "d":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
