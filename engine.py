@@ -22,9 +22,9 @@ class Engine:
     game_map: GameMap
 
     def __init__(self,player:Actor):
-        self.event_handler: EventHandler = MainGameEventHandler(self)
-        self.message_log = MessageLog()
         self.player = player
+        self.message_log = MessageLog()
+        self.event_handler: EventHandler = MainGameEventHandler(self)
         self.char_array = None # TODO Figure out type
 
     def handle_enemy_turns(self) -> None:

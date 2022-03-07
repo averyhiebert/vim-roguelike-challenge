@@ -25,7 +25,11 @@ class VimCommandParser:
 
     def __init__(self,engine:Engine):
         self.engine = engine
-        self.reset()
+
+        # History needed for implementing "u"
+        # Note: first position is a lie, ignore it.
+        self.past_player_locations = []
+        self.reset(update_history=False)
 
         self.last_tf_command = "" # For implementing ;
 
@@ -33,11 +37,19 @@ class VimCommandParser:
         self.reset()
         raise NotImplementedError(message)
 
-    def reset(self):
-        """ Only resets us back to able to receive new commands.
+    def reset(self,update_history:bool=True):
+        """ Only resets us back to able to receive new commands, and
+        updates the past location information.
 
         Does not reset the last_tf_command or other similar state that may
         be stored in the future."""
+        if update_history:
+            if len(self.past_player_locations) == 0:
+                # No history,
+                self.past_player_locations.append(self.engine.player.pos)
+            if self.engine.player.pos != self.past_player_locations[-1]:
+                # Update history
+                self.past_player_locations.append(self.engine.player.pos)
         self.partial_command = "" # i.e. command so far
 
     def next_key(self,char:str) -> Optional[Action]:
@@ -324,6 +336,18 @@ class VimCommandParser:
             register = command[-1]
             self.reset()
             return ActionMakeMark(engine.player,register)
+        elif command == "u":
+            # "Undo" (Move back to location prior to last move)
+            if len(self.past_player_locations) == 0:
+                # If no previous locations, do nothing/skip turn
+                self.reset()
+                return WaitAction(engine.player)
+            target = self.past_player_locations.pop()
+            self.reset(update_history=False)
+            path = self.engine.game_map.get_mono_path(self.engine.player.pos,
+                target)
+            return ActionMoveAlongPath(self.engine.player,path)
+
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an
