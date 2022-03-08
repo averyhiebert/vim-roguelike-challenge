@@ -50,7 +50,7 @@ class StatusBar:
             # Render default text, i.e. the x,y and %/top/etc.
             #  TODO Figure out what the %/top/bottom/all represents.
             #  Maybe progress towards the final level?
-            x,y = self.engine.player.pos
+            x,y = self.engine.coords_to_show
             position_text = f"{x:2d},{y:2d}"
             console.print(x=38,y=38,string=position_text,fg=fg,bg=bg)
             position = "Top"

@@ -49,17 +49,24 @@ class Engine:
         #  (i.e. not in entities list, so other functions won't find it.)
         # TODO Handle this better (bit of a hack currently)
         self.cursor_entity = copy.deepcopy(self.player)
-        self.show_cursor=True
+        self.show_cursor=False
 
-    def set_game_map(self,game_map:GameMap) -> None:
-        self.game_map = game_map
-        self.cursor_entity.parent = self.game_map
-
+    @property
+    def coords_to_show(self) -> Tuple[int,int]:
+        """ Coords to show in the status bar."""
+        if self.show_cursor:
+            return self.cursor
+        else:
+            return self.player.pos
 
     @property
     def cursor(self) -> Tuple[int,int]:
         """ Return cursor coordinates."""
         return self.cursor_entity.pos
+
+    def set_game_map(self,game_map:GameMap) -> None:
+        self.game_map = game_map
+        self.cursor_entity.parent = self.game_map
 
     def show_error_message(self,text:str) -> None:
         """ Show an error message to the user, in status bar (vim-style)."""
