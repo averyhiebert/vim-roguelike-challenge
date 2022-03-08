@@ -14,7 +14,9 @@ from actions import (
     EnterCommandMode,
     ExitCommandMode,
     CommandModeStringChanged,
-    NextPageAction
+    NextPageAction,
+    ActionMoveAlongPath,
+    MoveCursorAction,
 )
 from vim_parser import VimCommandParser
 from exceptions import VimError
@@ -102,7 +104,7 @@ class MainGameEventHandler(EventHandler):
     def __init__(self, engine:Engine):
         super().__init__(engine)
         self.command_parser = VimCommandParser(engine=engine)
-        self.do_enemy_turn = False
+        #self.do_enemy_turn = False
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
         action: Optional[Action] = None
@@ -155,6 +157,44 @@ class CommandEntryEventHandler(EventHandler):
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction(player)
         return action
+
+class CursorMovementEventHandler(EventHandler):
+    """ Event handler for moving a cursor (e.g. for "observe" or
+    possibly for some targeting effects).
+
+    Allows movement commands but not other commands.
+
+    At the end of its life, calls callback before returning to normal operation.
+    """
+    def __init__(self, engine:Engine,final_action:CursorAction):
+        super().__init__(engine)
+        self.command_parser = VimCommandParser(engine=engine,
+            movement_only=True)
+        self.final_action = final_action
+
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
+        action: Optional[Action] = None
+        player = self.engine.player
+
+        key = event.sym
+        usable_key = keydown_to_char(event) # i.e. an ascii char
+
+        if usable_key == "o" or key == tcod.event.K_RETURN:
+            # Exit cursor mode
+            self.engine.finish_cursor_input()
+            return self.final_action
+        elif usable_key:
+            #action = self.command_parser.next_key(usable_key)
+            action = self.command_parser.next_key(usable_key)
+            if isinstance(action,ActionMoveAlongPath):
+                return MoveCursorAction(action)
+            else:
+                return None
+        elif key == tcod.event.K_ESCAPE:
+            action = EscapeAction(player)
+
+        return action
+
 
 class TextWindowPagingEventHandler(EventHandler):
     def ev_keydown(self,event:tcod.event.KeyDown) -> Optional[Action]:

@@ -22,8 +22,10 @@ from actions import (
     ExitCommandMode,
     ShowInventory,
     TextScrollAction,
+    GetCursorInput,
+    ObserveAction,
 )
-from exceptions import VimError
+from exceptions import VimError, UserError
 from path import Path
 
 if TYPE_CHECKING:
@@ -34,8 +36,11 @@ MOVEMENT_RE = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|;|[tf].|[we]|[HML$
 
 class VimCommandParser:
 
-    def __init__(self,engine:Engine):
+    def __init__(self,engine:Engine,movement_only=False):
+        """ Use movement_only mode for situations that only require a movement,
+        and not an action."""
         self.engine = engine
+        self.movement_only = movement_only
 
         # History needed for implementing "u"
         # Note: first position is a lie, ignore it.
@@ -44,12 +49,15 @@ class VimCommandParser:
 
         self.last_tf_command = "" # For implementing ;
 
-    def invalid(self,message="Invalid command."):
-        self.reset()
-        raise NotImplementedError(message)
+    def on_non_movement(self):
+        """ Called every time we parse a partial command that is valid only as
+        part of a non-movement action."""
+        if self.movement_only:
+            raise UserError(" Not a valid movement. ")
+
 
     def reset(self,update_history:bool=True):
-        """ Only resets us back to able to receive new commands, and
+        """ Only resets us back to be able to receive new commands, and
         updates the past location information.
 
         Does not reset the last_tf_command or other similar state that may
@@ -95,9 +103,7 @@ class VimCommandParser:
 
         if self.partial_command == "":
             # We are starting a brand-new command
-            if char == "o":
-                raise NotImplementedError("o mode not yet implemented")
-            elif char == " ":
+            if char == " ":
                 # Do nothing, but DO perform an enemy turn
                 self.reset()
                 return WaitAction(self.engine.player)
@@ -106,7 +112,7 @@ class VimCommandParser:
 
         try:
             action = self.parse_partial_command() 
-        except VimError as err:
+        except UserError as err:
             # No point printing the stack here
             self.reset()
             raise err
@@ -244,7 +250,6 @@ class VimCommandParser:
                 target = player.pos
             path = engine.game_map.get_mono_path(player.pos,target)
             return path
-
         elif base[0] in "we":
             # TODO Implement this
             raise NotImplementedError("w and e not implemented yet, sorry")
@@ -304,6 +309,9 @@ class VimCommandParser:
 
         Otherwise, raise "invalid command" exception.
 
+        When in movement_only mode, raise a user error on anything that is
+         not a valid movement command.
+
         TODO: Need to solve the fact that every time I add a new command,
          I forget self.reset() and have trouble debugging it.
 
@@ -342,6 +350,7 @@ class VimCommandParser:
             path = self.parse_movement(command)
             return ActionMoveAlongPath(engine.player,path)
         elif re.match(valid_pyd_re, command):
+            self.on_non_movement()
             # A yank, pull, or delete
             self.reset()
             match = re.match(valid_pyd_re,command)
@@ -383,11 +392,13 @@ class VimCommandParser:
                 print(main_command)
                 raise NotImplementedError("This command not implemented")
         elif re.match("m.",command):
+            self.on_non_movement()
             # Set a mark in register .
             register = command[-1]
             self.reset()
             return ActionMakeMark(engine.player,register)
         elif command == "u":
+            self.on_non_movement()
             # "Undo" (Move back to location prior to last move)
             if len(self.past_player_locations) == 0:
                 # If no previous locations, do nothing/skip turn
@@ -399,6 +410,7 @@ class VimCommandParser:
                 target)
             return ActionMoveAlongPath(self.engine.player,path)
         elif re.match("@.",command):
+            self.on_non_movement()
             self.reset()
             # Use an item.
             # Note: inventory may raise a vim error if register invalid.
@@ -406,16 +418,25 @@ class VimCommandParser:
             item = self.engine.player.inventory.get_item(register)
             return ItemAction(self.engine.player,item)
         elif command in ":/":
+            self.on_non_movement()
             # Enter command mode
             self.reset()
             return EnterCommandMode(self.engine.player,command)
         elif command in ["gj","gk","G"]:
+            self.on_non_movement()
             self.reset()
             return TextScrollAction(self.engine.player,command[-1:])
         elif command == "i":
+            self.on_non_movement()
             # We treat this as shortcut for viewing inventory
             self.reset()
             return self.colon_command(":reg")
+        elif command == "o":
+            self.on_non_movement()
+            self.reset()
+            #return GetCursorInput(self.engine.player,
+            #    final_action=ObserveAction(self.engine.player))
+            return ObserveAction(self.engine.player)
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an
@@ -424,8 +445,10 @@ class VimCommandParser:
         elif re.match(partial_valid_movement_re,command):
             return WaitAction(engine.player)
         elif re.match(partial_valid_pyd_re,command):
+            self.on_non_movement()
             return WaitAction(engine.player)
         elif command in "m@":
+            self.on_non_movement()
             # Some straggler/singleton possibilities
             return WaitAction(engine.player)
         elif command == "g":

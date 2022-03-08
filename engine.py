@@ -9,7 +9,11 @@ from tcod.console import Console
 from tcod.map import compute_fov
 
 import exceptions
-from input_handlers import MainGameEventHandler, CommandEntryEventHandler
+from input_handlers import (
+    MainGameEventHandler,
+    CommandEntryEventHandler,
+    CursorMovementEventHandler,
+)
 from message_log import MessageLog
 from status_bar import StatusBar
 from text_window import TextWindow
@@ -39,6 +43,8 @@ class Engine:
             width=23, height=38 - 2 - self.top_box_space
         )
         self.message_log = MessageLog(self.text_window)
+        self.cursor:Tuple[int,int] = player.pos
+        self.show_cursor=True
 
     def show_error_message(self,text:str) -> None:
         """ Show an error message to the user, in status bar (vim-style)."""
@@ -51,6 +57,15 @@ class Engine:
     def exit_command_mode(self) -> None:
         self.event_handler = MainGameEventHandler(self)
         self.status_bar.set_long_message("")
+
+    def get_cursor_input(self,final_action:CursorAction) -> None:
+        self.cursor = self.player.pos
+        self.show_cursor = True
+        self.event_handler = CursorMovementEventHandler(self,final_action)
+
+    def finish_cursor_input(self) -> None:
+        self.event_handler = MainGameEventHandler(self)
+        self.show_cursor = False
 
     def handle_enemy_turns(self) -> None:
         # Reset status message and show log every turn. 

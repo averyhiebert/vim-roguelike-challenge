@@ -266,6 +266,58 @@ class BumpAction(ActionWithDirection):
         else:
             return MovementAction(self.entity,self.direction).perform()
 
+# Cursor Actions (weird) ========================================
+
+class MoveCursorAction(ActionWithPath):
+    """ Moves the cursor to a given location."""
+    def __init__(self,original:ActionMoveAlongPath):
+        """ Given a player movement action, copy its path but move
+        the cursor rather than the player.
+        """
+        super().__init__(original.entity,original.path)
+
+    def perform(self) -> None:
+        self.engine.cursor = self.path.points[-1]
+
+class GetCursorInput(Action):
+    def __init__(self, entity:Entity,final_action:CursorAction):
+        super().__init__(entity)
+        self.final_action = final_action
+
+    def perform(self) -> None:
+        self.entity.engine.get_cursor_input(final_action=self.final_action)
+
+class CursorAction(Action):
+    """ An action that requires a cursor position.
+
+    Will be performed twice (first to switch into cursor mode,
+    then to do something with the cursor).
+
+    Must implement perform2 as the second "performance"
+    
+    No difference implementation-wise from a regular Action,
+    just doing this for type-checking reasons.
+    """
+    def __init__(self,entity:Entity):
+        super().__init__(entity)
+        self.second_use = False
+
+    def perform(self) -> None:
+        if not self.second_use:
+            self.second_use = True
+            GetCursorInput(self.entity,self).perform()
+        else:
+            self.perform2()
+
+    def perform2(self) -> None:
+        raise NotImplementedError()
+
+
+class ObserveAction(CursorAction):
+    def perform2(self) -> None:
+        target = self.engine.cursor
+        raise NotImplementedError(f"Observe {str(target)}")
+
 # Item Actions =========================================================
 
 class ItemAction(Action):
