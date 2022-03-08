@@ -64,6 +64,12 @@ class CommandModeStringChanged(Action):
     def perform(self) -> None:
         self.engine.status_bar.set_long_message(self.text)
 
+class ShowInventory(Action):
+    def perform(self) -> None:
+        summary = self.entity.inventory.get_summary()
+        self.engine.text_window.show(summary,message_log_mode=True)
+        
+
 # Player actions =======================================================
 class WaitAction(Action):
     def perform(self) -> None:

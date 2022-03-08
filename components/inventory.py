@@ -29,6 +29,27 @@ class Inventory(BaseComponent):
         """
         return list(self.registers.values())
 
+    def get_summary(self) -> List[str]:
+        """ Return a list of lines summarizine the contents of
+        the inventory in human-readable form.
+
+        TODO Use colours?
+        """
+        lines = [
+            f"{self.parent.name} inventory",
+            len(f"{self.parent.name} inventory")*"~",
+            " ",
+            "Equipped:"
+        ]
+        for key in "123456789":
+            if key in self.registers:
+                lines.append(f" {key}) {self.registers[key].name}")
+        lines.extend([" ","Unequipped:"])
+        for key in "abcdefghijklmnopqrstuvwxyz":
+            if key in self.registers:
+                lines.append(f" {key}) {self.registers[key].name}")
+        return lines
+
     def get_last_used_register(self) -> Optional[str]:
         """ Return the register last used that still contains stuff.
 

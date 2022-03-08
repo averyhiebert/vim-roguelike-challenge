@@ -127,6 +127,7 @@ class CommandEntryEventHandler(EventHandler):
     def __init__(self, engine:Engine,text:str):
         super().__init__(engine)
         self.text=text
+        self.command_parser = VimCommandParser(engine=engine)
 
     def ev_keydown(self, 
             event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
@@ -147,8 +148,12 @@ class CommandEntryEventHandler(EventHandler):
                 action = CommandModeStringChanged(player,self.text)
         elif key == tcod.event.K_RETURN:
             # TODO Try executing command.
+            if self.text[0] == ":":
+                action = self.command_parser.colon_command(self.text)
+                ExitCommandMode(player).perform() # Also necessary
+            elif self.text[0] == "/":
+                raise NotImplementedError()
             self.text = ""
-            action = ExitCommandMode(player)
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction(player)
         return action

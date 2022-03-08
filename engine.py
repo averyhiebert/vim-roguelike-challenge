@@ -49,8 +49,9 @@ class Engine:
         self.status_bar.set_long_message("")
 
     def handle_enemy_turns(self) -> None:
-        # Reset status message whenever an enemy turn is processed
+        # Reset status message whenever an enemy turn is processed. 
         self.status_bar.reset()
+
         self.turn += 1
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
@@ -79,7 +80,6 @@ class Engine:
         top_box_space = self.top_box_space
 
         # Render UI stuff
-        self.message_log.display()
         render_stat_box(console,
             health=self.player.fighter.hp,
             max_health=self.player.fighter.max_hp,

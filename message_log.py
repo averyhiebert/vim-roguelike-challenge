@@ -42,6 +42,9 @@ class MessageLog:
             self.messages[-1].count += 1
         else:
             self.messages.append(Message(text,fg))
+        # Display self (i.e. replacing whatever was previously in the
+        #  text window.
+        self.display()
 
     def display(self) -> None:
         """Show this log in the text window."""

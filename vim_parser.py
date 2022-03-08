@@ -19,6 +19,8 @@ from actions import (
     DropItem,
     ItemAction,
     EnterCommandMode,
+    ExitCommandMode,
+    ShowInventory,
 )
 from exceptions import VimError
 from path import Path
@@ -59,6 +61,15 @@ class VimCommandParser:
                 # Update history
                 self.past_player_locations.append(self.engine.player.pos)
         self.partial_command = "" # i.e. command so far
+
+    def colon_command(self,command:str) -> Optional[Action]:
+        """
+        Parse a colon command and return an appropriate action.
+        """
+        if command in [":reg",":registers"]:
+            # Show inventory
+            return ShowInventory(self.engine.player)
+        return ExitCommandMode(self.engine.player)
 
     def next_key(self,char:str) -> Optional[Action]:
         """ 
