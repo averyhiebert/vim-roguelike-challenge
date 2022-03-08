@@ -77,7 +77,7 @@ class EventHandler(tcod.event.EventDispatch[Action]):
                 return
 
             if action:
-                # Note: excaptions here will still be caught by Main and
+                # Note: exceptions here will still be caught by Main and
                 #  shown to player.  Enemy turn will not be performed if there
                 #  is an exception during the player's turn.
                 action.perform()

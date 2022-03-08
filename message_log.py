@@ -1,15 +1,22 @@
-from typing import Iterable, List, Reversible, Tuple
+from __future__ import annotations
+
+from typing import Iterable, List, Reversible, Tuple, TYPE_CHECKING
 import textwrap
+import itertools
 
 import tcod
 
 import colors
+
+if TYPE_CHECKING:
+    from text_window import TextWindow
 
 class Message:
     def __init__(self, text:str, fg:Tuple[int,int,int]):
         self.plain_text = text
         self.fg = fg
         self.count = 1
+        self.max_show_history = 100
 
     @property
     def full_text(self) -> str:
@@ -19,8 +26,10 @@ class Message:
         return f"{self.plain_text}\n"
 
 class MessageLog:
-    def __init__(self) -> None:
+    def __init__(self,text_window:TextWindow) -> None:
+        self.text_window = text_window
         self.messages:List[Message] = []
+        self.max_show_history = 100
 
     def add_message(self, text:str, fg:Tuple[int,int,int]=colors.ui_fg,
             *,stack: bool=True):
@@ -34,36 +43,14 @@ class MessageLog:
         else:
             self.messages.append(Message(text,fg))
 
-    def render(self, console:tcod.Console, x:int, y:int, 
-            width:int, height: int) -> None:
-        """Render this log over the given area.
-        `x`,`y`,`width`,`height` is the rectangular region to render
-        onto the `console`.
-        """
-        self.render_messages(console,x,y,width,height,self.messages)
+    def display(self) -> None:
+        """Show this log in the text window."""
 
-    @staticmethod
-    def wrap(string:str,width:int) -> Iterable[str]:
-        """Return a wrapped text message."""
-        for line in string.splitlines(): # Handle newlines in messages.
-            yield from textwrap.wrap(
-                line, width, expand_tabs=True,
-                subsequent_indent=" "
-            )
-
-    @classmethod
-    def render_messages(cls,console:tcod.Console,x:int,y:int,width:int,
-            height:int,messages:Reversible[Message]) -> None:
-        """Render the messages provided.
-        The `messages` are rendered starting at the last message
-        and working backwards.
-        """
-        y_offset = height - 1
-
-        for message in reversed(messages):
-            for line in reversed(list(cls.wrap(message.full_text,width))):
-                console.print(x=x,y=y+y_offset,string=line,fg=message.fg)
-                y_offset -= 1
-                if y_offset < 0:
-                    return
-
+        # Only send a max number of messages to the textbox
+        #  Note: we reverse so as to slice the last however-many, and
+        #  then reverse again to send them to text window in correct order.
+        # Would it really be that bad to just slice the original list?
+        #  Probably not, but this seemed like a good idea at the time.
+        truncated_texts = [(m.full_text, m.fg) for m in itertools.islice(reversed(self.messages),self.max_show_history)]
+        self.text_window.show(list(reversed(truncated_texts)),
+            message_log_mode=True)

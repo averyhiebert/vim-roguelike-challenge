@@ -8,6 +8,7 @@ import colors
 from engine import Engine
 import entity_factories
 from procgen import generate_dungeon
+import exceptions
 
 def main() -> None:
     screen_width = 75
@@ -39,11 +40,21 @@ def main() -> None:
             try:
                 engine.render(console=root_console,context=context)
                 engine.event_handler.handle_events()
+            except exceptions.VimError as err:
+                # TODO Use the status bar, not message log.
+                engine.message_log.add_message(str(err))
+            except exceptions.Impossible as err:
+                engine.message_log.add_message(str(err))
+            except NotImplementedError as err:
+                traceback.print_exc()
+                engine.message_log.add_message(str(err))
             except Exception as err:
                 # TODO Do this in a way that doesn't risk the entire program
                 #  freezing if there's an error in the rendering or something.
                 traceback.print_exc()
                 engine.message_log.add_message(str(err))
+                # TEMP: While working on UI stuff:
+                raise err
 
 
 if __name__=="__main__":
