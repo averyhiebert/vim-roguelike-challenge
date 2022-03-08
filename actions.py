@@ -111,18 +111,28 @@ class ActionDeleteAlongPath(ActionWithPath):
 
 class PickupAlongPath(ActionWithPath):
 
+    def __init__(self, entity:Entity, path:Path, register:Optional[str]=None):
+        super().__init__(entity,path)
+        self.register = register
+
     def perform(self) -> None:
         inventory = self.entity.inventory
-        # TODO There is probably a more efficient way to do this.
         inserted = 0
+        first = True
+        # TODO There is probably a more efficient way to do this.
         # Must convert to list to iterate over,
         #  or else error "set changed size during iteration"
         for item in list(self.entity.gamemap.items):
             if item.pos in self.path.points:
-                inventory.insert(item)
+                if first:
+                    inventory.insert(item,self.register)
+                    first=False
+                else:
+                    inventory.insert(item)
                 inserted += 1
         if inserted == 0:
             raise exceptions.Impossible("There is nothing to yank.")
+        # TODO: Should have a single combined message for all actions.
 
         # Draw trace
         if len(self.path.points) > 1:
@@ -206,7 +216,7 @@ class BumpAction(ActionWithDirection):
 class ItemAction(Action):
     def __init__(
             self, entity:Actor, item:Item,
-            target_pos:Optional[Tuple[int,int]]) -> None:
+            target_pos:Optional[Tuple[int,int]]=None) -> None:
         super().__init__(entity)
         self.item = item
         if not target_pos:
@@ -220,3 +230,7 @@ class ItemAction(Action):
 
     def perform(self) -> None:
         self.item.consumable.activate(self)
+
+class DropItem(ItemAction):
+    def perform(self) -> None:
+        self.entity.inventory.drop(self.item)

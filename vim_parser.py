@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 import tcod
 
-from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath, PickupAlongPath
+from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath, PickupAlongPath, DropItem, ItemAction
 from exceptions import VimError
 from path import Path
 
@@ -273,7 +273,9 @@ class VimCommandParser:
         Parse the given partial vim command.
         
         For completed commands, return an appropriate Action.
-        For incomplete (but potentially valid) commands, return None.
+        For incomplete (but potentially valid) commands, currently returns
+         a Wait action, rather than none, because I still want the turn to
+         advance.  But there may be some cases where I choose to change this.
 
         Otherwise, raise "invalid command" exception.
 
@@ -316,9 +318,17 @@ class VimCommandParser:
             self.reset()
             match = re.match(valid_pyd_re,command)
             main_command = match.group("command")
+
+            # May or may not be a register
+            register = None
+            if match.group("register"):
+                register = match.group("register")[1]
+
             if main_command == "dd":
                 # A little area of effect attack for tight situations.
-                #return WaitAction(engine.player)
+                #  (Currently, register does nothing.)
+                #  (Maybe the register should, if specified, also yank
+                #   the corpse when something dies? TODO that, maybe)
                 offsets = [(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1)]
                 start = engine.player.pos
                 sx,sy = start
@@ -333,11 +343,14 @@ class VimCommandParser:
                 return ActionDeleteAlongPath(engine.player,path)
             elif main_command == "yy":
                 path = Path([engine.player.pos],game_map = engine.game_map)
-                return PickupAlongPath(engine.player,path)
+                return PickupAlongPath(engine.player,path,register)
             elif main_command[0] == "y":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
-                return PickupAlongPath(engine.player,path)
+                return PickupAlongPath(engine.player,path,register)
+            elif main_command == "p":
+                item = engine.player.inventory.get_item(register)
+                return DropItem(engine.player,item)
             else:
                 print(main_command)
                 raise NotImplementedError("This command not implemented")
@@ -357,6 +370,13 @@ class VimCommandParser:
             path = self.engine.game_map.get_mono_path(self.engine.player.pos,
                 target)
             return ActionMoveAlongPath(self.engine.player,path)
+        elif re.match("@.",command):
+            self.reset()
+            # Use an item.
+            # Note: inventory may raise a vim error if register invalid.
+            register = command[1]
+            item = self.engine.player.inventory.get_item(register)
+            return ItemAction(self.engine.player,item)
 
 
         # Checks for valid partial commands (which don't do anything):
@@ -367,7 +387,7 @@ class VimCommandParser:
             return WaitAction(engine.player)
         elif re.match(partial_valid_pyd_re,command):
             return WaitAction(engine.player)
-        elif command in "m":
+        elif command in "m@":
             # Some straggler/singleton possibilities
             return WaitAction(engine.player)
         else:

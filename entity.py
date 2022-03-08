@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING
+from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING, Union
 
 import colors
 from render_order import RenderOrder
@@ -24,7 +24,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    parent: GameMap
+    parent: Union[GameMap, Inventory]
 
     # TODO switch all entities from x/y to single position attribute
     def __init__(self, 

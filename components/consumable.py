@@ -4,6 +4,7 @@ from typing import Optional, TYPE_CHECKING
 
 import actions
 from components.base_component import BaseComponent
+from components.inventory import Inventory
 from exceptions import Impossible
 
 if TYPE_CHECKING:
@@ -21,6 +22,12 @@ class Consumable(BaseComponent):
         """
         raise NotImplementedError()
 
+    def consume(self) -> None:
+        item = self.parent
+        inventory = item.parent
+        if isinstance(inventory,Inventory):
+            inventory.remove(item)
+
 class HealingConsumable(Consumable):
     def __init__(self, amount:int):
         self.amount = amount
@@ -31,7 +38,8 @@ class HealingConsumable(Consumable):
 
         if amount_recovered > 0:
             self.engine.message_log.add_message(
-                f"You consume the {self.parent.name}, and recover {amount_recovered} hp"
+                f"You consumed the {self.parent.name}, recovering {amount_recovered} hp"
             )
+            self.consume()
         else:
             raise Impossible(f"Your health is already full.")
