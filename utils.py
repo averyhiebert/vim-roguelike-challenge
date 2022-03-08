@@ -13,4 +13,8 @@ def roll_dice(dice:str) -> int:
             total += sum([random.randint(1,int(parts[1])) 
                 for i in range(int(parts[0])) ])
     return total
-        
+
+def a_or_an(s:str) -> str:
+    """ Return 'a [str]' or 'an [str]' as appropriate."""
+    return f"an {s}" if s[0] in "aeiouAEIOU" else f"a {s}"
+    

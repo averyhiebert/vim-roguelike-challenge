@@ -1,5 +1,6 @@
 ''' A roguelike based on vim. '''
 import copy
+import traceback
 
 import tcod
 
@@ -35,8 +36,12 @@ def main() -> None:
             vsync=True) as context:
         root_console = tcod.Console(screen_width,screen_height,order="F")
         while True:
-            engine.render(console=root_console,context=context)
-            engine.event_handler.handle_events()
+            try:
+                engine.render(console=root_console,context=context)
+                engine.event_handler.handle_events()
+            except Exception as err:
+                traceback.print_exc()
+                engine.message_log.add_message(str(err))
 
 
 if __name__=="__main__":

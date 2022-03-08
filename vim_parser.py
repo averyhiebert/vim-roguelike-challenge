@@ -9,7 +9,8 @@ import traceback
 import numpy as np
 import tcod
 
-from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath
+from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath, PickupAlongPath
+from exceptions import VimError
 from path import Path
 
 if TYPE_CHECKING:
@@ -17,9 +18,6 @@ if TYPE_CHECKING:
 
 # TODO Maybe compile this
 MOVEMENT_RE = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|;|[tf].|[we]|[HML$]|[`'].)"
-
-class VimError(Exception):
-    pass
 
 class VimCommandParser:
 
@@ -89,10 +87,15 @@ class VimCommandParser:
         try:
             action = self.parse_partial_command() 
         except VimError as err:
+            # No point printing the stack here
+            self.reset()
+            raise err
+        except NotImplementedError as err:
+            # Only temporary. Once all vim commands are implemented,
+            #  this should be done away with.
             self.reset()
             raise err
         except Exception as err:
-            # TODO check for correct exception
             traceback.print_exc()
             self.reset()
             raise err
@@ -219,11 +222,11 @@ class VimCommandParser:
 
         elif base[0] in "we":
             # TODO Implement this
-            #raise NotImplementedError()
-            raise VimError("w and e are not yet implemented, sorry")
+            raise NotImplementedError("w and e not implemented yet, sorry")
+            #raise VimError("w and e are not yet implemented, sorry")
         else:
             # TODO implement
-            raise VimError("Unknown command")
+            raise VimError()
 
     def bump_destination(self,source:Tuple[int,int],
             target:Tuple[int,int],mode:str) -> Tuple[int,int]:
@@ -328,6 +331,13 @@ class VimCommandParser:
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
                 return ActionDeleteAlongPath(engine.player,path)
+            elif main_command == "yy":
+                path = Path([engine.player.pos],game_map = engine.game_map)
+                return PickupAlongPath(engine.player,path)
+            elif main_command[0] == "y":
+                movement = match.group("movement")
+                path = self.parse_movement(movement)
+                return PickupAlongPath(engine.player,path)
             else:
                 print(main_command)
                 raise NotImplementedError("This command not implemented")
@@ -361,5 +371,5 @@ class VimCommandParser:
             # Some straggler/singleton possibilities
             return WaitAction(engine.player)
         else:
-            raise VimError("Invalid command.")
+            raise VimError()
 

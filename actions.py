@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional, Tuple, TYPE_CHECKING
 
 from utils import roll_dice
+import exceptions
 import colors
 
 if TYPE_CHECKING:
@@ -107,8 +108,28 @@ class ActionDeleteAlongPath(ActionWithPath):
         if len(self.path.points) > 2:
             self.entity.gamemap.add_trace(self.path.points,
                 color=colors.delete_trace)
-    
-    
+
+class PickupAlongPath(ActionWithPath):
+
+    def perform(self) -> None:
+        inventory = self.entity.inventory
+        # TODO There is probably a more efficient way to do this.
+        inserted = 0
+        # Must convert to list to iterate over,
+        #  or else error "set changed size during iteration"
+        for item in list(self.entity.gamemap.items):
+            if item.pos in self.path.points:
+                inventory.insert(item)
+                inserted += 1
+        if inserted == 0:
+            raise exceptions.Impossible("There is nothing to yank.")
+
+        # Draw trace
+        if len(self.path.points) > 1:
+            self.entity.gamemap.add_trace(self.path.points,
+                color=colors.yank_trace)
+                
+
 
 class ActionWithDirection(Action):
     def __init__(self, entity:Actor, direction: Tuple[int,int]):
@@ -172,6 +193,8 @@ class MeleeAction(ActionWithDirection):
                 f"{self.entity.name} missed {target.name}."
             )
 
+# TODO: Figure out whether this is still needed?
+#  Although, enemies still use it even if player doesn't.
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:
 
@@ -180,3 +203,20 @@ class BumpAction(ActionWithDirection):
         else:
             return MovementAction(self.entity,self.direction).perform()
 
+class ItemAction(Action):
+    def __init__(
+            self, entity:Actor, item:Item,
+            target_pos:Optional[Tuple[int,int]]) -> None:
+        super().__init__(entity)
+        self.item = item
+        if not target_pos:
+            target_pos = entity.pos
+        self.target_pos = target_pos
+
+    @property
+    def target_actor(self) -> Optional[Actor]:
+        """Return the actor at the target destination."""
+        return self.engine.game_map.get_actor_at_location(self.target_pos)
+
+    def perform(self) -> None:
+        self.item.consumable.activate(self)

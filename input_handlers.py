@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import traceback
+
 from typing import Optional
 from typing import Optional, TYPE_CHECKING
 
@@ -7,6 +9,7 @@ import tcod.event
 
 from actions import Action, BumpAction, EscapeAction
 from vim_parser import VimCommandParser
+from exceptions import VimError
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -15,8 +18,6 @@ class EventHandler(tcod.event.EventDispatch[Action]):
 
     def __init__(self, engine:Engine):
         self.engine = engine
-        #self.command_parser = VimCommandParser(engine=engine)
-        #self.do_enemy_turn = False
 
     def handle_events(self) -> None:
         raise NotImplementedError()
@@ -76,6 +77,9 @@ class MainGameEventHandler(EventHandler):
             action = self.dispatch(event)
 
             if action:
+                # Note: excaptions here will still be caught by Main and
+                #  shown to player.  Enemy turn will not be performed if there
+                #  is an exception during the player's turn.
                 action.perform()
                 self.do_enemy_turn = not action.skip_turn
 
@@ -97,8 +101,9 @@ class MainGameEventHandler(EventHandler):
         if usable_key:
             try:
                 action = self.command_parser.next_key(usable_key)
-            except Exception as err:
-                # TODO Better error handling
+            except VimError as err:
+                # TODO Should print message to user, either in the
+                #  message log or in the bottom left where vim does.
                 print(err)
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction(player)

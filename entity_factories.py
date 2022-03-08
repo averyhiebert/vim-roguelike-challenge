@@ -1,6 +1,8 @@
 from components.ai import HostileEnemy
 from components.fighter import Fighter
-from entity import Entity, Actor
+from components.consumable import HealingConsumable
+from components.inventory import Inventory
+from entity import Actor, Item
 import colors
 
 player = Actor(
@@ -9,7 +11,8 @@ player = Actor(
     name="player",
     summary="A daring rogue.",
     ai_cls=HostileEnemy,
-    fighter=Fighter(hp=30,AC=10,to_hit="1d20",damage="1d20")
+    fighter=Fighter(hp=30,AC=10,to_hit="1d20",damage="1d20"),
+    inventory=Inventory(capacity=35)
 )
 
 # Define enemy types here
@@ -28,4 +31,12 @@ ed = Actor(
     summary="An ? known for ? and ?",
     ai_cls=HostileEnemy,
     fighter=Fighter(hp=8,AC=8,to_hit="1d12",damage="1d6")
+)
+
+# Define items here
+health_potion = Item(
+    char="?",
+    name="health potion",
+    summary="A potion that restores health.",
+    consumable=HealingConsumable(4),
 )

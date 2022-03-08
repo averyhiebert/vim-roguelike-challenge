@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
 from render_order import RenderOrder
 from input_handlers import GameOverEventHandler
+from entity import Corpse
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class Fighter(BaseComponent):
-    entity: Actor
+    parent: Actor
 
     def __init__(self,hp:int,AC:int,to_hit:str,damage:str):
         self.max_hp = hp
@@ -28,22 +29,35 @@ class Fighter(BaseComponent):
     @hp.setter
     def hp(self, value:int) -> None:
         self._hp = max(0,min(value,self.max_hp))
-        if self._hp == 0 and self.entity.ai:
+        if self._hp == 0 and self.parent.ai:
+            # TBH, I am not clear on what the point of checking parent.ai is,
+            #  but it's in the tutorial and I'm following it on the assumption
+            #  that they did it that way on purpose.
             self.die()
 
     def die(self) -> None:
-        if self.engine.player is self.entity:
+        if self.engine.player is self.parent:
             death_message = "You died!"
             self.engine.event_handler = GameOverEventHandler(self.engine)
         else:
-            death_message = f"{self.entity.name} is dead!"
+            death_message = f"{self.parent.name} is dead!"
 
-        # TODO Replace with a yankable, consumable corpse object
-        self.entity.char = "%"
-        self.entity.color = (191,0,0)
-        self.entity.blocks_movement = False
-        self.entity.name = f"{self.entity.name} corpse"
-        self.entity.ai = None
-        self.entity.summary = f"The consumable remains of the {self.entity.name}"
-        self.entity.render_order = RenderOrder.CORPSE
         self.engine.message_log.add_message(death_message)
+
+        # Spawn a corpse and remove self
+        corpse = Corpse(self.parent)
+        corpse.spawn(corpse.gamemap,*corpse.pos)
+        self.parent.gamemap.entities.remove(self.parent)
+
+    def heal(self,amount:int) -> None:
+        if self.hp == self.max_hp:
+            return 0
+
+        new_hp = min(self.max_hp,self.hp + amount)
+        amount_recovered = new_hp - self.hp
+
+        self.hp = new_hp
+        return amount_recovered
+
+    def take_damage(self, amount:int) -> None:
+        self.hp -= amount

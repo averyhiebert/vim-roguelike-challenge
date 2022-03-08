@@ -8,6 +8,7 @@ from tcod.context import Context
 from tcod.console import Console
 from tcod.map import compute_fov
 
+import exceptions
 from input_handlers import MainGameEventHandler
 from message_log import MessageLog
 from render_functions import render_stat_box
@@ -30,14 +31,17 @@ class Engine:
     def handle_enemy_turns(self) -> None:
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
-                entity.ai.perform()
+                try:
+                    entity.ai.perform()
+                except exceptions.Impossible:
+                    pass
 
     def update_fov(self) -> None:
         """ Recompute visible area based on player's POV."""
         self.game_map.visible[:] = compute_fov(
             self.game_map.tiles["transparent"],
             (self.player.x,self.player.y),
-            radius=12,
+            radius=10,
             algorithm=tcod.FOV_BASIC,
         )
         self.game_map.explored |= self.game_map.visible

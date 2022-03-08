@@ -7,7 +7,7 @@ import numpy as np # type: ignore
 import tcod
 from tcod.console import Console
 
-from entity import Actor
+from entity import Actor, Item
 import tile_types
 import colors
 
@@ -43,6 +43,15 @@ class GameMap:
 
         # Used as hack for finding nearby chars
         self.console:Optional[Console] = None
+
+    @property
+    def items(self) -> Iterator[item]:
+        yield from (entity for entity in self.entities 
+            if isinstance(entity,Item))
+
+    @property
+    def gamemap(self) -> GameMap:
+        return self
 
     @property
     def center(self):
