@@ -130,7 +130,10 @@ class Engine:
         self.status_bar.render(console)
         self.text_window.render(console)
         if self.show_cursor:
-            render_cursor(console,self.cursor)
+            # Check whether cursor is within fov first
+            #  TODO Handle explored-but-not-visible areas
+            in_fov = self.game_map.visible[self.cursor]
+            render_cursor(console,self.cursor,in_fov)
 
         context.present(console)
         console.clear()

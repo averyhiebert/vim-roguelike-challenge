@@ -29,8 +29,13 @@ def render_stat_box(console:Console,health:int,
     )
     render_bar(console,(52,13),health,max_health,total_width=22)
 
-def render_cursor(console:Console,position:Tuple[int,int]):
+def render_cursor(console:Console,position:Tuple[int,int],
+        in_fov:bool):
     """ Render a cursor at given location.
     """
-    console.fg[position] = colors.default_bg
-    console.bg[position] = colors.default_fg
+    if in_fov:
+        console.fg[position] = colors.default_bg
+        console.bg[position] = colors.ui_fg
+    else:
+        console.fg[position] = colors.ui_fg
+        console.bg[position] = colors.ui_fg
