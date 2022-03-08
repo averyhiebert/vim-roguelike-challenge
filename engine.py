@@ -9,9 +9,10 @@ from tcod.console import Console
 from tcod.map import compute_fov
 
 import exceptions
-from input_handlers import MainGameEventHandler
+from input_handlers import MainGameEventHandler, CommandEntryEventHandler
 from message_log import MessageLog
-from render_functions import render_stat_box
+from status_bar import StatusBar
+from render_functions import render_stat_box, render_bottom_text
 
 if TYPE_CHECKING:
     from entity import Entity, Actor
@@ -28,7 +29,20 @@ class Engine:
         self.event_handler: EventHandler = MainGameEventHandler(self)
         self.char_array = None # TODO Figure out type
 
+        self.status_bar = StatusBar(self)
+        self.status_bar.set_long_message("Welcome to the Vim Roguelike Challenge")
+
+    def enter_command_mode(self,text:str) -> None:
+        self.event_handler = CommandEntryEventHandler(self,text)
+        self.status_bar.set_long_message(text)
+
+    def exit_command_mode(self) -> None:
+        self.event_handler = MainGameEventHandler(self)
+        self.status_bar.set_long_message("")
+
     def handle_enemy_turns(self) -> None:
+        # Reset status message whenever an enemy turn is processed
+        self.status_bar.reset()
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
                 try:
@@ -66,15 +80,7 @@ class Engine:
             max_health=self.player.fighter.max_hp,
             gold=100
         )
-        """
-        render_bar(
-            console=console,
-            map_dims=(self.game_map.width,self.game_map.height),
-            current_value=self.player.fighter.hp,
-            maximum_value=self.player.fighter.max_hp,
-            total_width=20
-        )
-        """
+        self.status_bar.render(console)
 
         context.present(console)
         console.clear()

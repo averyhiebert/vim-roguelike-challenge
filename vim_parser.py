@@ -9,7 +9,17 @@ import traceback
 import numpy as np
 import tcod
 
-from actions import BumpAction, WaitAction, ActionMoveAlongPath, ActionMakeMark, ActionDeleteAlongPath, PickupAlongPath, DropItem, ItemAction
+from actions import (
+    BumpAction, 
+    WaitAction, 
+    ActionMoveAlongPath,
+    ActionMakeMark,
+    ActionDeleteAlongPath,
+    PickupAlongPath,
+    DropItem,
+    ItemAction,
+    EnterCommandMode,
+)
 from exceptions import VimError
 from path import Path
 
@@ -73,7 +83,7 @@ class VimCommandParser:
 
         if self.partial_command == "":
             # We are starting a brand-new command
-            if char in "io:/":
+            if char in "io":
                 # TODO these all need to trigger special modes
                 self.reset()
                 raise NotImplementedError(f"{char} mode not yet implemented")
@@ -377,7 +387,9 @@ class VimCommandParser:
             register = command[1]
             item = self.engine.player.inventory.get_item(register)
             return ItemAction(self.engine.player,item)
-
+        elif command in ":/":
+            # Enter command mode
+            return EnterCommandMode(self.engine.player,command)
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an

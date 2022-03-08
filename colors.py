@@ -26,6 +26,6 @@ ui_fg = (255,255,255)   # Plain light colour, presumably white
 bar_filled = (50,100,50)
 bar_empty = (50,50,50)
 
-error_text = (255,255,255)
+error_fg = (255,255,255)
 error_bg = (255,0,0) # Mimics vim error text, may change though.
 

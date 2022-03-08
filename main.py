@@ -40,6 +40,8 @@ def main() -> None:
                 engine.render(console=root_console,context=context)
                 engine.event_handler.handle_events()
             except Exception as err:
+                # TODO Do this in a way that doesn't risk the entire program
+                #  freezing if there's an error in the rendering or something.
                 traceback.print_exc()
                 engine.message_log.add_message(str(err))
 

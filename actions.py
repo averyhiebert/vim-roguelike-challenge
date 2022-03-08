@@ -33,10 +33,38 @@ class Action:
 
         raise NotImplementedError()
 
+# UI/Modal actions ===================================================
 class EscapeAction(Action):
     def perform(self) -> None:
         raise SystemExit()
 
+class EnterCommandMode(Action):
+    """ Action to start entering a / or : command."""
+    def __init__(self,entity:Actor,text:str):
+        super().__init__(entity,skip_turn=True)
+        self.text = text
+
+    def perform(self) -> None:
+        self.engine.enter_command_mode(self.text)
+
+class ExitCommandMode(Action):
+    """ Action to stop entering a / or : command."""
+    def __init__(self,entity:Actor):
+        super().__init__(entity,skip_turn=True)
+
+    def perform(self) -> None:
+        self.engine.exit_command_mode()
+
+class CommandModeStringChanged(Action):
+    """ Used when typing a letter in command mode."""
+    def __init__(self,entity:Actor,text:str):
+        super().__init__(entity,skip_turn=True)
+        self.text = text
+
+    def perform(self) -> None:
+        self.engine.status_bar.set_long_message(self.text)
+
+# Player actions =======================================================
 class WaitAction(Action):
     def perform(self) -> None:
         pass
@@ -138,8 +166,6 @@ class PickupAlongPath(ActionWithPath):
         if len(self.path.points) > 1:
             self.entity.gamemap.add_trace(self.path.points,
                 color=colors.yank_trace)
-                
-
 
 class ActionWithDirection(Action):
     def __init__(self, entity:Actor, direction: Tuple[int,int]):
@@ -212,6 +238,8 @@ class BumpAction(ActionWithDirection):
             return MeleeAction(self.entity,self.direction).perform()
         else:
             return MovementAction(self.entity,self.direction).perform()
+
+# Item Actions =========================================================
 
 class ItemAction(Action):
     def __init__(
