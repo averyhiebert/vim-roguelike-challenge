@@ -94,10 +94,8 @@ class VimCommandParser:
 
         if self.partial_command == "":
             # We are starting a brand-new command
-            if char in "io":
-                # TODO these all need to trigger special modes
-                self.reset()
-                raise NotImplementedError(f"{char} mode not yet implemented")
+            if char == "o":
+                raise NotImplementedError("o mode not yet implemented")
             elif char == " ":
                 # Do nothing, but DO perform an enemy turn
                 self.reset()
@@ -300,6 +298,9 @@ class VimCommandParser:
 
         Otherwise, raise "invalid command" exception.
 
+        TODO: Need to solve the fact that every time I add a new command,
+         I forget self.reset() and have trouble debugging it.
+
         To anyone (including me) who has to debug these regexes in the future:
           I am so sorry, please forgive me.
         """
@@ -400,7 +401,12 @@ class VimCommandParser:
             return ItemAction(self.engine.player,item)
         elif command in ":/":
             # Enter command mode
+            self.reset()
             return EnterCommandMode(self.engine.player,command)
+        elif command == "i":
+            # We treat this as shortcut for viewing inventory
+            self.reset()
+            return self.colon_command(":reg")
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an

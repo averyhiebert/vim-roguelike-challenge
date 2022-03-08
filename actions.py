@@ -65,6 +65,10 @@ class CommandModeStringChanged(Action):
         self.engine.status_bar.set_long_message(self.text)
 
 class ShowInventory(Action):
+    def __init__(self,entity:Actor):
+        # Should skip turn
+        super().__init__(entity,skip_turn=True)
+
     def perform(self) -> None:
         summary = self.entity.inventory.get_summary()
         self.engine.text_window.show(summary,message_log_mode=True)

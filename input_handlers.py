@@ -110,12 +110,7 @@ class MainGameEventHandler(EventHandler):
         usable_key = keydown_to_char(event) # i.e. an ascii char
 
         if usable_key:
-            try:
-                action = self.command_parser.next_key(usable_key)
-            except VimError as err:
-                # TODO Should print message to user, either in the
-                #  message log or in the bottom left where vim does.
-                print(err)
+            action = self.command_parser.next_key(usable_key)
         elif key == tcod.event.K_ESCAPE:
             action = EscapeAction(player)
 
