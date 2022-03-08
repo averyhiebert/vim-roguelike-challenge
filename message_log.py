@@ -16,7 +16,6 @@ class Message:
         self.plain_text = text
         self.fg = fg
         self.count = 1
-        self.max_show_history = 100
 
     @property
     def full_text(self) -> str:
@@ -41,6 +40,7 @@ class MessageLog:
         if stack and self.messages and text == self.messages[-1].plain_text:
             self.messages[-1].count += 1
         else:
+            self.messages.append(Message("",fg))
             self.messages.append(Message(text,fg))
         # Display self (i.e. replacing whatever was previously in the
         #  text window.

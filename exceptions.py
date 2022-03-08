@@ -3,11 +3,13 @@ class Impossible(Exception):
     """Exception raised when an impossible action is requested.
 
     (e.g. healing when at full health)
+
+    To be logged but not displayed as error text.
     """
     pass
 
 class UserError(Exception):
-    """Exception for when the user does something wrong."""
+    """To be used for any type of error that the user should see."""
     pass
 
 class VimError(UserError):

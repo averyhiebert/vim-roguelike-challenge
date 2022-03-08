@@ -21,6 +21,7 @@ from actions import (
     EnterCommandMode,
     ExitCommandMode,
     ShowInventory,
+    TextScrollAction,
 )
 from exceptions import VimError
 from path import Path
@@ -408,6 +409,9 @@ class VimCommandParser:
             # Enter command mode
             self.reset()
             return EnterCommandMode(self.engine.player,command)
+        elif command in ["gj","gk","G"]:
+            self.reset()
+            return TextScrollAction(self.engine.player,command[-1:])
         elif command == "i":
             # We treat this as shortcut for viewing inventory
             self.reset()
@@ -424,6 +428,10 @@ class VimCommandParser:
         elif command in "m@":
             # Some straggler/singleton possibilities
             return WaitAction(engine.player)
+        elif command == "g":
+            # Special case, since we don't want enemy action when
+            #  scrolling through the message log.
+            return None
         else:
             raise VimError(command)
 

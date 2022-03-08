@@ -80,6 +80,15 @@ class NextPageAction(Action):
 
     def perform(self) -> None:
         self.engine.text_window.next_page()
+
+class TextScrollAction(Action):
+    """ For scrolling the message log or other scroll-able text."""
+    def __init__(self,entity:Actor,text:str):
+        super().__init__(entity,skip_turn=True)
+        self.text=text
+
+    def perform(self) -> None:
+        self.engine.text_window.scroll(self.text)
         
 
 # Player actions =======================================================

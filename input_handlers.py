@@ -32,6 +32,7 @@ def keydown_to_char(event:tcod.event.KeyDown) -> Optional[str]:
     (e.g. backspace etc.)
     
     TODO Is it worth also supporting capslock?  Probably not.
+    TODO Dvorak and other layouts, maybe?
     """
     symbols = "`1234567890-=[]\;',./"
     shift_symbols = '~!@#$%^&*()_+{}|:"<>?'
@@ -148,6 +149,7 @@ class CommandEntryEventHandler(EventHandler):
                 action = self.command_parser.colon_command(self.text)
                 ExitCommandMode(player).perform() # Also necessary
             elif self.text[0] == "/":
+                ExitCommandMode(player).perform() # Also necessary
                 raise NotImplementedError()
             self.text = ""
         elif key == tcod.event.K_ESCAPE:
