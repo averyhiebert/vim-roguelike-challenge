@@ -49,8 +49,9 @@ class Engine:
         self.status_bar.set_long_message("")
 
     def handle_enemy_turns(self) -> None:
-        # Reset status message whenever an enemy turn is processed. 
+        # Reset status message and show log every turn. 
         self.status_bar.reset()
+        self.message_log.display()
 
         self.turn += 1
         for entity in set(self.game_map.actors) - {self.player}:

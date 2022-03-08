@@ -14,6 +14,7 @@ import textwrap
 import math
 
 import colors
+from input_handlers import MainGameEventHandler, TextWindowPagingEventHandler
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -32,6 +33,14 @@ class TextWindow:
         self.current_page = 0
         self.message_log_mode = False
         self.max_lines = 1000
+
+    def next_page(self):
+        self.current_page += 1
+        if self.current_page >= len(self.pages) - 1:
+            # Exit modal mode.
+            self.engine.event_handler = MainGameEventHandler(self.engine)
+            # Display the message log by default
+            #self.engine.message_log.display()
 
     def show(self,texts:Union[List[str],List[Tuple[str,Tuple[int,int,int]]]],
             message_log_mode=False):
@@ -77,7 +86,12 @@ class TextWindow:
             page_height = len(final_lines)
         total_pages = math.ceil(len(final_lines)/page_height)
 
-        self.pages = [final_lines[i:i+page_height] for i in range(total_pages)]
+        self.pages = [final_lines[i*page_height:i*page_height+page_height] for i in range(total_pages)]
+
+        if len(self.pages) > 1:
+            # Enter paged mode
+            handler = TextWindowPagingEventHandler(self.engine)
+            self.engine.event_handler = handler 
 
     def render(self,console:Console):
         """ Render the current page of messages.  
@@ -86,15 +100,11 @@ class TextWindow:
             return
         page = self.pages[self.current_page]
 
-        if self.message_log_mode:
-            # Todo: scrolling up/down, etc.
-            # For now: just render the last however-many lines.
-            lines_to_print = page[-self.height:]
-        else:
-            raise NotImplementedError()
+        # TODO scrolling up/down
+        lines_to_print = page[-self.height:]
 
-        if len(self.pages) > 1:
-            lines_to_print.append([("    -- More --",colors.ui_fg)])
+        if len(self.pages) > 1 and self.current_page < len(self.pages) - 1:
+            lines_to_print.append(("    -- More --",colors.ui_fg))
 
         for i,(text,color) in enumerate(lines_to_print):
             console.print(x=self.x,y=self.y+i,string=text,fg=colors.ui_fg)

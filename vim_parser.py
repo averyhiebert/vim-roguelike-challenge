@@ -229,7 +229,12 @@ class VimCommandParser:
             return path
         elif base == ";":
             # Easy, just repeat saved command
-            return self.parse_movement(self.last_tf_command)
+            if self.last_tf_command:
+                return self.parse_movement(self.last_tf_command)
+            else:
+                # A non-moving movement
+                path = engine.game_map.get_mono_path(player.pos,player.pos)
+                return path
         elif base[0] in "`'":
             # Move to mark
             target = engine.game_map.get_mark(base[1])

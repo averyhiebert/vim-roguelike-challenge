@@ -66,12 +66,20 @@ class CommandModeStringChanged(Action):
 
 class ShowInventory(Action):
     def __init__(self,entity:Actor):
-        # Should skip turn
         super().__init__(entity,skip_turn=True)
 
     def perform(self) -> None:
         summary = self.entity.inventory.get_summary()
-        self.engine.text_window.show(summary,message_log_mode=True)
+        #self.engine.text_window.show(summary,message_log_mode=True)
+        self.engine.text_window.show(summary,message_log_mode=False)
+
+class NextPageAction(Action):
+    """ Move to next page when viewing multi-page text."""
+    def __init__(self,entity:Actor):
+        super().__init__(entity,skip_turn=True)
+
+    def perform(self) -> None:
+        self.engine.text_window.next_page()
         
 
 # Player actions =======================================================

@@ -13,7 +13,8 @@ from actions import (
     EscapeAction,
     EnterCommandMode,
     ExitCommandMode,
-    CommandModeStringChanged
+    CommandModeStringChanged,
+    NextPageAction
 )
 from vim_parser import VimCommandParser
 from exceptions import VimError
@@ -153,6 +154,16 @@ class CommandEntryEventHandler(EventHandler):
             action = EscapeAction(player)
         return action
 
+class TextWindowPagingEventHandler(EventHandler):
+    def ev_keydown(self,event:tcod.event.KeyDown) -> Optional[Action]:
+        is_char = bool(keydown_to_char(event))
+        if is_char or event.sym == tcod.event.K_RETURN:
+            # On a character input or enter key, advance to next page.
+            action = NextPageAction(self.engine.player)
+            pass
+        elif event.sym == tcod.event.K_ESCAPE:
+            action = EscapeAction(self.engine.player)
+        return action
 
 class GameOverEventHandler(EventHandler):
     def handle_events(self) -> None:
