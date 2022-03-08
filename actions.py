@@ -334,7 +334,7 @@ class CursorAction(Action):
 class ObserveAction(CursorAction):
     def perform2(self) -> None:
         target = self.engine.cursor
-        raise NotImplementedError(f"Observe {str(target)}")
+        raise NotImplementedError(f"Observe {str(target)} (not implemented)")
 
 # Item Actions =========================================================
 

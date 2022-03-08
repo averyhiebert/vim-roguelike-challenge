@@ -88,7 +88,10 @@ class VimCommandParser:
         if command in [":reg",":registers"]:
             # Show inventory
             return ShowInventory(self.entity)
-        return ExitCommandMode(self.entity)
+        else:
+            self.reset()
+            self.engine.exit_command_mode()
+            raise VimError(command[1:].split(" ")[0])
 
     def next_key(self,char:str) -> Optional[Action]:
         """ 
