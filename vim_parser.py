@@ -36,11 +36,21 @@ MOVEMENT_RE = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|;|[tf].|[we]|[HML$
 
 class VimCommandParser:
 
-    def __init__(self,engine:Engine,movement_only=False):
+    def __init__(self,engine:Engine,movement_only=False,
+            entity:Optional[Entity]=None):
         """ Use movement_only mode for situations that only require a movement,
-        and not an action."""
+        and not an action.
+
+        entity should be player by default, but could be something else,
+         e.g. cursor (the latter is only allowed in movement only mode
+        """
         self.engine = engine
         self.movement_only = movement_only
+        if not entity or not movement_only:
+            entity = engine.player
+        elif not movement_only and entity is not self.engine.player:
+            raise RuntimeError("Invalid use of 'entity' param in vim parser")
+        self.entity = entity
 
         # History needed for implementing "u"
         # Note: first position is a lie, ignore it.
@@ -65,10 +75,10 @@ class VimCommandParser:
         if update_history:
             if len(self.past_player_locations) == 0:
                 # No history,
-                self.past_player_locations.append(self.engine.player.pos)
-            if self.engine.player.pos != self.past_player_locations[-1]:
+                self.past_player_locations.append(self.entity.pos)
+            if self.entity.pos != self.past_player_locations[-1]:
                 # Update history
-                self.past_player_locations.append(self.engine.player.pos)
+                self.past_player_locations.append(self.entity.pos)
         self.partial_command = "" # i.e. command so far
 
     def colon_command(self,command:str) -> Optional[Action]:
@@ -77,8 +87,8 @@ class VimCommandParser:
         """
         if command in [":reg",":registers"]:
             # Show inventory
-            return ShowInventory(self.engine.player)
-        return ExitCommandMode(self.engine.player)
+            return ShowInventory(self.entity)
+        return ExitCommandMode(self.entity)
 
     def next_key(self,char:str) -> Optional[Action]:
         """ 
@@ -106,7 +116,7 @@ class VimCommandParser:
             if char == " ":
                 # Do nothing, but DO perform an enemy turn
                 self.reset()
-                return WaitAction(self.engine.player)
+                return WaitAction(self.entity)
         
         self.partial_command += char
 
@@ -145,7 +155,7 @@ class VimCommandParser:
             "l":(1,0),
         }
 
-        player = engine.player
+        player = self.entity
         if match.group("zero"):
             # Command is just 0
             # Move all the way to the left.
@@ -163,7 +173,6 @@ class VimCommandParser:
             if not n:
                 n = 1
             dx,dy = directions[base]
-            player = engine.player
             target = (player.x + n*dx, player.y + n*dy)
             path = engine.game_map.get_mono_path(player.pos,target)
             return path
@@ -270,9 +279,11 @@ class VimCommandParser:
          and let the subsequent move action figure out what to do with that.
         """
         engine = self.engine
+        player = self.entity
+
         if source == target:
             return target
-        if mode == "f" and engine.game_map.is_navigable(target,engine.player):
+        if mode == "f" and engine.game_map.is_navigable(target,player):
             return target
         
         tx, ty = target
@@ -293,7 +304,7 @@ class VimCommandParser:
                 break
         else:
             final_hope = candidates[-1]
-        if engine.game_map.is_navigable(final_hope,engine.player):
+        if engine.game_map.is_navigable(final_hope,player):
             return final_hope
         else:
             return target
@@ -320,6 +331,7 @@ class VimCommandParser:
         """
         engine = self.engine
         command = self.partial_command
+        player = self.entity
 
         # Matches something that can be parsed to give a movement
         valid_movement_re = MOVEMENT_RE
@@ -348,7 +360,7 @@ class VimCommandParser:
             # Basic movement
             self.reset()
             path = self.parse_movement(command)
-            return ActionMoveAlongPath(engine.player,path)
+            return ActionMoveAlongPath(player,path)
         elif re.match(valid_pyd_re, command):
             self.on_non_movement()
             # A yank, pull, or delete
@@ -367,27 +379,27 @@ class VimCommandParser:
                 #  (Maybe the register should, if specified, also yank
                 #   the corpse when something dies? TODO that, maybe)
                 offsets = [(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1)]
-                start = engine.player.pos
+                start = player.pos
                 sx,sy = start
                 aoe_path = Path(
                     [(sx+x,sy+y) for x,y in offsets] + [start],
                     game_map = engine.game_map
                 )
-                return ActionDeleteAlongPath(engine.player,aoe_path)
+                return ActionDeleteAlongPath(player,aoe_path)
             elif main_command[0] == "d":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
-                return ActionDeleteAlongPath(engine.player,path)
+                return ActionDeleteAlongPath(player,path)
             elif main_command == "yy":
-                path = Path([engine.player.pos],game_map = engine.game_map)
-                return PickupAlongPath(engine.player,path,register)
+                path = Path([player.pos],game_map = engine.game_map)
+                return PickupAlongPath(player,path,register)
             elif main_command[0] == "y":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
-                return PickupAlongPath(engine.player,path,register)
+                return PickupAlongPath(player,path,register)
             elif main_command == "p":
-                item = engine.player.inventory.get_item(register)
-                return DropItem(engine.player,item)
+                item = player.inventory.get_item(register)
+                return DropItem(player,item)
             else:
                 print(main_command)
                 raise NotImplementedError("This command not implemented")
@@ -396,36 +408,36 @@ class VimCommandParser:
             # Set a mark in register .
             register = command[-1]
             self.reset()
-            return ActionMakeMark(engine.player,register)
+            return ActionMakeMark(player,register)
         elif command == "u":
             self.on_non_movement()
             # "Undo" (Move back to location prior to last move)
             if len(self.past_player_locations) == 0:
                 # If no previous locations, do nothing/skip turn
                 self.reset()
-                return WaitAction(engine.player)
+                return WaitAction(player)
             target = self.past_player_locations.pop()
             self.reset(update_history=False)
-            path = self.engine.game_map.get_mono_path(self.engine.player.pos,
+            path = self.engine.game_map.get_mono_path(player.pos,
                 target)
-            return ActionMoveAlongPath(self.engine.player,path)
+            return ActionMoveAlongPath(player,path)
         elif re.match("@.",command):
             self.on_non_movement()
             self.reset()
             # Use an item.
             # Note: inventory may raise a vim error if register invalid.
             register = command[1]
-            item = self.engine.player.inventory.get_item(register)
-            return ItemAction(self.engine.player,item)
+            item = player.inventory.get_item(register)
+            return ItemAction(player,item)
         elif command in ":/":
             self.on_non_movement()
             # Enter command mode
             self.reset()
-            return EnterCommandMode(self.engine.player,command)
+            return EnterCommandMode(player,command)
         elif command in ["gj","gk","G"]:
             self.on_non_movement()
             self.reset()
-            return TextScrollAction(self.engine.player,command[-1:])
+            return TextScrollAction(player,command[-1:])
         elif command == "i":
             self.on_non_movement()
             # We treat this as shortcut for viewing inventory
@@ -434,23 +446,21 @@ class VimCommandParser:
         elif command == "o":
             self.on_non_movement()
             self.reset()
-            #return GetCursorInput(self.engine.player,
-            #    final_action=ObserveAction(self.engine.player))
-            return ObserveAction(self.engine.player)
+            return ObserveAction(player)
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an
         #   enemy turn; maybe selecting registers, for instance?
         #   In those cases, do not return an action.
         elif re.match(partial_valid_movement_re,command):
-            return WaitAction(engine.player)
+            return WaitAction(player)
         elif re.match(partial_valid_pyd_re,command):
             self.on_non_movement()
-            return WaitAction(engine.player)
+            return WaitAction(player)
         elif command in "m@":
             self.on_non_movement()
             # Some straggler/singleton possibilities
-            return WaitAction(engine.player)
+            return WaitAction(player)
         elif command == "g":
             # Special case, since we don't want enemy action when
             #  scrolling through the message log.

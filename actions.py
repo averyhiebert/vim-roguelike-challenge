@@ -126,10 +126,23 @@ class ActionWithPath(Action):
 
 class ActionMoveAlongPath(ActionWithPath):
     """ Move to end of path."""
+    def __init__(self,entity:Entity,path:Path,ignore_blocking=False):
+        """
+        ignore_blocking mode is mainly intended for cursor movement, but there
+        may be other uses as well.
+        """
+        super().__init__(entity=entity,path=path)
+        self.ignore_blocking = ignore_blocking
 
     def perform(self) -> None:
-        self.path.truncate_to_navigable(self.entity)
-        destination = self.path.last_occupiable_square(self.entity)
+        """ TODO Figure out best way to still check for out-of-bounds in
+        ignore_blocking mode."""
+        if self.ignore_blocking:
+            self.path.truncate_to_navigable(self.entity)
+            destination = self.path.end
+        else:
+            self.path.truncate_to_navigable(self.entity)
+            destination = self.path.last_occupiable_square(self.entity)
         
         if len(self.path.points) >= 2 and destination == self.path.points[-2]:
             # Possibly a melee attack
@@ -137,7 +150,8 @@ class ActionMoveAlongPath(ActionWithPath):
             direction = (target_x - self.entity.x, target_y - self.entity.y)
             # Would be nicer if MeleeAction took a destination, not direction,
             #  but oh well...
-            MeleeAction(self.entity,direction).perform()
+            if not self.ignore_blocking:
+                MeleeAction(self.entity,direction).perform()
 
         self.entity.move_to(*destination)
         if len(self.path.points) > 2:
@@ -275,9 +289,13 @@ class MoveCursorAction(ActionWithPath):
         the cursor rather than the player.
         """
         super().__init__(original.entity,original.path)
+        self.original = original
+        self.original.ignore_blocking = True
 
     def perform(self) -> None:
-        self.engine.cursor = self.path.points[-1]
+        #self.engine.cursor = self.path.points[-1]
+        self.original.entity = self.engine.cursor_entity
+        self.original.perform()
 
 class GetCursorInput(Action):
     def __init__(self, entity:Entity,final_action:CursorAction):

@@ -36,7 +36,7 @@ class Path:
             # Sometimes occurs when path has length 0, although this really
             #  isn't supposed to happen.
             # Just return current location instead, a reasonably safe fallback
-            return self.entity.pos
+            return entity.pos
 
     def truncate_to_navigable(self,entity:Entity,
             include_barrier:bool=True) -> None:

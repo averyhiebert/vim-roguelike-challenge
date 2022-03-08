@@ -24,7 +24,8 @@ def main() -> None:
     player = copy.deepcopy(entity_factories.player)
 
     engine = Engine(player=player)
-    engine.game_map = generate_dungeon(map_width, map_height,engine=engine)
+    engine.set_game_map(generate_dungeon(map_width, 
+        map_height,engine=engine))
     engine.update_fov()
 
     engine.message_log.add_message(

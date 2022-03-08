@@ -169,7 +169,7 @@ class CursorMovementEventHandler(EventHandler):
     def __init__(self, engine:Engine,final_action:CursorAction):
         super().__init__(engine)
         self.command_parser = VimCommandParser(engine=engine,
-            movement_only=True)
+            movement_only=True,entity=engine.cursor_entity)
         self.final_action = final_action
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:

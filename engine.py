@@ -43,8 +43,23 @@ class Engine:
             width=23, height=38 - 2 - self.top_box_space
         )
         self.message_log = MessageLog(self.text_window)
-        self.cursor:Tuple[int,int] = player.pos
+
+        # Cursor stuff
+        # Cursor is a copy of player, but does nothing except move.
+        #  (i.e. not in entities list, so other functions won't find it.)
+        # TODO Handle this better (bit of a hack currently)
+        self.cursor_entity = copy.deepcopy(self.player)
         self.show_cursor=True
+
+    def set_game_map(self,game_map:GameMap) -> None:
+        self.game_map = game_map
+        self.cursor_entity.parent = self.game_map
+
+
+    @property
+    def cursor(self) -> Tuple[int,int]:
+        """ Return cursor coordinates."""
+        return self.cursor_entity.pos
 
     def show_error_message(self,text:str) -> None:
         """ Show an error message to the user, in status bar (vim-style)."""
@@ -59,7 +74,7 @@ class Engine:
         self.status_bar.set_long_message("")
 
     def get_cursor_input(self,final_action:CursorAction) -> None:
-        self.cursor = self.player.pos
+        self.cursor_entity.move_to(*self.player.pos)
         self.show_cursor = True
         self.event_handler = CursorMovementEventHandler(self,final_action)
 
