@@ -17,7 +17,7 @@ from input_handlers import (
 from message_log import MessageLog
 from status_bar import StatusBar
 from text_window import TextWindow
-from render_functions import render_stat_box, render_bottom_text
+from render_functions import render_stat_box, render_cursor
 
 if TYPE_CHECKING:
     from entity import Entity, Actor
@@ -107,6 +107,8 @@ class Engine:
         )
         self.status_bar.render(console)
         self.text_window.render(console)
+        if self.show_cursor:
+            render_cursor(console,self.cursor)
 
         context.present(console)
         console.clear()

@@ -29,11 +29,8 @@ def render_stat_box(console:Console,health:int,
     )
     render_bar(console,(52,13),health,max_health,total_width=22)
 
-def render_bottom_text(console:Console,text:str,error=False):
-    """ Render text at the bottom of the screen.
-
-    If error=True, render in the default error colours.
+def render_cursor(console:Console,position:Tuple[int,int]):
+    """ Render a cursor at given location.
     """
-    bg = colors.error_bg if error else colors.default_bg
-    fg = colors.error_fg if error else colors.ui_fg
-    console.print(x=1,y=38,string=text,fg=fg,bg=bg)
+    console.fg[position] = colors.default_bg
+    console.bg[position] = colors.default_fg
