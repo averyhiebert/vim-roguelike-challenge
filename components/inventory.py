@@ -75,7 +75,7 @@ class Inventory(BaseComponent):
         if register in self.registers:
             return self.registers[register]
         elif register not in self.valid_registers:
-            raise exceptions.VimError()
+            raise exceptions.RegisterError(register)
         raise exceptions.Impossible(f"Nothing in \"{register}!")
 
     def remove(self,item:Item) -> str:
@@ -115,7 +115,7 @@ class Inventory(BaseComponent):
         elif register and register in self.valid_registers:
             self.registers[register] = item
         elif register:
-            raise exceptions.VimError()
+            raise exceptions.RegisterError(register)
         else:
             # Add to first open register (in order)
             for key in self.valid_registers:

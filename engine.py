@@ -40,6 +40,10 @@ class Engine:
         )
         self.message_log = MessageLog(self.text_window)
 
+    def show_error_message(self,text:str) -> None:
+        """ Show an error message to the user, in status bar (vim-style)."""
+        self.status_bar.set_long_message(text,error=True)
+
     def enter_command_mode(self,text:str) -> None:
         self.event_handler = CommandEntryEventHandler(self,text)
         self.status_bar.set_long_message(text)

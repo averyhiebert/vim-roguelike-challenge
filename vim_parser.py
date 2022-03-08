@@ -250,7 +250,7 @@ class VimCommandParser:
             #raise VimError("w and e are not yet implemented, sorry")
         else:
             # TODO implement
-            raise VimError()
+            raise VimError(command)
 
     def bump_destination(self,source:Tuple[int,int],
             target:Tuple[int,int],mode:str) -> Tuple[int,int]:
@@ -425,5 +425,5 @@ class VimCommandParser:
             # Some straggler/singleton possibilities
             return WaitAction(engine.player)
         else:
-            raise VimError()
+            raise VimError(command)
 
