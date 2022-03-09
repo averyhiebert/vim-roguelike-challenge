@@ -365,7 +365,7 @@ class ObserveAction(CursorAction):
     def perform2(self) -> None:
         target = self.engine.cursor
         text = self.engine.game_map.describe_tile(target,visible_only=True)
-        text = f"You see here: {text}"
+        text = f"You see: {text}"
         self.engine.message_log.add_message(text)
 
 # Item Actions =========================================================

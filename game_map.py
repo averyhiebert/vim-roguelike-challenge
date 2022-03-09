@@ -12,6 +12,7 @@ import tile_types
 import colors
 
 from path import Path
+from utils import a_or_an
 from map_traces import MapTrace
 
 if TYPE_CHECKING:
@@ -124,6 +125,15 @@ class GameMap:
                 return actor
         return None
 
+    def get_entities_at_location(self,
+            location:Tuple[int,int],sort=False) -> List[Entity]:
+        """ Return list of entities at a location.  Can optionally
+        also sort them in render order (highest order last)."""
+        entities = [e for e in self.entities if e.pos == location]
+        if sort:
+            entities.sort(key=lambda x: x.render_order.value)
+        return entities
+
     def in_bounds(self, position:Tuple[int,int]) -> bool:
         """ Return true if position is in bounds. """
         x, y = position
@@ -181,8 +191,17 @@ class GameMap:
             elif not self.visible[location]:
                 return tile_types.tile_names[self.tiles[location]["name_index"]]
             else:
-                # TODO Also list entites
-                return tile_types.tile_names[self.tiles[location]["name_index"]]
+                ind = self.tiles[location]["name_index"]
+                tile_name = tile_types.tile_names[ind]
+
+                entities = self.get_entities_at_location(location,sort=True)
+                text = ", ".join([f"{a_or_an(e.name)}" 
+                    for e in reversed(entities)])
+                if len(text) > 0:
+                    text += f", {tile_name}"
+                else:
+                    text = tile_name
+                return text
         else:
             raise NotImplementedError()
 
