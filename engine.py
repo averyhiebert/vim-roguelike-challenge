@@ -3,6 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import copy
 
+import lzma
+import pickle
+
 import tcod
 from tcod.context import Context
 from tcod.console import Console
@@ -63,6 +66,23 @@ class Engine:
     def cursor(self) -> Tuple[int,int]:
         """ Return cursor coordinates."""
         return self.cursor_entity.pos
+
+    def save_as(self,fname:str) -> None:
+        """ Save self to file.
+
+        Using pickles is not ideal long-term (versioning issues etc), but
+         for a 7-day challenge this is good enough!
+        """
+        save_data = lzma.compress(pickle.dumps(self))
+        with open(fname, "wb") as f:
+            f.write(save_data)
+
+    @classmethod
+    def load(cls,fname:str) -> None:
+        with open(fname,"rb") as f:
+            engine=pickle.loads(lzma.decompress(f.read()))
+        assert isinstance(engine,cls)
+        return engine
 
     def set_game_map(self,game_map:GameMap) -> None:
         self.game_map = game_map

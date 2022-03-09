@@ -73,6 +73,12 @@ class VimCommandParser:
         if command in [":reg",":registers"]:
             # Show inventory
             return actions.ShowInventory(self.entity)
+        elif command in [":w",";write"]:
+            # Save game
+            return actions.SaveGame(self.entity)
+        elif command in [":new",":new game"]:
+            # Trigger a new game
+            return actions.NewGame(self.entity)
         else:
             self.reset()
             self.engine.exit_command_mode()

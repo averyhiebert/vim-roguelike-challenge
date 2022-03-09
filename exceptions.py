@@ -25,3 +25,6 @@ class RegisterError(UserError):
     def __init__(self,register):
         message = f" Not a valid register: {register} "
         super().__init__(message)
+
+class NewGame(Exception):
+    pass

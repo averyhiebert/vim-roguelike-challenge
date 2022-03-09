@@ -33,10 +33,23 @@ class Action:
 
         raise NotImplementedError()
 
+
 # UI/Modal actions ===================================================
 class EscapeAction(Action):
     def perform(self) -> None:
         raise SystemExit()
+
+class SaveGame(Action):
+    def perform(self) -> None:
+        self.skip_turn = True # No turn on save
+        self.engine.save_as(fname="save.sav")
+        self.engine.status_bar.set_short_message(
+            f" Game written to <save.sav>")
+
+class NewGame(Action):
+    def perform(self) -> None:
+        self.skip_turn = True # Pointless, I guess
+        raise exceptions.NewGame("Bad hack to communicate with main()")
 
 class EnterCommandMode(Action):
     """ Action to start entering a / or : command."""

@@ -106,10 +106,6 @@ class Inventory(BaseComponent):
         if len(self.items) >= self.capacity:
             raise exceptions.Impossible("Your inventory is full.")
 
-        # Remove item from old parent
-        item.parent.gamemap.entities.remove(item)
-        item.parent = self
-
         if register and register in self.registers:
             raise exceptions.Impossible(f"\"{register} is full.")
         elif register and register in self.valid_registers:
@@ -123,6 +119,10 @@ class Inventory(BaseComponent):
                     register = key
                     self.registers[key] = item
                     break
+        # Remove item from old parent
+        item.parent.gamemap.entities.remove(item)
+        item.parent = self
+
         self.register_history.append(register)
         if not silent:
             self.parent.gamemap.engine.message_log.add_message(f"You yanked the {item.name} (\"{register})")
