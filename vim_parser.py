@@ -103,9 +103,15 @@ class VimCommandParser:
         elif command in [":wq",":x"]:
             actions.SaveGame(self.entity).perform()
             return actions.QuitGame(self.entity)
+        elif re.match(":swap (.) (.)", command):
+            m = re.match(":swap (.) (.)", command)
+            return actions.SwapRegisters(self.entity,m.group(1),m.group(2))
+        #elif re.match(":let @(.)=@(.)", command):
+            #m = re.match(":let @(.)=@(.)", command)
+            #return actions.SwapRegisters(self.entity,m.group(1),m.group(2))
         else:
             self.engine.exit_command_mode()
-            raise VimError(command[1:].split(" ")[0])
+            raise VimError(command[1:])
 
     def next_key(self,char:str) -> Optional[Action]:
         """ 

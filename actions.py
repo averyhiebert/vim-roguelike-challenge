@@ -331,6 +331,16 @@ class RegexSearch(Action):
         points = self.engine.game_map.regex_search(self.regex)
         self.engine.game_map.set_highlight(points)
 
+class SwapRegisters(Action):
+    def __init__(self,entity:Entity,reg_a:str,reg_b:str):
+        super().__init__(entity,skip_turn=True)
+        self.reg_a = reg_a
+        self.reg_b = reg_b
+
+    def perform(self) -> None:
+        self.entity.inventory.swap(self.reg_a,self.reg_b)
+
+
 # Cursor Actions (weird) ========================================
 
 class MoveCursorAction(ActionWithPath):

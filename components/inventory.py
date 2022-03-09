@@ -47,6 +47,24 @@ class Inventory(Ability):
         return [v for k,v in self.registers.items() 
             if k in self.equipped_registers]
 
+    def swap(self,a,b) -> None:
+        """ Swap the two given registers. """
+        if a in self.registers and b in self.registers:
+            self.registers[b],self.registers[a] = self.registers[a], self.registers[b]
+        elif a in self.registers:
+            self.registers[b] = self.registers[a]
+            del self.registers[a]
+        elif b in self.registers:
+            self.registers[a] = self.registers[b]
+            del self.registers[b]
+        elif a in self.valid_registers and b in self.valid_registers:
+            # Swap nothing with nothing
+            pass
+        else:
+            raise exceptions.Impossible("Invalid register.")
+        self.parent.engine.message_log.add_message(
+            f'Swapped "{a} and "{b}')
+
     def get_summary(self) -> List[str]:
         """ Return a list of lines summarizine the contents of
         the inventory in human-readable form.
