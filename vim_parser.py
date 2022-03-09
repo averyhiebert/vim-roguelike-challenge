@@ -70,6 +70,7 @@ class VimCommandParser:
         """
         Parse a colon command and return an appropriate action.
         """
+        self.reset()
         if command in [":reg",":registers"]:
             # Show inventory
             return actions.ShowInventory(self.entity)
@@ -79,8 +80,14 @@ class VimCommandParser:
         elif command in [":new",":new game"]:
             # Trigger a new game
             return actions.NewGame(self.entity)
+        elif command in [":q",":quit"]:
+            return actions.QuitGame(self.entity)
+        elif command in [":q!",":quit!"]:
+            return actions.HardQuitGame(self.entity)
+        elif command in [":wq",":x"]:
+            actions.SaveGame(self.entity).perform()
+            return actions.QuitGame(self.entity)
         else:
-            self.reset()
             self.engine.exit_command_mode()
             raise VimError(command[1:].split(" ")[0])
 
@@ -441,6 +448,11 @@ class VimCommandParser:
             self.on_non_movement()
             self.reset()
             return actions.ObserveAction(player)
+        elif command == "ZZ":
+            # Save and quit
+            self.reset()
+            actions.SaveGame(self.entity).perform()
+            return actions.QuitGame(self.entity)
 
         # Checks for valid partial commands (which don't do anything):
         #   TODO Check for cases that we don't want to penalize with an
@@ -451,9 +463,9 @@ class VimCommandParser:
         elif re.match(partial_valid_pyd_re,command):
             self.on_non_movement()
             return actions.WaitAction(player)
-        elif command in "m@":
-            self.on_non_movement()
+        elif command in "m@Z":
             # Some straggler/singleton possibilities
+            self.on_non_movement()
             return actions.WaitAction(player)
         elif command == "g":
             # Special case, since we don't want enemy action when

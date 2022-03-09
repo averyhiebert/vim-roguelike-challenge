@@ -29,7 +29,7 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     engine.update_fov()
 
     engine.message_log.add_message(
-        "Welcome to the Vim Roguelike Challenge (VimRC)."
+        "Welcome to the Vim Roguelike Challenge (VimRC)!"
     )
     return engine
 

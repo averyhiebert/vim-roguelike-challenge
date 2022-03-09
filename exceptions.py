@@ -18,7 +18,7 @@ class VimError(UserError):
         # Just doing this to standardize the error messages somewhat.
         #  (A more specific message is still *allowed*, but I'll try
         #   to avoid doing that.)
-        message = f" E492: Not an editor command: {attempted_command} "
+        message = f"E492: Not an editor command: {attempted_command}"
         super().__init__(message)
 
 class RegisterError(UserError):

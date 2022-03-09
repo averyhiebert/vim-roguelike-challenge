@@ -36,11 +36,13 @@ class Engine:
         self.event_handler: EventHandler = MainGameEventHandler(self)
         self.char_array = None # TODO Figure out type
         self.turn = 0 # Turn counter
+        self.last_save = -1
+
 
         # Add some UI elements
         self.top_box_space = 15
         self.status_bar = StatusBar(self)
-        self.status_bar.set_long_message("Welcome to the Vim Roguelike Challenge")
+        self.status_bar.set_long_message("New game started.")
         self.text_window = TextWindow(self,
             x=51,y=1 + self.top_box_space,
             width=23, height=38 - 2 - self.top_box_space
@@ -76,6 +78,7 @@ class Engine:
         save_data = lzma.compress(pickle.dumps(self))
         with open(fname, "wb") as f:
             f.write(save_data)
+        self.last_save = self.turn
 
     @classmethod
     def load(cls,fname:str) -> None:
@@ -104,6 +107,7 @@ class Engine:
         self.cursor_entity.move_to(*self.player.pos)
         self.show_cursor = True
         self.event_handler = CursorMovementEventHandler(self,final_action)
+
 
     def finish_cursor_input(self) -> None:
         self.event_handler = MainGameEventHandler(self)

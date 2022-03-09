@@ -52,7 +52,7 @@ class StatusBar:
             #  Maybe progress towards the final level?
             x,y = self.engine.coords_to_show
             position_text = f"{x:2d},{y:2d}"
-            console.print(x=38,y=38,string=position_text,fg=fg,bg=bg)
+            console.print(x=35,y=38,string=position_text,fg=fg,bg=bg)
             position = "Top"
             console.print(50-len(position) - 1,y=38,string="Top",fg=fg,bg=bg)
             console.print(x=1,y=38,string=self.short_message,fg=fg,bg=bg)

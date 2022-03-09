@@ -148,8 +148,8 @@ class CommandEntryEventHandler(EventHandler):
         elif key == tcod.event.K_RETURN:
             # TODO Try executing command.
             if self.text[0] == ":":
-                action = self.command_parser.colon_command(self.text)
                 ExitCommandMode(player).perform() # Also necessary
+                action = self.command_parser.colon_command(self.text)
             elif self.text[0] == "/":
                 ExitCommandMode(player).perform() # Also necessary
                 raise NotImplementedError()

@@ -37,7 +37,9 @@ class Action:
 # UI/Modal actions ===================================================
 class EscapeAction(Action):
     def perform(self) -> None:
-        raise SystemExit()
+        # TODO Make sure this makes sense in other modes (e.g. cursor, :)
+        #QuitGame(self.entity).perform()
+        raise exceptions.UserError("Type :quit<Enter> to exit vim")
 
 class SaveGame(Action):
     def perform(self) -> None:
@@ -45,6 +47,18 @@ class SaveGame(Action):
         self.engine.save_as(fname="save.sav")
         self.engine.status_bar.set_short_message(
             f" Game written to <save.sav>")
+
+class HardQuitGame(Action):
+    def perform(self) -> None:
+        raise SystemExit()
+
+class QuitGame(Action):
+    def perform(self) -> None:
+        self.skip_turn = True
+        if self.engine.last_save < self.engine.turn:
+            raise exceptions.UserError(
+                "E37: No write since last change (add ! to override)")
+        raise SystemExit()
 
 class NewGame(Action):
     def perform(self) -> None:
