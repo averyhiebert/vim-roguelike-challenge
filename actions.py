@@ -307,6 +307,16 @@ class BumpAction(ActionWithDirection):
         else:
             return MovementAction(self.entity,self.direction).perform()
 
+class RegexSearch(Action):
+    def __init__(self,entity:Entity,regex:str):
+        super().__init__(entity,skip_turn=True)
+        self.regex = regex
+
+    def perform(self) -> None:
+        # TODO: Let the player keep track of the points as well.
+        points = self.engine.game_map.regex_search(self.regex)
+        self.engine.game_map.set_highlight(points)
+
 # Cursor Actions (weird) ========================================
 
 class MoveCursorAction(ActionWithPath):

@@ -39,6 +39,9 @@ class GameMap:
         # For now, format is (x,y,type), where 0 = nothing, 1 = movement
         self.traces:List[MapTrace] = [] 
 
+        # Used for hlsearch highlighting
+        self.highlight = np.full((width,height),fill_value=False,order="F")
+
         # Set of location markers
         self.marks = {}
 
@@ -172,6 +175,27 @@ class GameMap:
         full_path = list(dict.fromkeys(full_path))
         return Path(points=full_path,game_map=self)
 
+    def regex_search(self,regex:str) -> List[Tuple[int,int]]:
+        """Return a list of locations whose description matches the given
+        regex.
+
+        Note: currently uses python regex, not vim regex.
+        """
+        if regex == "":
+            return []
+        w,h = self.tiles.shape
+        locations = [pos for pos in np.ndindex(self.tiles.shape)
+            if re.search(regex,self.describe_tile(pos,visible_only=False))]
+        # TODO Text describing # of matches found, etc.
+        return locations
+
+    def set_highlight(self,points:List[Tuple[int,int]]) -> None:
+        """ Update own highlighting mask (presumably after a regex search)."""
+        self.highlight[:,:] = False
+        # TODO Vectorize properly
+        for point in points:
+            self.highlight[point] = True
+
     def describe_tile(self,location:Tuple[int,int],visible_only=True) -> str:
         """ Return a text description for the given square.
 
@@ -185,25 +209,30 @@ class GameMap:
         #  is inefficient; could keep some sort of better data structure
         #  if it turns out to be an issue.
         #  I doubt it'll be an issue, though.
+
+        # Helper
+        def tile_full_summary(location):
+            ind = self.tiles[location]["name_index"]
+            tile_name = tile_types.tile_names[ind]
+
+            entities = self.get_entities_at_location(location,sort=True)
+            text = ", ".join([f"{a_or_an(e.name)}" 
+                for e in reversed(entities)])
+            if len(text) > 0:
+                text += f", {tile_name}"
+            else:
+                text = tile_name
+            return text
+
         if visible_only:
             if not self.explored[location]:
                 return "unexplored"
             elif not self.visible[location]:
                 return tile_types.tile_names[self.tiles[location]["name_index"]]
             else:
-                ind = self.tiles[location]["name_index"]
-                tile_name = tile_types.tile_names[ind]
-
-                entities = self.get_entities_at_location(location,sort=True)
-                text = ", ".join([f"{a_or_an(e.name)}" 
-                    for e in reversed(entities)])
-                if len(text) > 0:
-                    text += f", {tile_name}"
-                else:
-                    text = tile_name
-                return text
+                return tile_full_summary(location)
         else:
-            raise NotImplementedError()
+            return tile_full_summary(location)
 
     def render(self,console: Console) -> None:
         """ Render the map.
@@ -212,7 +241,6 @@ class GameMap:
         explored-but-unseen tiles in "dark" colors,
         and otherwise use "unseen" colors.
         """
-        #console.tiles_rgb[0:self.width,0:self.height] = self.tiles["dark"]
         console.tiles_rgb[0:self.width,0:self.height] = np.select(
             condlist=[self.visible,self.explored],
             choicelist=[self.tiles["light"],self.tiles["dark"]],
@@ -243,4 +271,10 @@ class GameMap:
                 r,g,b = console.bg[entity.x,entity.y]
                 bg = (r,g,b) # Converting np to tuple
                 console.print(x=entity.x,y=entity.y,string=entity.char,fg=bg)
+
+        # Render highlights
+        console.bg[:self.width,:self.height][self.highlight] = colors.highlight
+        invisible_highlights = self.highlight & np.logical_not(self.visible)
+        console.fg[:self.width,:self.height][invisible_highlights] = colors.highlight
+
         self.console = console # (somewhat) sorry about this

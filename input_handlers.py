@@ -7,22 +7,15 @@ from typing import Optional, TYPE_CHECKING
 
 import tcod.event
 
-from actions import (
-    Action,
-    BumpAction,
-    EscapeAction,
-    EnterCommandMode,
-    ExitCommandMode,
-    CommandModeStringChanged,
-    NextPageAction,
-    ActionMoveAlongPath,
-    MoveCursorAction,
-)
+# TODO change to just import action,
+#  would be less annoying
+import actions
 from vim_parser import VimCommandParser
 from exceptions import VimError
 
 if TYPE_CHECKING:
     from engine import Engine
+    from actions import Action
 
 def keydown_to_char(event:tcod.event.KeyDown) -> Optional[str]:
     """Convert keydown event to a character (including correct
@@ -65,7 +58,7 @@ def keydown_to_char(event:tcod.event.KeyDown) -> Optional[str]:
     return None
 
 
-class EventHandler(tcod.event.EventDispatch[Action]):
+class EventHandler(tcod.event.EventDispatch[actions.Action]):
 
     def __init__(self, engine:Engine):
         self.engine = engine
@@ -98,7 +91,8 @@ class EventHandler(tcod.event.EventDispatch[Action]):
             self.engine.update_fov() # Update FOV before player's next turn
 
     def ev_quit(self,event:tcod.event.Quit) -> Optional[Action]:
-        raise SystemExit()
+        actions.EscapeAction(self.engine.player).perform()
+        #actions.QuitGame(self.engine.player).perform()
 
 class MainGameEventHandler(EventHandler):
     def __init__(self, engine:Engine):
@@ -116,7 +110,7 @@ class MainGameEventHandler(EventHandler):
         if usable_key:
             action = self.command_parser.next_key(usable_key)
         elif key == tcod.event.K_ESCAPE:
-            action = EscapeAction(player)
+            action = actions.EscapeAction(player)
 
         return action
 
@@ -138,24 +132,24 @@ class CommandEntryEventHandler(EventHandler):
 
         if usable_key:
             self.text += usable_key
-            action = CommandModeStringChanged(player,self.text)
+            action = actions.CommandModeStringChanged(player,self.text)
         elif key == tcod.event.K_BACKSPACE:
             self.text = self.text[:-1]
             if self.text == "":
-                action = ExitCommandMode(player)
+                action = actions.ExitCommandMode(player)
             else:
-                action = CommandModeStringChanged(player,self.text)
+                action = actions.CommandModeStringChanged(player,self.text)
         elif key == tcod.event.K_RETURN:
             # TODO Try executing command.
             if self.text[0] == ":":
-                ExitCommandMode(player).perform() # Also necessary
+                actions.ExitCommandMode(player).perform() # Also necessary
                 action = self.command_parser.colon_command(self.text)
             elif self.text[0] == "/":
-                ExitCommandMode(player).perform() # Also necessary
-                raise NotImplementedError()
+                actions.ExitCommandMode(player).perform() # Also necessary
+                action = actions.RegexSearch(player,self.text[1:])
             self.text = ""
         elif key == tcod.event.K_ESCAPE:
-            action = EscapeAction(player)
+            action = actions.EscapeAction(player)
         return action
 
 class CursorMovementEventHandler(EventHandler):
@@ -184,14 +178,13 @@ class CursorMovementEventHandler(EventHandler):
             self.engine.finish_cursor_input()
             return self.final_action
         elif usable_key:
-            #action = self.command_parser.next_key(usable_key)
             action = self.command_parser.next_key(usable_key)
             if isinstance(action,ActionMoveAlongPath):
-                return MoveCursorAction(action)
+                return actions.MoveCursorAction(action)
             else:
                 return None
         elif key == tcod.event.K_ESCAPE:
-            action = EscapeAction(player)
+            action = actions.EscapeAction(player)
 
         return action
 
@@ -201,10 +194,10 @@ class TextWindowPagingEventHandler(EventHandler):
         is_char = bool(keydown_to_char(event))
         if is_char or event.sym == tcod.event.K_RETURN:
             # On a character input or enter key, advance to next page.
-            action = NextPageAction(self.engine.player)
+            action = actions.NextPageAction(self.engine.player)
             pass
         elif event.sym == tcod.event.K_ESCAPE:
-            action = EscapeAction(self.engine.player)
+            action = actions.EscapeAction(self.engine.player)
         return action
 
 class GameOverEventHandler(EventHandler):
@@ -222,6 +215,6 @@ class GameOverEventHandler(EventHandler):
         key = event.sym
 
         if key == tcod.event.K_ESCAPE:
-            action = EscapeAction(self.engine.player)
+            action = actions.EscapeAction(self.engine.player)
 
         return action
