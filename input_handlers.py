@@ -106,6 +106,9 @@ class MainGameEventHandler(EventHandler):
 
         key = event.sym
         usable_key = keydown_to_char(event) # i.e. an ascii char
+        if key == tcod.event.K_BACKSPACE:
+            # Backspace just moves left.
+            usable_key = "h"
 
         if usable_key:
             action = self.command_parser.next_key(usable_key)
