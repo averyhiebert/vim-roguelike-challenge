@@ -365,8 +365,8 @@ class ObserveAction(CursorAction):
     def perform2(self) -> None:
         target = self.engine.cursor
         text = self.engine.game_map.describe_tile(target,visible_only=True)
-        print(text)
-        raise NotImplementedError(f"Text at {str(target)}: {text}")
+        text = f"You see here: {text}"
+        self.engine.message_log.add_message(text)
 
 # Item Actions =========================================================
 
