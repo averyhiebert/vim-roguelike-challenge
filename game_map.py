@@ -102,19 +102,20 @@ class GameMap:
         If char is None, return entities instead.
         
         Return None if no valid target found."""
+        location = np.array(location)
+
         if char:
             # Get locations where char_array = the given char
             char_array = self.engine.char_array
             if type(char_array) == type(None):
                 raise RuntimeError("Error: console not found (shouldn't happen, knock on wood).")
 
-            location = np.array(location)
             target_val = ord(char)
             candidates = list(zip(*np.nonzero(char_array==target_val)))
         else:
-            # Get locations of all entities
-            # TODO Maybe just actors?
-            candidates = list(e.pos for e in self.entities)
+            # Get locations of all actors
+            candidates = list(e.pos for e in self.entities 
+                if isinstance(e,Actor) and e is not self.engine.player)
         if ignore:
             candidates = [(x,y) for x,y in candidates if (x,y) not in ignore]
         if exclude_adjacent:

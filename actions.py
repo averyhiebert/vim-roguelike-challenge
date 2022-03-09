@@ -332,7 +332,6 @@ class MoveCursorAction(ActionWithPath):
         self.original.ignore_blocking = True
 
     def perform(self) -> None:
-        #self.engine.cursor = self.path.points[-1]
         self.original.entity = self.engine.cursor_entity
         self.original.perform()
 

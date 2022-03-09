@@ -21,7 +21,8 @@ class Path:
 
     @property
     def end(self):
-        """ Return final point on path. """
+        """ Return final point on path. Also trims any OOB options."""
+        self.points = [p for p in self.points if self.game_map.in_bounds(p)]
         return self.points[-1]
 
     def last_occupiable_square(self,entity:Entity):

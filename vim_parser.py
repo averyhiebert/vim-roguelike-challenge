@@ -217,13 +217,22 @@ class VimCommandParser:
             #  the map, not just centered vertically.
             path = engine.game_map.get_mono_path(player.pos,engine.game_map.center)
             return path
-        elif base[0] in "tf":
+        #elif base[0] in "we":
+            # TODO Implement this
+            #raise NotImplementedError("w and e not implemented yet, sorry")
+            #raise VimError("w and e are not yet implemented, sorry")
+        #elif base[0] in "tf":
+        if base[0] in "tfwe":
             if not n:
                 n = 1
 
-            mode = base[0] # should be t or f
-            target_char = base[-1]
-            exclude_adjacent = (mode=="t")
+            mode = base[0] # t, f, w, or e
+            if mode in "tf":
+                target_char = base[-1]
+                exclude_adjacent = (mode=="t")
+            else:
+                target_char = None # for w and e functionality
+                exclude_adjacent = (mode=="w")
 
             possible_targets = engine.game_map.get_nearest(player.pos,
                 target_char,exclude_adjacent=exclude_adjacent)
@@ -237,6 +246,9 @@ class VimCommandParser:
             else:
                 # Handle the details of whether to overshoot/undershoot the
                 #  final target, based on "t" or "f" mode.
+                #   "w" and "e" have same behaviour as "t" and "f" respectively
+                if mode in "we":
+                    mode = "t" if mode=="w" else "f"
                 targets[-1] = self.bump_destination(targets[-2],
                     targets[-1],mode)
 
@@ -260,10 +272,6 @@ class VimCommandParser:
                 target = player.pos
             path = engine.game_map.get_mono_path(player.pos,target)
             return path
-        elif base[0] in "we":
-            # TODO Implement this
-            raise NotImplementedError("w and e not implemented yet, sorry")
-            #raise VimError("w and e are not yet implemented, sorry")
         else:
             # TODO implement
             raise VimError(command)

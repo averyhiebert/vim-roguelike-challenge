@@ -182,7 +182,7 @@ class CursorMovementEventHandler(EventHandler):
             return self.final_action
         elif usable_key:
             action = self.command_parser.next_key(usable_key)
-            if isinstance(action,ActionMoveAlongPath):
+            if isinstance(action,actions.ActionMoveAlongPath):
                 return actions.MoveCursorAction(action)
             else:
                 return None
