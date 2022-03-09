@@ -108,7 +108,6 @@ class Engine:
         self.show_cursor = True
         self.event_handler = CursorMovementEventHandler(self,final_action)
 
-
     def finish_cursor_input(self) -> None:
         self.event_handler = MainGameEventHandler(self)
         self.show_cursor = False

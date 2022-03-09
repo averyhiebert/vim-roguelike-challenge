@@ -11,9 +11,11 @@ if TYPE_CHECKING:
     from entity import Actor, Entity
 
 class Action:
-    def __init__(self, entity:Actor,skip_turn:bool=False) -> None:
+    def __init__(self, entity:Actor,skip_turn:bool=False,
+            requirements:List[str]=[]) -> None:
         super().__init__()
         self.entity = entity
+        self.requirements = requirements
         self.skip_turn = skip_turn # True if action does not expend a turn
 
     @property
@@ -30,8 +32,19 @@ class Action:
 
         Must be overridden by subclasses.
         """
-
         raise NotImplementedError()
+
+    def first_failure(self) -> Optional[str]:
+        """Check whether the given entity fulfills the requirements
+        for this action.
+
+        Return the first failed requirement, or None if all pass
+        """
+        for r in self.requirements:
+            if not self.entity.fulfills(r):
+                return r
+        else:
+            return None
 
 
 # UI/Modal actions ===================================================

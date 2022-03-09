@@ -394,7 +394,9 @@ class VimCommandParser:
                     [(sx+x,sy+y) for x,y in offsets] + [start],
                     game_map = engine.game_map
                 )
-                return actions.ActionDeleteAlongPath(player,aoe_path)
+                action = actions.ActionDeleteAlongPath(player,aoe_path)
+                action.requirements = ["dd"]
+                return action
             elif main_command[0] == "d":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)

@@ -3,12 +3,14 @@ from __future__ import annotations
 from typing import List, TYPE_CHECKING
 
 from components.base_component import BaseComponent
+from components.ability import Ability
 import exceptions
 
 if TYPE_CHECKING:
     from entity import Actor, Item
 
-class Inventory(BaseComponent):
+#class Inventory(BaseComponent,Ability):
+class Inventory(Ability):
     parent: Actor
 
     def __init__(self, capacity:int):
@@ -18,6 +20,13 @@ class Inventory(BaseComponent):
         self.equipped_registers = "123456789"
         self.registers:Dict[str,Item] = {}
         self.register_history = []
+
+    def fulfills(self,requirement:str) -> Bool:
+        for item in self.equipped:
+            if item.fulfills(requirement):
+                return True
+        else:
+            return False
 
     @property
     def items(self) -> List[item]:

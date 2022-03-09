@@ -2,16 +2,22 @@ from components.ai import HostileEnemy
 from components.fighter import Fighter
 from components.consumable import HealingConsumable
 from components.inventory import Inventory
+from components.ability import Omnipotent, SimpleAbility
 from entity import Actor, Item, Amulet
 import colors
+
+# TODO Multiple differing starting classes
+starting_abilities = ["h","j","k","l","yy","y","d"]
 
 player = Actor(
     char="@",
     color=colors.default_fg,
     name="player",
-    summary="A daring rogue.",
+    summary="You, the player.",
     ai_cls=HostileEnemy,
     fighter=Fighter(hp=30,AC=10,to_hit="1d20",damage="1d20"),
+    #abilities=[Omnipotent()],
+    abilities=[SimpleAbility(s) for s in starting_abilities],
     inventory=Inventory(capacity=35)
 )
 

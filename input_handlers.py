@@ -11,7 +11,7 @@ import tcod.event
 #  would be less annoying
 import actions
 from vim_parser import VimCommandParser
-from exceptions import VimError
+import exceptions
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -77,6 +77,11 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
                 # Note: exceptions here will still be caught by Main and
                 #  shown to player.  Enemy turn will not be performed if there
                 #  is an exception during the player's turn.
+
+                # Check
+                failed_req = action.first_failure()
+                if failed_req:
+                    raise exceptions.Impossible(f"You can't use {failed_req} yet.")
                 action.perform()
                 do_enemy_turn = not action.skip_turn
 

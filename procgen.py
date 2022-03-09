@@ -50,7 +50,7 @@ def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
     entity_factories.ed.spawn(dungeon,18,20)
     entity_factories.ed.spawn(dungeon,27,22)
 
-    entity_factories.amulet["H"].spawn(dungeon,39,24)
+    entity_factories.amulet["dd"].spawn(dungeon,39,24)
 
     room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
     room_2 = RectangularRoom(x=35,y=15,width=10,height=15)

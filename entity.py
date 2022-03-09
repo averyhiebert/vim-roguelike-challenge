@@ -96,6 +96,7 @@ class Actor(Entity):
             summary:str="An unknown entity.",
             ai_cls:Type[BaseAI], # so we can specify the AI at creation without having to create an instance
             fighter:Fighter,
+            abilities:List[Ability]=[],
             inventory:Optional[Inventory]=None):
         super().__init__(
             x=x,y=y,
@@ -104,20 +105,30 @@ class Actor(Entity):
             name=name,
             summary=summary,
             blocks_movement=True,
-            render_order=RenderOrder.ACTOR)
+            render_order=RenderOrder.ACTOR
+        )
         self.ai:Optional[BaseAI] = ai_cls(self)
-
+        self.abilities=abilities
         self.fighter = fighter
         self.fighter.parent = self
         if not inventory:
             inventory = Inventory(capacity=0)
         self.inventory = inventory
         self.inventory.parent = self
+        print(self.abilities)
 
     @property
     def is_alive(self) -> bool:
         """Returns True as long as this actor can perform actions."""
         return bool(self.ai)
+
+    def fulfills(self,requirement:str) -> bool:
+        """ Check whether we intrinsically have this ability or
+        have it via equipped items in the inventory."""
+        for a in self.abilities:
+            if a.fulfills(requirement):
+                return True
+        return self.inventory.fulfills(requirement)
 
 # Note: I will probably change some things about this once I've finished 
 #  with the tutorial, but sticking with the tutorial for now until I have
@@ -129,16 +140,25 @@ class Item(Entity):
             color:Tuple[int,int,int]=colors.default_fg,
             name:str="<Unnamed>",
             summary:str="An unknown item.",
-            consumable: Consumable):
+            consumable: Optional[Consumable]=None,
+            ability:Optional[Ability]=None):
         super().__init__(
             x=x,y=y,char=char,color=color,name=name,
             summary=summary,
             blocks_movement=False,
             render_order=RenderOrder.ITEM
         )
+        if not ability:
+            ability = SimpleAbility("Fulfills nothing")
+        if not consumable:
+            consumable = NotConsumable(f"You can't eat {utils.a_or_an(name)}.")
         # TODO: Set default do-nothing consumable by default
         self.consumable=consumable
         self.consumable.parent = self
+        self.ability = ability
+
+    def fulfills(self,req:str) -> bool:
+        return self.ability.fulfills(req)
 
 class PassiveAbilityItem(Item):
     def __init__(self,*,
@@ -152,8 +172,7 @@ class PassiveAbilityItem(Item):
             x=x,y=y,char=char,
             color=color,
             name=name,
-            summary=summary,
-            consumable=NotConsumable(f"You can't eat {utils.a_or_an(name)}.")
+            summary=summary
         )
         self.ability = ability
 

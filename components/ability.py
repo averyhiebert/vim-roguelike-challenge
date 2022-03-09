@@ -21,11 +21,23 @@ from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
 
 class Ability(BaseComponent):
-    def fulfills(self,requirement:str) -> Bool:
+    def fulfills(self,requirement:str) -> bool:
         """ Return true if this Ability is sufficient to meet the
         given requirement.
         """
         raise NotImplementedError()
+
+    def name(self) -> str:
+        """ Return a (short) string summary of the ability, which can be
+        displayed to the user in a list of currently-active abilities.
+        """
+        raise NotImplementedError()
+
+class Omnipotent(Ability):
+    def fulfills(self,requirement:str) -> bool:
+        return True
+    def name(self) -> str:
+        return "all commands"
 
 class SimpleAbility(Ability):
     def __init__(self,requirement_string:str):
@@ -39,4 +51,7 @@ class SimpleAbility(Ability):
 
     def fulfills(self,requirement:str) -> Bool:
         return requirement == self.requirement_string
+
+    def name(self) -> str:
+        return self.requirement_string
         

@@ -5,6 +5,7 @@ from typing import Optional, TYPE_CHECKING
 import actions
 from components.base_component import BaseComponent
 from components.inventory import Inventory
+from components.ability import Ability
 
 import exceptions
 import utils
