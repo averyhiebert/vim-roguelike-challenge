@@ -90,7 +90,7 @@ class GameMap:
             return False
         return True
 
-    def get_nearest(self,location:Tuple[int,int],char:str,
+    def get_nearest(self,location:Tuple[int,int],char:Optional[str],
             ignore:Option[List[Tuple[int,int]]]=None,
             exclude_adjacent=False) -> List[Tuple[int,int]]:
         """ Return the nearest tile (to the specified location)
@@ -98,15 +98,23 @@ class GameMap:
 
         If exclude_adjacent is true, then directly adjacent tiles are not
         considered.
+
+        If char is None, return entities instead.
         
         Return None if no valid target found."""
-        char_array = self.engine.char_array
-        if type(char_array) == type(None):
-            raise RuntimeError("Error: console not found (shouldn't happen, knock on wood).")
+        if char:
+            # Get locations where char_array = the given char
+            char_array = self.engine.char_array
+            if type(char_array) == type(None):
+                raise RuntimeError("Error: console not found (shouldn't happen, knock on wood).")
 
-        location = np.array(location)
-        target_val = ord(char)
-        candidates = list(zip(*np.nonzero(char_array==target_val)))
+            location = np.array(location)
+            target_val = ord(char)
+            candidates = list(zip(*np.nonzero(char_array==target_val)))
+        else:
+            # Get locations of all entities
+            # TODO Maybe just actors?
+            candidates = list(e.pos for e in self.entities)
         if ignore:
             candidates = [(x,y) for x,y in candidates if (x,y) not in ignore]
         if exclude_adjacent:

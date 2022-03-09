@@ -214,7 +214,13 @@ class GameOverEventHandler(EventHandler):
         action: Optional[Action] = None
         key = event.sym
 
-        if key == tcod.event.K_ESCAPE:
-            action = actions.EscapeAction(self.engine.player)
+        usable_key = keydown_to_char(event) # i.e. an ascii char
+
+        if usable_key == "q":
+            action = actions.HardQuitGame(self.engine.player)
+        elif usable_key == "n":
+            action = actions.NewGame(self.engine.player)
+        elif key == tcod.event.K_ESCAPE:
+            action = actions.HardQuitGame(self.engine.player)
 
         return action

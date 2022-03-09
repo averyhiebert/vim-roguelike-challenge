@@ -37,12 +37,15 @@ class Fighter(BaseComponent):
 
     def die(self) -> None:
         if self.engine.player is self.parent:
-            death_message = "You died!"
+            # Should save, to prevent save scumming/ensure permadeath.
+            death_message = "You died! Press (q) to quit, or (n) to start a new game."
             self.engine.event_handler = GameOverEventHandler(self.engine)
+            # Note: must log BEFORE saving
+            self.engine.message_log.add_message(death_message)
+            self.engine.save_as()
         else:
             death_message = f"{self.parent.name} is dead!"
-
-        self.engine.message_log.add_message(death_message)
+            self.engine.message_log.add_message(death_message)
 
         # Spawn a corpse and remove self
         corpse = Corpse(self.parent)

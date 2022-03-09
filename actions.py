@@ -62,6 +62,7 @@ class QuitGame(Action):
 
 class NewGame(Action):
     def perform(self) -> None:
+        # TODO Should erase old save file.
         self.skip_turn = True # Pointless, I guess
         raise exceptions.NewGame("Bad hack to communicate with main()")
 
