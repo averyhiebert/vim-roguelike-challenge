@@ -19,6 +19,22 @@ if TYPE_CHECKING:
 # TODO Maybe compile this
 MOVEMENT_RE = r"(?P<zero>0)|(?P<repeat>[0-9]*)(?P<base>[hjkl]|;|[tf].|[we]|[HML$]|[`'].)"
 
+def movement_reqs(command:str):
+    """ Return a list of requirements for the given valid movement command.
+    """
+    m = re.match(MOVEMENT_RE,command)
+
+    # Special case of 0
+    if m.group("zero"):
+        return ["0"]
+
+    if m.group("base")[0] in "`'tf":
+        # Don't include register or target char
+        reqs = [m.group("base")[0]]
+    else:
+        reqs = [char for char in m.group("base")]
+    return reqs
+
 class VimCommandParser:
 
     def __init__(self,engine:Engine,movement_only=False,
@@ -369,7 +385,9 @@ class VimCommandParser:
             # Basic movement
             self.reset()
             path = self.parse_movement(command)
-            return actions.ActionMoveAlongPath(player,path)
+            action = actions.ActionMoveAlongPath(player,path)
+            action.requirements = movement_reqs(command)
+            return action
         elif re.match(valid_pyd_re, command):
             self.on_non_movement()
             # A yank, pull, or delete
@@ -395,19 +413,26 @@ class VimCommandParser:
                     game_map = engine.game_map
                 )
                 action = actions.ActionDeleteAlongPath(player,aoe_path)
-                action.requirements = ["dd"]
+                action.requirements = ["d","dd"]
                 return action
             elif main_command[0] == "d":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
-                return actions.ActionDeleteAlongPath(player,path)
+
+                action = actions.ActionDeleteAlongPath(player,path)
+                action.requirements = movement_reqs(movement) + ["d"]
+                return action
             elif main_command == "yy":
                 path = Path([player.pos],game_map = engine.game_map)
-                return actions.PickupAlongPath(player,path,register)
+                action = actions.PickupAlongPath(player,path,register)
+                # No yy requirement, as that could be game-breaking
+                return action
             elif main_command[0] == "y":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
-                return actions.PickupAlongPath(player,path,register)
+                action = actions.PickupAlongPath(player,path,register)
+                action.requirements = movement_reqs(movement) + ["y"]
+                return action
             elif main_command == "p":
                 item = player.inventory.get_item(register)
                 return actions.DropItem(player,item)
@@ -419,7 +444,9 @@ class VimCommandParser:
             # Set a mark in register .
             register = command[-1]
             self.reset()
-            return actions.ActionMakeMark(player,register)
+            action = actions.ActionMakeMark(player,register)
+            action.requirements = ["m"]
+            return action
         elif command == "u":
             self.on_non_movement()
             # "Undo" (Move back to location prior to last move)
@@ -431,7 +458,9 @@ class VimCommandParser:
             self.reset(update_history=False)
             path = self.engine.game_map.get_mono_path(player.pos,
                 target)
-            return actions.ActionMoveAlongPath(player,path)
+            action = actions.ActionMoveAlongPath(player,path)
+            action.requirements = ["u"]
+            return action
         elif re.match("@.",command):
             self.on_non_movement()
             self.reset()

@@ -39,15 +39,11 @@ ed = Actor(
     fighter=Fighter(hp=8,AC=8,to_hit="1d12",damage="1d6")
 )
 
-# Define items here
-health_potion = Item(
-    char="?",
-    name="health potion",
-    summary="A potion that restores health.",
-    consumable=HealingConsumable(4),
-)
+# Define items here =======================================================
 
 # Dictionary of amulet items
 amulet = {}
 for command in ["h","j","k","l","H","M","L","0","$","`","'","dd","t","f","w","e",";","u","m"]:
     amulet[command] = Amulet(ability_str=command)
+
+# TODO Spellbooks?
