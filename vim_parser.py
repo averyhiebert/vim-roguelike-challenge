@@ -469,7 +469,7 @@ class VimCommandParser:
             register = command[1]
             item = player.inventory.get_item(register)
             return actions.ItemAction(player,item)
-        elif command in ":/":
+        elif command in ":?/":
             self.on_non_movement()
             # Enter command mode
             self.reset()

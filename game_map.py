@@ -258,10 +258,14 @@ class GameMap:
 
 
         # Render highlights
-        console.bg[:self.width,:self.height][self.highlight & self.visible] = colors.highlight 
-        invisible_highlights = self.highlight & np.logical_not(self.visible)
-        console.bg[:self.width,:self.height][invisible_highlights] = colors.highlight_dark
-        console.fg[:self.width,:self.height][invisible_highlights] = colors.highlight_dark
+        if self.engine.hlsearch:
+            # Visible (i.e. in fov) highlighted tiles:
+            vh = self.highlight & self.visible
+            console.bg[:self.width,:self.height][vh] = colors.highlight 
+            # Invisible tiles:
+            ih = self.highlight & np.logical_not(self.visible)
+            console.bg[:self.width,:self.height][ih] = colors.highlight_dark
+            console.fg[:self.width,:self.height][ih] = colors.highlight_dark
 
         # Draw map traces
         # TODO Make this more vectorized, somehow

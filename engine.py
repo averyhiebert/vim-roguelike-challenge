@@ -56,6 +56,9 @@ class Engine:
         self.cursor_entity = copy.deepcopy(self.player)
         self.show_cursor=False
 
+        # Global settings like hlsearch
+        self.hlsearch = True 
+
     @property
     def coords_to_show(self) -> Tuple[int,int]:
         """ Coords to show in the status bar."""

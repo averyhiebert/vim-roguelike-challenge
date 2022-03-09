@@ -123,7 +123,7 @@ class MainGameEventHandler(EventHandler):
         return action
 
 class CommandEntryEventHandler(EventHandler):
-    """ Used when entering a / or : command."""
+    """ Used when entering a ?/ or : command."""
 
     def __init__(self, engine:Engine,text:str):
         super().__init__(engine)
@@ -139,6 +139,7 @@ class CommandEntryEventHandler(EventHandler):
         usable_key = keydown_to_char(event) # i.e. an ascii char
 
         if usable_key:
+            # Continue entering the command
             self.text += usable_key
             action = actions.CommandModeStringChanged(player,self.text)
         elif key == tcod.event.K_BACKSPACE:
@@ -148,11 +149,13 @@ class CommandEntryEventHandler(EventHandler):
             else:
                 action = actions.CommandModeStringChanged(player,self.text)
         elif key == tcod.event.K_RETURN:
-            # TODO Try executing command.
+            # Execute the current command
             if self.text[0] == ":":
                 actions.ExitCommandMode(player).perform() # Also necessary
                 action = self.command_parser.colon_command(self.text)
-            elif self.text[0] == "/":
+            elif self.text[0] in "?/":
+                # Currently no difference between ? and /
+                #  (Maybe ? should return search results in reverse order?)
                 actions.ExitCommandMode(player).perform() # Also necessary
                 action = actions.RegexSearch(player,self.text[1:])
             self.text = ""
