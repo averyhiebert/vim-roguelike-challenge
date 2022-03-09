@@ -316,6 +316,7 @@ class MoveCursorAction(ActionWithPath):
         the cursor rather than the player.
         """
         super().__init__(original.entity,original.path)
+        self.skip_turn=True
         self.original = original
         self.original.ignore_blocking = True
 
@@ -328,6 +329,7 @@ class GetCursorInput(Action):
     def __init__(self, entity:Entity,final_action:CursorAction):
         super().__init__(entity)
         self.final_action = final_action
+        self.skip_turn = True
 
     def perform(self) -> None:
         self.entity.engine.get_cursor_input(final_action=self.final_action)
@@ -346,6 +348,7 @@ class CursorAction(Action):
     def __init__(self,entity:Entity):
         super().__init__(entity)
         self.second_use = False
+        self.skip_turn = True
 
     def perform(self) -> None:
         if not self.second_use:
@@ -361,7 +364,9 @@ class CursorAction(Action):
 class ObserveAction(CursorAction):
     def perform2(self) -> None:
         target = self.engine.cursor
-        raise NotImplementedError(f"Observe {str(target)} (not implemented)")
+        text = self.engine.game_map.describe_tile(target,visible_only=True)
+        print(text)
+        raise NotImplementedError(f"Text at {str(target)}: {text}")
 
 # Item Actions =========================================================
 

@@ -162,6 +162,30 @@ class GameMap:
         full_path = list(dict.fromkeys(full_path))
         return Path(points=full_path,game_map=self)
 
+    def describe_tile(self,location:Tuple[int,int],visible_only=True) -> str:
+        """ Return a text description for the given square.
+
+        e.g. "a nano, an ed corpse, floor"
+
+        To be used for regex search and "observe" action. "Observe" action
+        should use flag visible_only (i.e. only describe what's visible to
+        the player), while regex search should also reveal invisible stuff.
+        """
+        # TODO Maybe iterating through each entity for each position
+        #  is inefficient; could keep some sort of better data structure
+        #  if it turns out to be an issue.
+        #  I doubt it'll be an issue, though.
+        if visible_only:
+            if not self.explored[location]:
+                return "unexplored"
+            elif not self.visible[location]:
+                return tile_types.tile_names[self.tiles[location]["name_index"]]
+            else:
+                # TODO Also list entites
+                return tile_types.tile_names[self.tiles[location]["name_index"]]
+        else:
+            raise NotImplementedError()
+
     def render(self,console: Console) -> None:
         """ Render the map.
 

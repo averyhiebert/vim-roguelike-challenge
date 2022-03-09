@@ -23,6 +23,7 @@ tile_dt = np.dtype(
      ("dark",graphic_dt),     # graphics for when not in FOV
      ("light",graphic_dt),    # graphics for when in FOV
      ("unseen",graphic_dt),   # graphics for when unexplored
+     ("name_index",np.int32), # index into list of tile names
     ]
 )
 
@@ -31,22 +32,30 @@ def new_tile(
         walkable: int, transparent: int,
         dark: Tuple[int,Tuple[int,int,int],Tuple[int,int,int]],
         light: Tuple[int,Tuple[int,int,int],Tuple[int,int,int]],
+        name:str,
         ) -> np.ndarray:
     # Automatically generate the "unseen" graphic
     """Helper for defining individual tile types."""
     unseen = (dark[0],colors.default_bg,colors.default_bg)
     # Possibly useful when designing UI (makes map boundary visible):
     #unseen = (dark[0],colors.test_bg,colors.test_bg)
-    return np.array((walkable,transparent,dark,light,unseen),dtype=tile_dt)
+    return np.array((walkable,transparent,dark,light,unseen,name),dtype=tile_dt)
 
 # Define tiles here =========================
+tile_names = [
+    "floor",
+    "wall"
+]
 floor = new_tile(
     walkable=True, transparent=True,
     dark=(ord(" "),colors.default_dim_fg,colors.default_bg),
     light=(ord(" "),colors.default_fg,colors.default_FOV_bg),
+    name=tile_names.index("floor"),
 )
 wall = new_tile(
     walkable=False, transparent=False,
     dark=(ord("#"),colors.default_dim_fg,colors.default_bg),
     light=(ord("#"),colors.default_fg,colors.default_FOV_bg),
+    name=tile_names.index("wall"),
 )
+tile_names = np.array(tile_names) # To support fancy indexing
