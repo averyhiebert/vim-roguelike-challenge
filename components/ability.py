@@ -12,6 +12,8 @@ for the requisite abilities.  A requirement string will be passed to the
 Ability, and it will return True/False regarding whether it satisfies the
 requirement string.  Requirement string could be something simple like "d",
 or more complex, like a regex search.
+
+In retrospect, these are really more like status effects.
 """
 
 from __future__ import annotations

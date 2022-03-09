@@ -203,8 +203,9 @@ class ActionDeleteAlongPath(ActionWithPath):
         self.path.truncate_to_navigable(self.entity)
         destination = self.path.last_occupiable_square(self.entity)
 
-        # Move (TODO: Maybe this should be optional)
-        self.entity.move_to(*destination)
+        # Move, unless a ranged weapon is equipped
+        if not self.entity.fulfills("ranged"):
+            self.entity.move_to(*destination)
 
         # Attack everything along path.
         for point in self.path.points:

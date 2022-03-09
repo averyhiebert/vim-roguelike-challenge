@@ -46,4 +46,12 @@ amulet = {}
 for command in ["h","j","k","l","H","M","L","0","$","`","'","dd","t","f","w","e",";","u","m"]:
     amulet[command] = Amulet(ability_str=command)
 
+# Arquebus - lets you d without moving
+arquebus = Item(
+    char=")",
+    name="arquebus",
+    summary="A ranged weapon.",
+    ability = SimpleAbility("ranged")
+)
+
 # TODO Spellbooks?

@@ -55,6 +55,7 @@ def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
     entity_factories.amulet["M"].spawn(dungeon,39,24)
     entity_factories.amulet["m"].spawn(dungeon,39,24)
     entity_factories.amulet["`"].spawn(dungeon,39,24)
+    entity_factories.arquebus.spawn(dungeon,39,22)
 
     room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
     room_2 = RectangularRoom(x=35,y=15,width=10,height=15)
