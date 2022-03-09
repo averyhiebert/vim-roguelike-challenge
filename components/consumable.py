@@ -5,7 +5,9 @@ from typing import Optional, TYPE_CHECKING
 import actions
 from components.base_component import BaseComponent
 from components.inventory import Inventory
-from exceptions import Impossible
+
+import exceptions
+import utils
 
 if TYPE_CHECKING:
     from entity import Actor, Item
@@ -27,6 +29,19 @@ class Consumable(BaseComponent):
         inventory = item.parent
         if isinstance(inventory,Inventory):
             inventory.remove(item)
+
+class NotConsumable(Consumable):
+    """ A consumable that does nothing but print a message.
+
+    Crucially, it does not remove itself from parent inventory."""
+    def __init__(self,message:str):
+        self.message = message
+
+    def consume(self) -> None:
+        raise exceptions.Impossible(self.message)
+
+    def activate(self,action:actions.ItemAction) -> None:
+        raise exceptions.Impossible(self.message)
 
 class HealingConsumable(Consumable):
     def __init__(self, amount:int):

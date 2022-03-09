@@ -1,0 +1,42 @@
+"""
+Basic architectural idea:
+
+Actors (basically just the player) can have "intrinsic" Abilities.
+Additionally, Items can have abilities.
+
+An actor has access to the abilities of any items that they have equipped
+in their inventory, in addition to any "intrinsic" abilities that they have. 
+
+In general, when the player executes a command some TBD function will check
+for the requisite abilities.  A requirement string will be passed to the
+Ability, and it will return True/False regarding whether it satisfies the
+requirement string.  Requirement string could be something simple like "d",
+or more complex, like a regex search.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from components.base_component import BaseComponent
+
+class Ability(BaseComponent):
+    def fulfills(self,requirement:str) -> Bool:
+        """ Return true if this Ability is sufficient to meet the
+        given requirement.
+        """
+        raise NotImplementedError()
+
+class SimpleAbility(Ability):
+    def __init__(self,requirement_string:str):
+        """ Fulfills only the requirement specified by requirement_string.
+        
+        E.G. if requirement_string = "H", that presumably means that this
+          Ability allows the player to use the "H" command.
+        """
+        super().__init__()
+        self.requirement_string = requirement_string
+
+    def fulfills(self,requirement:str) -> Bool:
+        return requirement == self.requirement_string
+        

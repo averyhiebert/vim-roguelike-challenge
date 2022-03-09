@@ -2,7 +2,7 @@ from components.ai import HostileEnemy
 from components.fighter import Fighter
 from components.consumable import HealingConsumable
 from components.inventory import Inventory
-from entity import Actor, Item
+from entity import Actor, Item, Amulet
 import colors
 
 player = Actor(
@@ -40,3 +40,8 @@ health_potion = Item(
     summary="A potion that restores health.",
     consumable=HealingConsumable(4),
 )
+
+# Dictionary of amulet items
+amulet = {}
+for command in ["h","j","k","l","H","M","L","0","$","`","'","dd","t","f","w","e",";","u","m"]:
+    amulet[command] = Amulet(ability_str=command)

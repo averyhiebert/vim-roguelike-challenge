@@ -15,6 +15,7 @@ class Inventory(BaseComponent):
         """ Note: capacity must be <= 35."""
         self.capacity = capacity
         self.valid_registers = "123456789abcdefghijklmnopqrstuvwxyz"[:capacity]
+        self.equipped_registers = "123456789"
         self.registers:Dict[str,Item] = {}
         self.register_history = []
 
@@ -29,6 +30,14 @@ class Inventory(BaseComponent):
         """
         return list(self.registers.values())
 
+    @property
+    def equipped(self) -> List[item]:
+        """ Returns a list of items that are equipped (i.e. in
+        registers 1 to 9).
+        """
+        return [v for k,v in self.registers.items() 
+            if k in self.equipped_registers]
+
     def get_summary(self) -> List[str]:
         """ Return a list of lines summarizine the contents of
         the inventory in human-readable form.
@@ -41,7 +50,7 @@ class Inventory(BaseComponent):
             " ",
             "Equipped:"
         ]
-        for key in "123456789":
+        for key in self.equipped_registers:
             if key in self.registers:
                 lines.append(f" {key}) {self.registers[key].name}")
         lines.extend([" ","Unequipped:"])

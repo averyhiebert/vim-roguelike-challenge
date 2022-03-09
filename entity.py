@@ -7,14 +7,18 @@ import colors
 from render_order import RenderOrder
 from utils import a_or_an
 
-from components.consumable import HealingConsumable
+from components.consumable import HealingConsumable, NotConsumable
 from components.inventory import Inventory
+from components.ability import SimpleAbility
+
+import utils
 
 if TYPE_CHECKING:
     from components.ai import BaseAI
     from components.consumable import Consumable
     from components.fighter import Fighter
     from components.inventory import Inventory
+    from components.ability import Ability
     from game_map import GameMap
     from engine import Engine
 
@@ -135,6 +139,39 @@ class Item(Entity):
         # TODO: Set default do-nothing consumable by default
         self.consumable=consumable
         self.consumable.parent = self
+
+class PassiveAbilityItem(Item):
+    def __init__(self,*,
+            x=0,y=0,
+            char:str="?",
+            color:Tuple[int,int,int]=colors.default_fg,
+            name:str="<Unnamed>",
+            summary:str="An unknown item.",
+            ability:Ability):
+        super().__init__(
+            x=x,y=y,char=char,
+            color=color,
+            name=name,
+            summary=summary,
+            consumable=NotConsumable(f"You can't eat {utils.a_or_an(name)}.")
+        )
+        self.ability = ability
+
+class Amulet(PassiveAbilityItem):
+    def __init__(self,*,
+            x=0,y=0,
+            color:Tuple[int,int,int]=colors.default_fg,
+            name:str="<Unnamed>",
+            summary:str="An unknown item.",
+            ability_str:str):
+        name = f"Amulet of {ability_str}"
+        summary = f"When equipped, you may use the command {ability_str}"
+        super().__init__(
+            x=x,y=y,char='"',color=color,
+            name=name,
+            summary=summary,
+            ability=SimpleAbility(ability_str)
+        )
 
 class Corpse(Item):
     def __init__(self,a:Actor):
