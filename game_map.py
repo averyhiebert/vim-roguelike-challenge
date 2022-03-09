@@ -247,6 +247,13 @@ class GameMap:
             default=self.tiles["unseen"]
         )
 
+
+        # Render highlights
+        console.bg[:self.width,:self.height][self.highlight & self.visible] = colors.highlight 
+        invisible_highlights = self.highlight & np.logical_not(self.visible)
+        console.bg[:self.width,:self.height][invisible_highlights] = colors.highlight_dark
+        console.fg[:self.width,:self.height][invisible_highlights] = colors.highlight_dark
+
         # Draw map traces
         # TODO Make this more vectorized, somehow
         for trace in self.traces:
@@ -271,10 +278,5 @@ class GameMap:
                 r,g,b = console.bg[entity.x,entity.y]
                 bg = (r,g,b) # Converting np to tuple
                 console.print(x=entity.x,y=entity.y,string=entity.char,fg=bg)
-
-        # Render highlights
-        console.bg[:self.width,:self.height][self.highlight] = colors.highlight
-        invisible_highlights = self.highlight & np.logical_not(self.visible)
-        console.fg[:self.width,:self.height][invisible_highlights] = colors.highlight
 
         self.console = console # (somewhat) sorry about this

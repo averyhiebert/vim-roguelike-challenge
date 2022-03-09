@@ -19,7 +19,8 @@ default_trace = (0,100,100) # A fairly neutral faint teal
 move_trace = (0,100,100)    # To be used when moving
 delete_trace = (100,0,0)    # To be used when deleting/attacking
 yank_trace = (0,100,0)      # To be used when yanking
-highlight = (100,100,0)     # For hlsearch
+highlight = (100,100,0)     # For hlsearch (within FOV)
+highlight_dark = (50,50,0)     # For hlsearch (outside of FOV)
 
 # UI
 
