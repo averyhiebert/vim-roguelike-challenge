@@ -37,7 +37,7 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
         """
         level_gen = TestDungeon("Test")
     else:
-        level_gen = level_types["default"]
+        level_gen = level_types["crisscross"]
     engine.set_game_map(level_gen.generate((map_width,map_height),
         engine,difficulty=1))
     engine.update_fov()

@@ -186,6 +186,7 @@ class BasicDungeon(LevelGenerator):
     def __init__(self,*args,
             room_size_range:Tuple[int,int,int,int]=((8,12),(8,12)),  # min_w, max_w, min_h, max_h,
             max_rooms:int=20,
+            diagonal=False,
             allow_overlap=False):
         super().__init__(*args)
         self.room_size_range=room_size_range
@@ -194,6 +195,7 @@ class BasicDungeon(LevelGenerator):
         self.num_items_range=(2,4)
         self.num_enemies_range=(2,4)
         self.allow_overlap = allow_overlap
+        self.diagonal=diagonal # Whether to generate diagonal tunnels
 
     def room_mask(self,shape) -> np.ndarray:
         """ Should return a boolean array that is True for
@@ -218,7 +220,8 @@ class BasicDungeon(LevelGenerator):
 
             if len(rooms) > 0:
                 # Dig tunnel to previous room.
-                for x,y in tunnel_between(rooms[-1].center,new_room.center):
+                for x,y in tunnel_between(rooms[-1].center,new_room.center,
+                        diagonal=self.diagonal):
                     mask[x,y] = True
             rooms.append(new_room)
         self.rooms = rooms
