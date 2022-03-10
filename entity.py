@@ -100,7 +100,7 @@ class Actor(Entity):
             summary:str="An unknown entity.",
             ai_cls:Type[BaseAI], # so we can specify the AI at creation without having to create an instance
             fighter:Fighter,
-            max_num:int=0,
+            max_range:int=0,
             fov_radius:int=10,
             hp_buff:bool=False, # Whether corpse should buff hp
             abilities:List[Ability]=[],
@@ -127,7 +127,7 @@ class Actor(Entity):
         # Some stats:
         self.fov_radius = fov_radius
         # Max number used in commands (only really relevant to player)
-        self.max_num = max_num
+        self.max_range = max_range
         print(self.abilities)
 
     @property

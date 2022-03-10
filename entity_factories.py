@@ -37,7 +37,7 @@ player = Actor(
     fighter=Fighter(hp=10,AC=0,strength=2),
     abilities=[SimpleAbility(s) for s in starting_abilities],
     inventory=Inventory(capacity=35),
-    max_num=5,
+    max_range=5,
     fov_radius=12,
 )
 

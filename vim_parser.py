@@ -1,5 +1,12 @@
 """ For tracking a series of character inputs (representing a vim command)
-and identifiying the appropriate resulting action."""
+and identifiying the appropriate resulting action.
+
+If I were to do this again, I would change it so that there are separate
+parsers for checking for a completed command (and which type) vs. conducting
+the details of searching, path creation, etc. (which should actually be
+handled by the action, thus allowing it to be decoupled from the player and
+potentially allowing enemies to also take similar movement actions).
+"""
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
@@ -211,6 +218,8 @@ class VimCommandParser:
         n:Optional[int] = None # Note: n will never be 0, so "if n:" is fine
         if match.group("repeat"):
             n = int(match.group("repeat"))
+            # Take into account player max range
+            n = min(n,player.max_range)
 
         base = match.group("base")
 
