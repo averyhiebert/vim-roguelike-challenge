@@ -118,7 +118,16 @@ class VimCommandParser:
             self.entity.enable_all()
             self.entity.engine.hlsearch = True
             return actions.EnterCommandMode(self.entity,"/wall")
-        #elif command in ["gj","gk","G"]:
+        elif re.match(":debug (.*)",command):
+            # For debuggin: execute arbitrary code in an environment
+            #  with access to the engine
+            python = re.match(":debug (.*)",command).group(1)
+            def isolated_environment(engine:Engine):
+                exec(python)
+            isolated_environment(self.entity.engine)
+            action = actions.WaitAction(self.entity)
+            action.skip_turn=True
+            return action
         else:
             self.engine.exit_command_mode()
             raise VimError(command[1:])

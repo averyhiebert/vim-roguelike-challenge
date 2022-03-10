@@ -60,6 +60,7 @@ class HealingConsumable(Consumable):
             self.engine.message_log.add_message(
                 f"You consumed the {self.parent.name}, increasing your max hp by {self.amount}"
             )
+            self.consume()
         elif amount_recovered > 0:
             self.engine.message_log.add_message(
                 f"You consumed the {self.parent.name}, recovering {amount_recovered} hp"

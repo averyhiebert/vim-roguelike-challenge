@@ -45,8 +45,12 @@ class GameMap:
         # Set of location markers
         self.marks = {}
 
+        # Whether to render invisible tiles as the correct character or not
+        self.render_invisible_characters = True
+
         # Used as hack for finding nearby chars
         self.console:Optional[Console] = None
+
 
     @property
     def items(self) -> Iterator[item]:
