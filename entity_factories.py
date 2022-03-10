@@ -41,23 +41,29 @@ player = Actor(
     fov_radius=12,
 )
 
-# Define enemy types here
+# Enemies ==================================================================
+
+# Will follow player by sight if possible
 nano = Actor(
     char="n",
     color=colors.nano,
     name="nano",
     summary="A harmless text editor.",
     ai_cls=HostileEnemy,
-    fighter=Fighter(hp=4,AC=0,strength=3),
+    fov_radius=11,
+    fighter=Fighter(hp=4,AC=0,strength=3,attack_text="bit"),
     hp_buff=True
 )
+# Remains stationary until player seen, then tracks indefinitely
 ed = Actor(
     char="e",
     color=colors.ed,
     name="ed",
-    summary="An ? known for ? and ?",
+    summary="ed is the standard text editor.",
     ai_cls=HostileEnemy,
-    fighter=Fighter(hp=2,AC=0,strength=2)
+    fov_radius=11,
+    needs_los=False,
+    fighter=Fighter(hp=2,AC=0,strength=2,attack_text="?")
     # TODO Ed should track you, while nano doesn't.
 )
 

@@ -17,12 +17,13 @@ class Fighter(BaseComponent):
     parent: Actor
 
     def __init__(self,hp:int,AC:int,strength:int,
-            hp_buff:bool=False):
+            hp_buff:bool=False,attack_text:str="hit"):
         self.max_hp = hp
         self._hp = hp
         self.AC = AC
         self.strength = strength
         self.hp_buff = hp_buff # Whether the corpse buffs hp
+        self.attack_text=attack_text # e.g. hit, bit, stabbed, etc.
 
     @property
     def hp(self) -> int:

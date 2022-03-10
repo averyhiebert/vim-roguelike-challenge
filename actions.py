@@ -309,8 +309,9 @@ class MeleeAction(ActionWithDirection):
         #  (No damage from attacks below a quarter of AC)
         half_damage = (remaining - (target.fighter.AC//2))//2
         total_damage = full_damage + half_damage
+        flavourtext = self.entity.fighter.attack_text
         self.engine.message_log.add_message(
-            f"{self.entity.name} hit {target.name} ({total_damage} hp)."
+            f"{self.entity.name} {flavourtext} {target.name} ({total_damage} hp)."
         )
         target.fighter.hp -= total_damage
 

@@ -101,7 +101,8 @@ class Actor(Entity):
             ai_cls:Type[BaseAI], # so we can specify the AI at creation without having to create an instance
             fighter:Fighter,
             max_range:int=0,
-            fov_radius:int=10,
+            needs_los:bool=True,
+            fov_radius:int=1000, # i.e. no limit by default
             hp_buff:bool=False, # Whether corpse should buff hp
             abilities:List[Ability]=[],
             inventory:Optional[Inventory]=None):
@@ -123,6 +124,7 @@ class Actor(Entity):
         self.inventory = inventory
         self.inventory.parent = self
         self.hp_buff = hp_buff
+        self.needs_los = needs_los # Whether this being needs line-of-sight
 
         # Some stats:
         self.fov_radius = fov_radius
