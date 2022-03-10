@@ -45,12 +45,6 @@ class GameMap:
         # Set of location markers
         self.marks = {}
 
-        # Whether to render invisible tiles as the correct character or not
-        self.render_invisible_characters = True
-
-        # Used as hack for finding nearby chars
-        self.console:Optional[Console] = None
-
 
     @property
     def items(self) -> Iterator[item]:
@@ -94,6 +88,18 @@ class GameMap:
             return False
         return True
 
+    def entity_visible(self,entity:Entity):
+        """ Return true if entity should be visible, and false otherwise.
+        Specifically, Actors are only visible when in fov, while Items are
+        visible as long as they were explored."""
+        if isinstance(entity,Item):
+            return self.explored[entity.pos]
+        elif isinstance(entity,Actor):
+            return self.visible[entity.pos]
+        else:
+            # Default to not showing, I guess?
+            return self.visible[entity.pos]
+
     def get_nearest(self,location:Tuple[int,int],char:Optional[str],
             ignore:Option[List[Tuple[int,int]]]=None,
             exclude_adjacent=False) -> List[Tuple[int,int]]:
@@ -118,8 +124,11 @@ class GameMap:
             candidates = list(zip(*np.nonzero(char_array==target_val)))
         else:
             # Get locations of all actors
-            candidates = list(e.pos for e in self.entities 
+            candidates = list(e for e in self.entities 
                 if isinstance(e,Actor) and e is not self.engine.player)
+            if not self.engine.include_invisible_characters:
+                candidates = [c for c in candidates if self.entity_visible(c)]
+            candidates = [c.pos for c in candidates]
         if ignore:
             candidates = [(x,y) for x,y in candidates if (x,y) not in ignore]
         if exclude_adjacent:
@@ -259,7 +268,10 @@ class GameMap:
             choicelist=[self.tiles["light"],self.tiles["dark"]],
             default=self.tiles["unseen"]
         )
-
+    
+        if not self.engine.include_invisible_characters:
+            char_array = console.ch[:self.width,:self.height]
+            char_array[np.logical_not(self.explored)] = ord(" ")
 
         # Render highlights
         if self.engine.hlsearch:
@@ -288,14 +300,12 @@ class GameMap:
         )
         for entity in entities_sorted_for_rendering:
             # Only print entities that are in the FOV
-            if self.visible[entity.pos]:
+            if self.entity_visible(entity):
                 console.print(x=entity.x,y=entity.y,
                     string=entity.char,fg=entity.color)
-            else:
+            elif self.engine.include_invisible_characters:
                 # Technically, I do print invisible entites, I just print
                 #  them in black on black. (This means they are stil t/f-able)
                 r,g,b = console.bg[entity.x,entity.y]
                 bg = (r,g,b) # Converting np to tuple
                 console.print(x=entity.x,y=entity.y,string=entity.char,fg=bg)
-
-        self.console = console # (somewhat) sorry about this

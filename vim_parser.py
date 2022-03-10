@@ -113,18 +113,21 @@ class VimCommandParser:
             return actions.WaitAction(self.entity)
         # Bonus: some cheats for development
         elif command == ":godmode":
-            # activate player god mode, turn on hlsearch, 
+            # Enable all player abilities, turn on hlsearch, 
             #  and also automatically get ready to search walls.
             self.entity.enable_all()
             self.entity.engine.hlsearch = True
             return actions.EnterCommandMode(self.entity,"/wall")
         elif re.match(":debug (.*)",command):
-            # For debuggin: execute arbitrary code in an environment
-            #  with access to the engine
+            # For debugging: execute arbitrary code, with access to the
+            #  engine or the player.
             python = re.match(":debug (.*)",command).group(1)
-            def isolated_environment(engine:Engine):
-                exec(python)
-            isolated_environment(self.entity.engine)
+            def isolated_environment(engine:Engine,player:Actor):
+                    exec(python)
+            try:
+                isolated_environment(self.entity.engine,self.entity.engine.player)
+            except Exception as err:
+                print(err)
             action = actions.WaitAction(self.entity)
             action.skip_turn=True
             return action

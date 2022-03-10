@@ -56,8 +56,10 @@ class Engine:
         self.cursor_entity = copy.deepcopy(self.player)
         self.show_cursor=False
 
-        # Global settings like hlsearch
+        # Global settings
         self.hlsearch = False
+        # Render invisible, i.e. will tf work outside of fov:
+        self.include_invisible_characters = False
 
     @property
     def coords_to_show(self) -> Tuple[int,int]:
