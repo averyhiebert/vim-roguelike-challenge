@@ -153,7 +153,11 @@ class Engine:
         render_stat_box(console,
             health=self.player.fighter.hp,
             max_health=self.player.fighter.max_hp,
-            gold=100
+            strength=self.player.fighter.strength,
+            max_range=self.player.max_range,
+            gold=self.player.gold,
+            abilities=self.player.ability_string,
+            AC=self.player.fighter.AC,
         )
         self.status_bar.render(console)
         self.text_window.render(console)

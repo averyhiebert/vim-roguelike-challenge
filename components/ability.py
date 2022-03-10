@@ -32,16 +32,19 @@ class Ability(BaseComponent):
         """
         raise NotImplementedError()
 
-    def name(self) -> str:
+    def ability_string(self) -> str:
         """ Return a (short) string summary of the ability, which can be
         displayed to the user in a list of currently-active abilities.
         """
-        raise NotImplementedError()
+        # TODO This may cause confusion in the future
+        return ""
 
 class Omnipotent(Ability):
     def fulfills(self,requirement:str) -> bool:
         return True
-    def name(self) -> str:
+
+    @property
+    def ability_string(self) -> str:
         return "All abilities"
 
 class AllCommands(Ability):
@@ -51,7 +54,9 @@ class AllCommands(Ability):
         TODO Improve this if I add short status effects that aren't commands
         """
         return len(requirement) <= 2
-    def name(self) -> str:
+
+    @property
+    def ability_string(self) -> str:
         return "all commands"
 
 class SimpleAbility(Ability):
@@ -67,6 +72,7 @@ class SimpleAbility(Ability):
     def fulfills(self,requirement:str) -> Bool:
         return requirement == self.requirement_string
 
-    def name(self) -> str:
+    @property
+    def ability_string(self) -> str:
         return self.requirement_string
         

@@ -126,14 +126,24 @@ class Actor(Entity):
 
         # Some stats:
         self.fov_radius = fov_radius
+        self.gold=0
         # Max number used in commands (only really relevant to player)
         self.max_range = max_range
-        print(self.abilities)
 
     @property
     def is_alive(self) -> bool:
         """Returns True as long as this actor can perform actions."""
         return bool(self.ai)
+
+    @property
+    def ability_string(self) -> str:
+        abilities = set([a.ability_string for a in self.abilities])
+        abilities.update([item.ability.ability_string
+            for item in self.inventory.equipped])
+        if "" in abilities:
+            # Remove case of non-abilities, e.g. corpses
+            abilities.remove("")
+        return ", ".join(list(abilities))
 
     def fulfills(self,requirement:str) -> bool:
         """ Check whether we intrinsically have this ability or
@@ -162,7 +172,7 @@ class Item(Entity):
             render_order=RenderOrder.ITEM
         )
         if not ability:
-            ability = SimpleAbility("Fulfills nothing")
+            ability = SimpleAbility("")
         if not consumable:
             consumable = NotConsumable(f"You can't eat {utils.a_or_an(name)}.")
         # TODO: Set default do-nothing consumable by default
