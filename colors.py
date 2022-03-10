@@ -9,10 +9,16 @@ default_FOV_bg = (25,25,25) # Used by default in background where visible
 default_dim_fg = (200,200,200) # Might use for fg when not in FOV, maybe?
 default_fg = (255,255,255)  # Used by default for foreground colour
 
-# Enemy colours
-nano = (0,255,255)
+# Etity colours
+player = default_fg
 ed = (200,120,0)
+sed = ed
+nano = (0,255,255)
+gedit = nano
 emacs = (255,50,50)
+
+# Items
+amulet = default_fg 
 
 # Map trace colours
 default_trace = (0,100,100) # A fairly neutral faint teal

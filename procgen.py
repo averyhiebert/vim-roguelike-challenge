@@ -35,7 +35,10 @@ item_chances: Dict[int,List[Tuple[Union[Entity,ef.Family],int]]] = {
 }
 
 enemy_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
-  0:[(ef.nano,100),(ef.ed,100)]
+  0:[(ef.nano,100)],
+  1:[(ef.ed,100)],
+  3:[(ef.sed,100),(ef.ed,50)],
+  4:[(ef.gedit,100),(ef.ed,10),(ef.nano,10)],
 }
 
 def sample_from_dist(
@@ -238,19 +241,12 @@ class TestDungeon(LevelGenerator):
         dungeon = GameMap(engine,map_width, map_height,entities=[player])
         player.place((40,26),dungeon)
 
-        ef.nano.spawn(dungeon,25,11)
         ef.nano.spawn(dungeon,29,19)
         ef.ed.spawn(dungeon,28,19)
-        ef.nano.spawn(dungeon,16,16)
-        ef.ed.spawn(dungeon,16,20)
-        ef.ed.spawn(dungeon,18,20)
-        ef.ed.spawn(dungeon,27,22)
+        ef.gedit.spawn(dungeon,29,21)
+        ef.sed.spawn(dungeon,28,20)
 
-        ef.amulet["dd"].spawn(dungeon,39,24)
-        ef.amulet["H"].spawn(dungeon,39,24)
-        ef.amulet["M"].spawn(dungeon,39,24)
-        ef.amulet["m"].spawn(dungeon,39,24)
-        ef.amulet["`"].spawn(dungeon,39,24)
+        ef.amulet_of_yendor.spawn(dungeon,39,24)
         ef.arquebus.spawn(dungeon,39,22)
 
         room_1 = RectangularRoom(x=10,y=10,width=20,height=15)

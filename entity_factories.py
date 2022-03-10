@@ -30,7 +30,7 @@ starting_abilities = ["h","j","k","l","yy","y","d"]
 
 player = Actor(
     char="@",
-    color=colors.default_fg,
+    color=colors.player,
     name="player",
     summary="You, the player.",
     ai_cls=HostileEnemy,
@@ -43,12 +43,24 @@ player = Actor(
 
 # Enemies ==================================================================
 
-# Will follow player by sight if possible
+# Remains stationary until player seen, then tracks indefinitely
 nano = Actor(
     char="n",
     color=colors.nano,
     name="nano",
     summary="A harmless text editor.",
+    fighter=Fighter(hp=2,AC=0,strength=2,attack_text="?"),
+    ai_cls=HostileEnemy,
+    fov_radius=10,
+    needs_los=False,
+    wandering=False,
+)
+# Will follow player by sight if possible, otherwise just wander
+ed = Actor(
+    char="e",
+    color=colors.ed,
+    name="ed",
+    summary="ed is the standard text editor.",
     fighter=Fighter(hp=4,AC=0,strength=3,attack_text="bit"),
     hp_buff=True,
     ai_cls=HostileEnemy,
@@ -56,18 +68,32 @@ nano = Actor(
     wandering=True,
     needs_los=True,
 )
-# Remains stationary until player seen, then tracks indefinitely
-ed = Actor(
-    char="e",
-    color=colors.ed,
-    name="ed",
-    summary="ed is the standard text editor.",
-    fighter=Fighter(hp=2,AC=0,strength=2,attack_text="?"),
+# Same behaviour as ed, but stronger.
+sed = Actor(
+    char="s",
+    color=colors.sed,
+    name="sed",
+    summary="A feral stream editor.",
+    fighter=Fighter(hp=6,AC=0,strength=4,attack_text="s/@/%/"),
+    hp_buff=True,
+    ai_cls=HostileEnemy,
+    fov_radius=11,
+    wandering=True,
+    needs_los=True,
+)
+# Same behaviour as nano, but stronger
+gedit = Actor(
+    char="g",
+    color=colors.gedit,
+    name="gedit",
+    summary="A primitive graphical text editor.",
+    fighter=Fighter(hp=6,AC=0,strength=4,attack_text="deleted"),
     ai_cls=HostileEnemy,
     fov_radius=10,
     needs_los=False,
     wandering=False,
 )
+# Magnetized needle? Two moves per turn and high attack but low hp?
 
 # Define items here =======================================================
 
@@ -82,6 +108,13 @@ capital_amulet = Family([amulet[s] for s in "HML0$"])
 mark_amulet = Family([amulet[s] for s in "m`'"])
 f_amulet = Family([amulet[s] for s in "tfwe;"])
 special_amulet = Family([amulet[s] for s in ["dd","u"]])
+# Special!
+amulet_of_yendor = Item(
+    char='"',name="amulet of Yendor",
+    color=colors.amulet,
+    summary="A powerful and mysterious amulet.",
+    ability=AllCommands(),
+)
 
 # Arquebus - lets you d without moving
 arquebus = Item(

@@ -208,7 +208,7 @@ class PassiveAbilityItem(Item):
 class Amulet(PassiveAbilityItem):
     def __init__(self,*,
             x=0,y=0,
-            color:Tuple[int,int,int]=colors.default_fg,
+            color:Tuple[int,int,int]=colors.amulet,
             name:str="<Unnamed>",
             summary:str="An unknown item.",
             ability_str:str):
