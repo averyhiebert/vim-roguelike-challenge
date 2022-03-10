@@ -34,11 +34,11 @@ player = Actor(
     name="player",
     summary="You, the player.",
     ai_cls=HostileEnemy,
-    fighter=Fighter(hp=30,AC=10,to_hit="1d20",damage="1d20"),
-    #abilities=[AllCommands()],
-    #abilities=[Omnipotent()],
+    fighter=Fighter(hp=10,AC=0,strength=2),
     abilities=[SimpleAbility(s) for s in starting_abilities],
-    inventory=Inventory(capacity=35)
+    inventory=Inventory(capacity=35),
+    max_num=5,
+    fov_radius=12,
 )
 
 # Define enemy types here
@@ -48,7 +48,8 @@ nano = Actor(
     name="nano",
     summary="A harmless text editor.",
     ai_cls=HostileEnemy,
-    fighter=Fighter(hp=8,AC=8,to_hit="1d20",damage="1d4")
+    fighter=Fighter(hp=4,AC=0,strength=3),
+    hp_buff=True
 )
 ed = Actor(
     char="e",
@@ -56,7 +57,8 @@ ed = Actor(
     name="ed",
     summary="An ? known for ? and ?",
     ai_cls=HostileEnemy,
-    fighter=Fighter(hp=8,AC=8,to_hit="1d12",damage="1d6")
+    fighter=Fighter(hp=2,AC=0,strength=2)
+    # TODO Ed should track you, while nano doesn't.
 )
 
 # Define items here =======================================================

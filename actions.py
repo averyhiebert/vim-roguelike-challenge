@@ -300,17 +300,19 @@ class MeleeAction(ActionWithDirection):
         if not target:
             return # Nothing to attack
 
-        to_hit = roll_dice(self.entity.fighter.to_hit)
-        if to_hit > target.fighter.AC:
-            damage = roll_dice(self.entity.fighter.damage)
-            self.engine.message_log.add_message(
-                f"{self.entity.name} attacked {target.name} ({damage} hp)."
-            )
-            target.fighter.hp -= damage
-        else:
-            self.engine.message_log.add_message(
-                f"{self.entity.name} missed {target.name}."
-            )
+        damage = self.entity.fighter.strength
+
+        # Deal full damage for anything above target AC
+        full_damage = max(damage,damage-target.fighter.AC)
+        remaining = damage - full_damage
+        # Deal half damage for anything above half of target AC
+        #  (No damage from attacks below a quarter of AC)
+        half_damage = (remaining - (target.fighter.AC//2))//2
+        total_damage = full_damage + half_damage
+        self.engine.message_log.add_message(
+            f"{self.entity.name} hit {target.name} ({total_damage} hp)."
+        )
+        target.fighter.hp -= total_damage
 
 # TODO: Figure out whether this is still needed?
 #  Although, enemies still use it even if player doesn't.

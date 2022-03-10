@@ -100,6 +100,9 @@ class Actor(Entity):
             summary:str="An unknown entity.",
             ai_cls:Type[BaseAI], # so we can specify the AI at creation without having to create an instance
             fighter:Fighter,
+            max_num:int=0,
+            fov_radius:int=10,
+            hp_buff:bool=False, # Whether corpse should buff hp
             abilities:List[Ability]=[],
             inventory:Optional[Inventory]=None):
         super().__init__(
@@ -109,7 +112,7 @@ class Actor(Entity):
             name=name,
             summary=summary,
             blocks_movement=True,
-            render_order=RenderOrder.ACTOR
+            render_order=RenderOrder.ACTOR,
         )
         self.ai:Optional[BaseAI] = ai_cls(self)
         self.abilities=abilities
@@ -119,6 +122,12 @@ class Actor(Entity):
             inventory = Inventory(capacity=0)
         self.inventory = inventory
         self.inventory.parent = self
+        self.hp_buff = hp_buff
+
+        # Some stats:
+        self.fov_radius = fov_radius
+        # Max number used in commands (only really relevant to player)
+        self.max_num = max_num
         print(self.abilities)
 
     @property
@@ -187,7 +196,7 @@ class Amulet(PassiveAbilityItem):
             name:str="<Unnamed>",
             summary:str="An unknown item.",
             ability_str:str):
-        name = f"Amulet of {ability_str}"
+        name = f"amulet of {ability_str}"
         summary = f"When equipped, you may use the command {ability_str}"
         super().__init__(
             x=x,y=y,char='"',color=color,
@@ -198,13 +207,16 @@ class Amulet(PassiveAbilityItem):
 
 class Corpse(Item):
     def __init__(self,a:Actor):
-        # TODO get default healing amount based on parent.
+        consumable = HealingConsumable(
+            int(1.5*a.fighter.strength),
+            hp_buff=a.hp_buff
+        )
         super().__init__(
             x=a.x,y=a.y,color=a.color,
             char="%",
             name=f"{a.name} corpse",
             summary=f"The remains of {a_or_an(a.name)}.",
-            consumable=HealingConsumable(5)
+            consumable=consumable,
         )
         self.parent = a.parent
         self.render_order=RenderOrder.CORPSE

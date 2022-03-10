@@ -139,6 +139,7 @@ class LevelGenerator:
     def place_items(self,dungeon:GameMap) -> List[Tuple[Item]]:
         """ Place items in the dungeon."""
         # TODO Logic about how many items to sample
+        # TODO Optional min distance from player
         num_items = 3
         for item in sample_from_dist(item_chances,k=num_items,
             difficulty=self.difficulty):
@@ -149,7 +150,7 @@ class LevelGenerator:
     def place_enemies(self,dungeon:GameMap) -> List[Tuple[Item]]:
         """ Place enemies in the dungeon."""
         # TODO Avoid duplicated code between this and place_items
-        num_enemies = 10
+        num_enemies = 8
         for enemy in sample_from_dist(enemy_chances,k=num_enemies,
             difficulty=self.difficulty):
             if isinstance(enemy,ef.Family):
@@ -169,8 +170,9 @@ class LevelGenerator:
         dungeon = GameMap(engine,map_width, map_height,entities=[player])
         mask = self.room_mask(shape)
         dungeon.tiles[mask] = tile_types.floor # Set floor based on mask
-
-        # Place various entities
+        
+        # Place player first, so that we can (maybe) ensure you don't start
+        #  right next to monsters or the exit.
         self.place_player(dungeon)
         self.place_items(dungeon)
         self.place_enemies(dungeon)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+import random
 
 from components.base_component import BaseComponent
 from render_order import RenderOrder
@@ -15,12 +16,13 @@ if TYPE_CHECKING:
 class Fighter(BaseComponent):
     parent: Actor
 
-    def __init__(self,hp:int,AC:int,to_hit:str,damage:str):
+    def __init__(self,hp:int,AC:int,strength:int,
+            hp_buff:bool=False):
         self.max_hp = hp
         self._hp = hp
         self.AC = AC
-        self.to_hit = to_hit
-        self.damage = damage
+        self.strength = strength
+        self.hp_buff = hp_buff # Whether the corpse buffs hp
 
     @property
     def hp(self) -> int:
@@ -47,9 +49,11 @@ class Fighter(BaseComponent):
             death_message = f"{self.parent.name} is dead!"
             self.engine.message_log.add_message(death_message)
 
-        # Spawn a corpse and remove self
-        corpse = Corpse(self.parent)
-        corpse.spawn(corpse.gamemap,*corpse.pos)
+        # Possibly spawn a corpse
+        if random.random() < 0.5:
+            corpse = Corpse(self.parent)
+            corpse.spawn(corpse.gamemap,*corpse.pos)
+        # Remove self from map
         self.parent.gamemap.entities.remove(self.parent)
 
     def heal(self,amount:int) -> None:
