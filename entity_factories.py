@@ -93,7 +93,19 @@ gedit = Actor(
     needs_los=False,
     wandering=False,
 )
-# Magnetized needle? Two moves per turn and high attack but low hp?
+# Magnetized needle. Wandering, two moves per turn and high attack but low hp.
+needle = Actor(
+    char="m",
+    color=colors.needle,
+    name="magnetized needle",
+    summary="See xkcd #378.",
+    fighter=Fighter(hp=1,AC=0,strength=8,attack_text="stabbed"),
+    ai_cls=HostileEnemy,
+    fov_radius=10,
+    needs_los=False,
+    wandering=False,
+    moves_per_turn=2
+)
 
 # Define items here =======================================================
 

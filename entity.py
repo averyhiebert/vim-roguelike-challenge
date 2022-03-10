@@ -106,6 +106,7 @@ class Actor(Entity):
             hp_buff:bool=False, # Whether corpse should buff hp
             wandering:bool=False, # Whether to wander when not tracking player
             abilities:List[Ability]=[],
+            moves_per_turn:int=1,
             inventory:Optional[Inventory]=None):
         super().__init__(
             x=x,y=y,
@@ -125,6 +126,7 @@ class Actor(Entity):
         self.inventory = inventory
         self.inventory.parent = self
         self.hp_buff = hp_buff
+        self.moves_per_turn = moves_per_turn
 
         # Some things that only matter if ai is HostileEnemy
         self.needs_los = needs_los # Whether this being needs line-of-sight

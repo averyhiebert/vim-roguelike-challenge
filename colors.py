@@ -16,6 +16,7 @@ sed = ed
 nano = (0,255,255)
 gedit = nano
 emacs = (255,50,50)
+needle = (200,0,0)
 
 # Items
 amulet = default_fg 

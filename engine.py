@@ -125,10 +125,11 @@ class Engine:
         self.turn += 1
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
-                try:
-                    entity.ai.perform()
-                except exceptions.Impossible:
-                    pass
+                for i in range(entity.moves_per_turn):
+                    try:
+                        entity.ai.perform()
+                    except exceptions.Impossible:
+                        pass
 
     def update_fov(self) -> None:
         """ Recompute visible area based on player's POV."""

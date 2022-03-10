@@ -241,10 +241,11 @@ class TestDungeon(LevelGenerator):
         dungeon = GameMap(engine,map_width, map_height,entities=[player])
         player.place((40,26),dungeon)
 
-        ef.nano.spawn(dungeon,29,19)
-        ef.ed.spawn(dungeon,28,19)
-        ef.gedit.spawn(dungeon,29,21)
-        ef.sed.spawn(dungeon,28,20)
+        #ef.nano.spawn(dungeon,29,19)
+        #ef.ed.spawn(dungeon,28,19)
+        #ef.gedit.spawn(dungeon,29,21)
+        #ef.sed.spawn(dungeon,28,20)
+        ef.needle.spawn(dungeon,28,20)
 
         ef.amulet_of_yendor.spawn(dungeon,39,24)
         ef.arquebus.spawn(dungeon,39,22)
