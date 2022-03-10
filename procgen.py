@@ -1,16 +1,58 @@
 from __future__ import annotations
 
-from typing import Tuple, Iterator, TYPE_CHECKING
 import random
+from typing import Dict, List, Tuple, Union, Iterator, Any, TYPE_CHECKING
 
 import tcod
+import numpy as np #type: ignore
 
-import entity_factories
+import entity_factories as ef
 from game_map import GameMap
 import tile_types
 
 if TYPE_CHECKING:
+    from engine import Engine
     from entity import Entity
+
+# Item distribution ======================================================
+
+# Define weights for items/item families, difficulty-dependant
+# Heuristic: 100 is "typical" weight, so 50 is half as common etc.
+# TODO: Make a distribution of individual commands, rather than amulets,
+#  so that it can be re-used for spellbooks, scrolls, etc.
+item_chances: Dict[int,List[Tuple[Union[Entity,ef.Family],int]]] = {
+  0: [(ef.basic_movement_amulet,20), # Boring, so we don't want too many
+      (ef.capital_amulet,100),
+      (ef.f_amulet,100),
+     ],
+  3: [(ef.mark_amulet,50),
+      (ef.amulet["dd"],30),
+      (ef.arquebus,30)
+     ],
+  4: [(ef.basic_movement_amulet,0), # No point wasting the player's time
+      (ef.amulet["u"],30)
+     ]
+}
+
+enemy_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
+  0:[(ef.nano,100),(ef.ed,100)]
+}
+
+def sample_from_dist(
+        dist:Dict[int,List[Tuple[Union[Any,ef.Family],int]]],
+        k:int, difficulty:int) -> List[Any]:
+    """ Return k items sampled from the given distribution."""
+    weights = {}
+    for key, values in dist.items():
+        if key > difficulty:
+            break
+        weights.update({k:v for k,v in values})
+    items = list(weights.keys())
+    weight_list = list(weights.values())
+    return random.choices(items,weights=weight_list,k=k)
+
+
+# Map generation  ========================================================
 
 class RectangularRoom:
     def __init__(self, x:int, y:int, width:int, height:int):
@@ -52,66 +94,164 @@ def tunnel_between(start:Tuple[int,int],
         yield from tcod.los.bresenham(start,corner)
         yield from tcod.los.bresenham(corner,end)
 
-def generate_dungeon(
-        map_width:int,
-        map_height:int,
-        engine:Engine,
-        room_size_range:Tuple[int,int,int,int],  # min_w, max_w, min_h, max_h,
-        num_items_range:Tuple[int,int],  # min_items, max_items
-    ) -> GameMap:
+def place_randomly(dungeon:GameMap,entity:Entity,max_tries=100,
+        restricted_range:Optional(Tuple[int,int,int,int])=None,spawn=True):
+    """Try up to max_tries times to place the entity somewhere that
+    it is allowed to be. Throws an exception otherwise.
+
+    If spawn=True, use the "spawn" function (e.g. for items and enemies).
+    Otherwise, place the entity itself (e.g. for the player).
+
+    TODO: I could instead iterate over the valid locations and then pick
+    one at random, but in most cases I'm pretty sure this should be faster
+    and also reasonably safe.
     """
-    Generate a very generic dungeon
-    (rectangular rooms connected by paths).
-    """
-    player = engine.player
-    dungeon = GameMap(engine,map_width, map_height,entities=[player])
-    player.place((40,26),dungeon)
+    if not restricted_range:
+        restricted_range = (0,dungeon.width-1,0,dungeon.height-1)
+    xmin,xmax,ymin,ymax = restricted_range
+    for i in range(max_tries):
+        location = (random.randint(xmin,xmax),random.randint(ymin,ymax))
+        if dungeon.is_navigable(location,entity):
+            if spawn:
+                entity.spawn(dungeon,*location)
+            else:
+                entity.place(location,dungeon)
+            return
+    else:
+        # TODO A sensible default.
+        raise RuntimeError("Dungeon generation failed.")
 
-    # Add some rooms
-    room_1 = RectangularRoom(x=10,y=10,width=12,height=15)
-    room_2 = RectangularRoom(x=35,y=15,width=10,height=15)
-    dungeon.tiles[room_1.inner] = tile_types.floor
-    dungeon.tiles[room_2.inner] = tile_types.floor
-    for x,y in tunnel_between(room_1.center,room_2.center,diagonal=False):
-        dungeon.tiles[x,y] = tile_types.floor
+# Base class for generating levels
+class LevelGenerator:
+    def __init__(self,name):
+        self.name=name
+        self.difficulty=1 # Should be set by "set difficulty" function at time of generation
 
-    # Connect with corridors
+    def room_mask(self,shape:Tuple[int,int]) -> np.ndarray:
+        """ Should return a boolean array that is True for
+        walkable tiles and False otherwise.
+        
+        Using a boolean mask rather than directly returning a gamemap makes
+        it easier to isolate the procedural generation into a library that
+        could be used for other things, maybe?"""
+        raise NotImplementedError()
 
-    # Add some items
+    def place_items(self,dungeon:GameMap) -> List[Tuple[Item]]:
+        """ Place items in the dungeon."""
+        # TODO Logic about how many items to sample
+        num_items = 3
+        for item in sample_from_dist(item_chances,k=num_items,
+            difficulty=self.difficulty):
+            if isinstance(item,ef.Family):
+                item = item.sample()
+            place_randomly(dungeon,item,max_tries=100)
 
-    # Add some monsters
-    return dungeon
+    def place_enemies(self,dungeon:GameMap) -> List[Tuple[Item]]:
+        """ Place enemies in the dungeon."""
+        # TODO Avoid duplicated code between this and place_items
+        num_enemies = 10
+        for enemy in sample_from_dist(enemy_chances,k=num_enemies,
+            difficulty=self.difficulty):
+            if isinstance(enemy,ef.Family):
+                enemy = enemy.sample()
+            place_randomly(dungeon,enemy,max_tries=100)
 
-def test_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
-    """
-    A manually created dungeon, for testing.
-    """
+    def place_player(self,dungeon:GameMap) -> None:
+        place_randomly(dungeon,dungeon.engine.player,max_tries=100,spawn=False)
 
-    player = engine.player
-    dungeon = GameMap(engine,map_width, map_height,entities=[player])
-    player.place((40,26),dungeon)
+    def generate(self,shape:Tuple[int,int],
+            engine:Engine,difficulty:int) -> GameMap:
+        map_width, map_height = shape
+        # Set difficulty first, as other functions may use it
+        self.difficulty = difficulty
 
-    entity_factories.nano.spawn(dungeon,25,11)
-    entity_factories.nano.spawn(dungeon,29,19)
-    entity_factories.ed.spawn(dungeon,28,19)
-    entity_factories.nano.spawn(dungeon,16,16)
-    entity_factories.ed.spawn(dungeon,16,20)
-    entity_factories.ed.spawn(dungeon,18,20)
-    entity_factories.ed.spawn(dungeon,27,22)
+        player = engine.player
+        dungeon = GameMap(engine,map_width, map_height,entities=[player])
+        mask = self.room_mask(shape)
+        dungeon.tiles[mask] = tile_types.floor # Set floor based on mask
 
-    entity_factories.amulet["dd"].spawn(dungeon,39,24)
-    entity_factories.amulet["H"].spawn(dungeon,39,24)
-    entity_factories.amulet["M"].spawn(dungeon,39,24)
-    entity_factories.amulet["m"].spawn(dungeon,39,24)
-    entity_factories.amulet["`"].spawn(dungeon,39,24)
-    entity_factories.arquebus.spawn(dungeon,39,22)
+        # Place various entities
+        self.place_player(dungeon)
+        self.place_items(dungeon)
+        self.place_enemies(dungeon)
 
-    room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
-    room_2 = RectangularRoom(x=35,y=15,width=10,height=15)
+        return dungeon
 
-    dungeon.tiles[room_1.inner] = tile_types.floor
-    dungeon.tiles[room_2.inner] = tile_types.floor
-    dungeon.tiles[15:36,18] = tile_types.floor
+class BasicDungeon(LevelGenerator):
+    rooms:List[RectangularRoom]
 
-    return dungeon
+    def __init__(self,*args,
+            room_size_range:Tuple[int,int,int,int]=((8,12),(8,12)),  # min_w, max_w, min_h, max_h,
+            max_rooms:int=20,
+            allow_overlap=False):
+        super().__init__(*args)
+        self.room_size_range=room_size_range
+        self.max_rooms=max_rooms
+        # TODO Later, will set the following based on difficulty
+        self.num_items_range=(2,4)
+        self.num_enemies_range=(2,4)
+        self.allow_overlap = allow_overlap
 
+    def room_mask(self,shape) -> np.ndarray:
+        """ Should return a boolean array that is True for
+        walkable tiles and False otherwise."""
+        map_width,map_height = shape
+        mask = np.full(shape,False)
+
+        # Add some rooms
+        rooms = []
+        for r in range(self.max_rooms):
+            (min_w,max_w),(min_h,max_h) = self.room_size_range
+            room_width = random.randint(min_w,max_w)
+            room_height = random.randint(min_h,max_h)
+            x = random.randint(0,map_width - room_width - 1)
+            y = random.randint(0,map_height - room_height - 1)
+            
+            new_room = RectangularRoom(x,y,room_width,room_height)
+            if not self.allow_overlap:
+                if any(new_room.intersects(other_room) for other_room in rooms):
+                    continue
+            mask[new_room.inner] = True
+
+            if len(rooms) > 0:
+                # Dig tunnel to previous room.
+                for x,y in tunnel_between(rooms[-1].center,new_room.center):
+                    mask[x,y] = True
+            rooms.append(new_room)
+        self.rooms = rooms
+        return mask
+
+
+class TestDungeon(LevelGenerator):
+    """ A manually created dungeon, for testing."""
+    def generate(self,shape:Tuple[int,int],engine:Engine,
+            difficulty:int):
+        map_width,map_height = shape
+
+        player = engine.player
+        dungeon = GameMap(engine,map_width, map_height,entities=[player])
+        player.place((40,26),dungeon)
+
+        ef.nano.spawn(dungeon,25,11)
+        ef.nano.spawn(dungeon,29,19)
+        ef.ed.spawn(dungeon,28,19)
+        ef.nano.spawn(dungeon,16,16)
+        ef.ed.spawn(dungeon,16,20)
+        ef.ed.spawn(dungeon,18,20)
+        ef.ed.spawn(dungeon,27,22)
+
+        ef.amulet["dd"].spawn(dungeon,39,24)
+        ef.amulet["H"].spawn(dungeon,39,24)
+        ef.amulet["M"].spawn(dungeon,39,24)
+        ef.amulet["m"].spawn(dungeon,39,24)
+        ef.amulet["`"].spawn(dungeon,39,24)
+        ef.arquebus.spawn(dungeon,39,22)
+
+        room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
+        room_2 = RectangularRoom(x=35,y=15,width=10,height=15)
+
+        dungeon.tiles[room_1.inner] = tile_types.floor
+        dungeon.tiles[room_2.inner] = tile_types.floor
+        dungeon.tiles[15:36,18] = tile_types.floor
+
+        return dungeon

@@ -7,7 +7,8 @@ import tcod
 import colors
 from engine import Engine
 import entity_factories
-from procgen import generate_dungeon, test_dungeon
+from procgen import TestDungeon, BasicDungeon
+from level_factories import level_types
 import exceptions
 
 # Some constants for development
@@ -29,15 +30,16 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
 
     engine = Engine(player=player)
     if USE_TEST_ROOM:
+        """
         engine.set_game_map(test_dungeon(map_width, 
             map_height,engine=engine,
         ))
+        """
+        level_gen = TestDungeon("Test")
     else:
-        engine.set_game_map(generate_dungeon(map_width, 
-            map_height,engine=engine,
-            room_size_range=((6,12),(6,12)),
-            num_items_range=(2,4)
-        ))
+        level_gen = level_types["default"]
+    engine.set_game_map(level_gen.generate((map_width,map_height),
+        engine,difficulty=1))
     engine.update_fov()
 
     engine.message_log.add_message(

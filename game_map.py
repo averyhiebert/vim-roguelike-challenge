@@ -265,7 +265,9 @@ class GameMap:
             # Invisible tiles:
             ih = self.highlight & np.logical_not(self.visible)
             console.bg[:self.width,:self.height][ih] = colors.highlight_dark
-            console.fg[:self.width,:self.height][ih] = colors.highlight_dark
+            # Unexplored highlighted tiles
+            ueh = self.highlight & np.logical_not(self.explored)
+            console.fg[:self.width,:self.height][ueh] = colors.highlight_dark
 
         # Draw map traces
         # TODO Make this more vectorized, somehow
