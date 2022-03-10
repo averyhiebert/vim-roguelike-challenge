@@ -67,4 +67,4 @@ class HealingConsumable(Consumable):
             )
             self.consume()
         else:
-            raise Impossible(f"Your health is already full.")
+            raise exceptions.Impossible(f"Your health is already full.")

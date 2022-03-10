@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 import re
+import random
 
 import numpy as np # type: ignore
 import tcod
@@ -45,7 +46,6 @@ class GameMap:
         # Set of location markers
         self.marks = {}
 
-
     @property
     def items(self) -> Iterator[item]:
         yield from (entity for entity in self.entities 
@@ -87,6 +87,21 @@ class GameMap:
             # Note: entity does not block self.
             return False
         return True
+
+    def get_random_navigable(self,entity:Entity,max_tries=1000,
+            restricted_range:Optional[Tuple[int,int,int,int]]=None) -> Tuple[int,int]:
+        """ Return a random location that the given Entity could
+        navigate to."""
+        if not restricted_range:
+            restricted_range = (0,self.width-1,0,self.height-1)
+        xmin,xmax,ymin,ymax = restricted_range
+        for i in range(max_tries):
+            location = (random.randint(xmin,xmax),random.randint(ymin,ymax))
+            if self.is_navigable(location,entity):
+                return location
+        else:
+            # TODO A sensible default.
+            raise RuntimeError("Couldn't find navigable location.")
 
     def entity_visible(self,entity:Entity):
         """ Return true if entity should be visible, and false otherwise.
@@ -151,10 +166,13 @@ class GameMap:
         return None
 
     def get_entities_at_location(self,
-            location:Tuple[int,int],sort=False) -> List[Entity]:
+            location:Tuple[int,int],sort=False,visible_only=False) -> List[Entity]:
         """ Return list of entities at a location.  Can optionally
         also sort them in render order (highest order last)."""
-        entities = [e for e in self.entities if e.pos == location]
+        if visible_only:
+            entities = [e for e in self.entities if e.pos == location and self.entity_visible(e)]
+        else:
+            entities = [e for e in self.entities if e.pos == location]
         if sort:
             entities.sort(key=lambda x: x.render_order.value)
         return entities
@@ -233,11 +251,13 @@ class GameMap:
         #  I doubt it'll be an issue, though.
 
         # Helper
+        # TODO This is vestigial, change it.
         def tile_full_summary(location):
             ind = self.tiles[location]["name_index"]
             tile_name = tile_types.tile_names[ind]
 
-            entities = self.get_entities_at_location(location,sort=True)
+            entities = self.get_entities_at_location(location,sort=True,
+                visible_only=visible_only)
             text = ", ".join([f"{a_or_an(e.name)}" 
                 for e in reversed(entities)])
             if len(text) > 0:
@@ -246,15 +266,9 @@ class GameMap:
                 text = tile_name
             return text
 
-        if visible_only:
-            if not self.explored[location]:
-                return "unexplored"
-            elif not self.visible[location]:
-                return tile_types.tile_names[self.tiles[location]["name_index"]]
-            else:
-                return tile_full_summary(location)
-        else:
-            return tile_full_summary(location)
+        if visible_only and not self.explored[location]:
+            return "unexplored"
+        return tile_full_summary(location)
 
     def render(self,console: Console) -> None:
         """ Render the map.

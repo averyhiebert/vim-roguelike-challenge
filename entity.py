@@ -104,6 +104,7 @@ class Actor(Entity):
             needs_los:bool=True,
             fov_radius:int=1000, # i.e. no limit by default
             hp_buff:bool=False, # Whether corpse should buff hp
+            wandering:bool=False, # Whether to wander when not tracking player
             abilities:List[Ability]=[],
             inventory:Optional[Inventory]=None):
         super().__init__(
@@ -124,7 +125,10 @@ class Actor(Entity):
         self.inventory = inventory
         self.inventory.parent = self
         self.hp_buff = hp_buff
+
+        # Some things that only matter if ai is HostileEnemy
         self.needs_los = needs_los # Whether this being needs line-of-sight
+        self.wandering = wandering
 
         # Some stats:
         self.fov_radius = fov_radius

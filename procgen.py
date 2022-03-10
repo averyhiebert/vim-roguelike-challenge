@@ -106,6 +106,7 @@ def place_randomly(dungeon:GameMap,entity:Entity,max_tries=100,
     one at random, but in most cases I'm pretty sure this should be faster
     and also reasonably safe.
     """
+    # TODO Switch to using GameMap.get_random_navigable
     if not restricted_range:
         restricted_range = (0,dungeon.width-1,0,dungeon.height-1)
     xmin,xmax,ymin,ymax = restricted_range

@@ -40,6 +40,7 @@ class HostileEnemy(BaseAI):
         super().__init__(entity)
         self.target_last_seen:Optional[Tuple[int,int]] = None
         self.path: List[Tuple[int,int]] = []
+        self.currently_wandering = True
 
 
     def perform(self) -> None:
@@ -66,6 +67,7 @@ class HostileEnemy(BaseAI):
                 self.target_last_seen = target.pos
 
         if self.target_last_seen:
+            self.currently_wandering = False
             # We may or may not see the player, but we at least know
             #  where we last saw them
             if self.target_last_seen != self.entity.pos:
@@ -73,10 +75,19 @@ class HostileEnemy(BaseAI):
             else:
                 # They're not here, give up
                 self.target_last_seen = None
-                # TODO Maybe path to a random location?
+                self.currently_wandering = True
                 self.path = None
+        else:
+            self.currently_wandering = True
+        
+        # Possibly wander around
+        if self.entity.wandering and not self.path:
+            location = self.entity.gamemap.get_random_navigable(self.entity)
+            self.path = self.get_path_to(location)
 
         if self.path:
+            if self.currently_wandering and self.entity.engine.turn % 2 == 0:
+                return WaitAction(self.entity).perform()
             dest_x,dest_y = self.path.pop(0)
             return MovementAction(
                 self.entity, 

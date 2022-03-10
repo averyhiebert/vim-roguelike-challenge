@@ -49,10 +49,12 @@ nano = Actor(
     color=colors.nano,
     name="nano",
     summary="A harmless text editor.",
+    fighter=Fighter(hp=4,AC=0,strength=3,attack_text="bit"),
+    hp_buff=True,
     ai_cls=HostileEnemy,
     fov_radius=11,
-    fighter=Fighter(hp=4,AC=0,strength=3,attack_text="bit"),
-    hp_buff=True
+    wandering=True,
+    needs_los=True,
 )
 # Remains stationary until player seen, then tracks indefinitely
 ed = Actor(
@@ -60,11 +62,11 @@ ed = Actor(
     color=colors.ed,
     name="ed",
     summary="ed is the standard text editor.",
+    fighter=Fighter(hp=2,AC=0,strength=2,attack_text="?"),
     ai_cls=HostileEnemy,
-    fov_radius=11,
+    fov_radius=10,
     needs_los=False,
-    fighter=Fighter(hp=2,AC=0,strength=2,attack_text="?")
-    # TODO Ed should track you, while nano doesn't.
+    wandering=False,
 )
 
 # Define items here =======================================================
