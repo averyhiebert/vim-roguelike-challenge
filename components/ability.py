@@ -13,7 +13,10 @@ Ability, and it will return True/False regarding whether it satisfies the
 requirement string.  Requirement string could be something simple like "d",
 or more complex, like a regex search.
 
-In retrospect, these are really more like status effects.
+In retrospect, these are really more like status effects.  If I were to
+do this again, these would be "effects" with various subclasses,
+and players/inventories would have "fulfills(effect)" method. But for 7drl
+this system is good enough.
 """
 
 from __future__ import annotations
@@ -38,6 +41,16 @@ class Ability(BaseComponent):
 class Omnipotent(Ability):
     def fulfills(self,requirement:str) -> bool:
         return True
+    def name(self) -> str:
+        return "All abilities"
+
+class AllCommands(Ability):
+    def fulfills(self,requirement:str) -> bool:
+        """ Return true for any short command (i.e. 1 or 2 characters).
+
+        TODO Improve this if I add short status effects that aren't commands
+        """
+        return len(requirement) <= 2
     def name(self) -> str:
         return "all commands"
 

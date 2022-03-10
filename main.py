@@ -7,8 +7,12 @@ import tcod
 import colors
 from engine import Engine
 import entity_factories
-from procgen import generate_dungeon
+from procgen import generate_dungeon, test_dungeon
 import exceptions
+
+# Some constants for development
+USE_TEST_ROOM = False
+ALWAYS_NEW_GAME = True
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     """ Return a new game object (i.e. an Engine).
@@ -24,8 +28,16 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     player = copy.deepcopy(entity_factories.player)
 
     engine = Engine(player=player)
-    engine.set_game_map(generate_dungeon(map_width, 
-        map_height,engine=engine))
+    if USE_TEST_ROOM:
+        engine.set_game_map(test_dungeon(map_width, 
+            map_height,engine=engine,
+        ))
+    else:
+        engine.set_game_map(generate_dungeon(map_width, 
+            map_height,engine=engine,
+            room_size_range=((6,12),(6,12)),
+            num_items_range=(2,4)
+        ))
     engine.update_fov()
 
     engine.message_log.add_message(
@@ -43,7 +55,9 @@ def main() -> None:
 
     try:
         engine = Engine.load("save.sav")
+        assert(not ALWAYS_NEW_GAME)
     except:
+        #Save file dow not exist, or we're in always-new testing mode.
         engine = new_game(
             tileset,
             screen_width=screen_width,

@@ -106,9 +106,15 @@ class VimCommandParser:
         elif re.match(":swap (.) (.)", command):
             m = re.match(":swap (.) (.)", command)
             return actions.SwapRegisters(self.entity,m.group(1),m.group(2))
-        #elif re.match(":let @(.)=@(.)", command):
-            #m = re.match(":let @(.)=@(.)", command)
-            #return actions.SwapRegisters(self.entity,m.group(1),m.group(2))
+        elif command == ":godmode":
+            # activate player god mode
+            self.entity.enable_all()
+            return actions.WaitAction(self.entity)
+        elif command == ":set hlsearch":
+            # TODO: This, and others, should be part of a general
+            #  "GameCommandAction" with appropriate requirements.
+            self.entity.engine.hlsearch = True
+            return actions.WaitAction(self.entity)
         else:
             self.engine.exit_command_mode()
             raise VimError(command[1:])

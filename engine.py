@@ -57,7 +57,7 @@ class Engine:
         self.show_cursor=False
 
         # Global settings like hlsearch
-        self.hlsearch = True 
+        self.hlsearch = False
 
     @property
     def coords_to_show(self) -> Tuple[int,int]:

@@ -1,10 +1,16 @@
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Tuple, Iterator, TYPE_CHECKING
+import random
+
+import tcod
 
 import entity_factories
 from game_map import GameMap
 import tile_types
+
+if TYPE_CHECKING:
+    from entity import Entity
 
 class RectangularRoom:
     def __init__(self, x:int, y:int, width:int, height:int):
@@ -32,10 +38,53 @@ class RectangularRoom:
             and self.y2 >= other.y1
         )
 
-def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
-    """ Not gonna bother with random generation until I have
-    most of the vim commands/movement/etc. dealt with, since
-    that's the core priority for this game.
+def tunnel_between(start:Tuple[int,int],
+        end:Tuple[int,int],diagonal=False) -> Iterator[Tuple[int,int]]:
+    """ Give a path between two rooms, either L-shaped, or stright-line,
+    depending on `diagonal`.
+    """
+    (x1,y1),(x2,y2) = start,end
+    if diagonal:
+        yield from tcod.los.bresenham(start,end)
+        yield from tcod.los.bresenham((x1+1,y1),(x2+1,y2))
+    else:
+        corner = (x2,y1) if random.random() < 0.5 else (x1,y2)
+        yield from tcod.los.bresenham(start,corner)
+        yield from tcod.los.bresenham(corner,end)
+
+def generate_dungeon(
+        map_width:int,
+        map_height:int,
+        engine:Engine,
+        room_size_range:Tuple[int,int,int,int],  # min_w, max_w, min_h, max_h,
+        num_items_range:Tuple[int,int],  # min_items, max_items
+    ) -> GameMap:
+    """
+    Generate a very generic dungeon
+    (rectangular rooms connected by paths).
+    """
+    player = engine.player
+    dungeon = GameMap(engine,map_width, map_height,entities=[player])
+    player.place((40,26),dungeon)
+
+    # Add some rooms
+    room_1 = RectangularRoom(x=10,y=10,width=12,height=15)
+    room_2 = RectangularRoom(x=35,y=15,width=10,height=15)
+    dungeon.tiles[room_1.inner] = tile_types.floor
+    dungeon.tiles[room_2.inner] = tile_types.floor
+    for x,y in tunnel_between(room_1.center,room_2.center,diagonal=False):
+        dungeon.tiles[x,y] = tile_types.floor
+
+    # Connect with corridors
+
+    # Add some items
+
+    # Add some monsters
+    return dungeon
+
+def test_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
+    """
+    A manually created dungeon, for testing.
     """
 
     player = engine.player
@@ -63,7 +112,6 @@ def generate_dungeon(map_width:int,map_height:int,engine:Engine) -> GameMap:
     dungeon.tiles[room_1.inner] = tile_types.floor
     dungeon.tiles[room_2.inner] = tile_types.floor
     dungeon.tiles[15:36,18] = tile_types.floor
-
 
     return dungeon
 

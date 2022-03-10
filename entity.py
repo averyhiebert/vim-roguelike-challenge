@@ -9,7 +9,7 @@ from utils import a_or_an
 
 from components.consumable import HealingConsumable, NotConsumable
 from components.inventory import Inventory
-from components.ability import SimpleAbility
+from components.ability import SimpleAbility, AllCommands
 
 import utils
 
@@ -60,6 +60,10 @@ class Entity:
     @property
     def engine(self) -> Engine:
         return self.gamemap.engine
+
+    def enable_all(self) -> None:
+        """ Add AllCommands to existing abilities."""
+        self.abilities.append(AllCommands())
 
     def spawn(self: T, gamemap: GameMap, x: int, y:int) -> T:
         """Spawn a copy of this instance at given location."""
