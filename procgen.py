@@ -39,6 +39,7 @@ enemy_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
   1:[(ef.ed,100)],
   3:[(ef.sed,100),(ef.ed,50)],
   4:[(ef.gedit,100),(ef.ed,10),(ef.nano,10)],
+  6:[(ef.needle,50)],
 }
 
 def sample_from_dist(
@@ -190,6 +191,8 @@ class BasicDungeon(LevelGenerator):
             room_size_range:Tuple[int,int,int,int]=((8,12),(8,12)),  # min_w, max_w, min_h, max_h,
             max_rooms:int=20,
             diagonal=False,
+            invert=False,
+            do_tunnels=True,
             allow_overlap=False):
         super().__init__(*args)
         self.room_size_range=room_size_range
@@ -198,7 +201,9 @@ class BasicDungeon(LevelGenerator):
         self.num_items_range=(2,4)
         self.num_enemies_range=(2,4)
         self.allow_overlap = allow_overlap
-        self.diagonal=diagonal # Whether to generate diagonal tunnels
+        self.diagonal = diagonal # Whether to generate diagonal tunnels
+        self.invert = invert # Invert floor and all
+        self.do_tunnels = do_tunnels
 
     def room_mask(self,shape) -> np.ndarray:
         """ Should return a boolean array that is True for
@@ -222,12 +227,15 @@ class BasicDungeon(LevelGenerator):
             mask[new_room.inner] = True
 
             if len(rooms) > 0:
-                # Dig tunnel to previous room.
-                for x,y in tunnel_between(rooms[-1].center,new_room.center,
-                        diagonal=self.diagonal):
-                    mask[x,y] = True
+                if self.do_tunnels:
+                    # Dig tunnel to previous room.
+                    for x,y in tunnel_between(rooms[-1].center,new_room.center,
+                            diagonal=self.diagonal):
+                        mask[x,y] = True
             rooms.append(new_room)
         self.rooms = rooms
+        if self.invert:
+            mask = np.logical_not(mask)
         return mask
 
 

@@ -11,6 +11,7 @@ from tcod.console import Console
 from entity import Actor, Item
 import tile_types
 import colors
+import exceptions
 
 from path import Path
 from utils import a_or_an
@@ -224,8 +225,11 @@ class GameMap:
         if regex == "":
             return []
         w,h = self.tiles.shape
-        locations = [pos for pos in np.ndindex(self.tiles.shape)
-            if re.search(regex,self.describe_tile(pos,visible_only=False))]
+        try:
+            locations = [pos for pos in np.ndindex(self.tiles.shape)
+                    if re.search(regex,self.describe_tile(pos,visible_only=False))]
+        except re.error as err:
+            raise exceptions.UserError("Invalid regex (note: uses python syntax, not vim syntax)")
         # TODO Text describing # of matches found, etc.
         return locations
 

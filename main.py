@@ -8,11 +8,11 @@ import colors
 from engine import Engine
 import entity_factories
 from procgen import TestDungeon, BasicDungeon
-from level_factories import level_types
+import level_factories as lf
 import exceptions
 
 # Some constants for development
-USE_TEST_ROOM = True
+USE_TEST_ROOM = False
 ALWAYS_NEW_GAME = True
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
@@ -37,7 +37,7 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
         """
         level_gen = TestDungeon("Test")
     else:
-        level_gen = level_types["crisscross"]
+        level_gen = lf.default
     engine.set_game_map(level_gen.generate((map_width,map_height),
         engine,difficulty=1))
     engine.update_fov()
