@@ -255,7 +255,10 @@ class TestDungeon(LevelGenerator):
         #ef.sed.spawn(dungeon,28,20)
         #ef.needle.spawn(dungeon,28,20)
         #ef.vimic.spawn(dungeon,28,20)
-        ef.vimpire.spawn(dungeon,28,20)
+        #ef.vimpire.spawn(dungeon,28,20)
+        ef.emacs.spawn(dungeon,28,20)
+        #ef.emax.spawn(dungeon,28,20)
+
 
         ef.amulet_of_yendor.spawn(dungeon,39,24)
         ef.arquebus.spawn(dungeon,39,22)

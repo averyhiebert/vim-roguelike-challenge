@@ -197,8 +197,13 @@ class ActionMoveAlongPath(ActionWithPath):
             self.entity.gamemap.add_trace(self.path.points)
 
 class ActionDeleteAlongPath(ActionWithPath):
+    def __init__(self,*args,no_truncate:bool=False,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.no_truncate = no_truncate
+
     def perform(self) -> None:
-        self.path.truncate_to_navigable(self.entity)
+        if not self.no_truncate:
+            self.path.truncate_to_navigable(self.entity)
         destination = self.path.last_occupiable_square(self.entity)
 
         # Move, unless a ranged weapon is equipped

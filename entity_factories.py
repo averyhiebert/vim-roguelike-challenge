@@ -117,6 +117,7 @@ vimic = Actor(
     fov_radius=11,
     wandering=True,
     needs_los=True,
+    will_flee=True,
 )
 # Like a vimic, but ranged and moves faster.
 # TODO Ability to make you forget an intrinsic command.
@@ -130,7 +131,39 @@ vimpire = Actor(
     ai_cls=VimlikeEnemy,
     fov_radius=11,
     wandering=True,
+    will_flee=True,
     moves_per_turn=2,
+    abilities=[SimpleAbility("ranged")],
+    needs_los=True,
+)
+emacs = Actor(
+    char="E",
+    color=colors.emacs,
+    name="Emacs",
+    summary="A lumbering monstrosity created by mad scientists.",
+    fighter=Fighter(hp=30,AC=0,strength=10,attack_text="C-x h C-w"), #TODO dynamic text
+    hp_buff=True,
+    ai_cls=VimlikeEnemy,
+    fov_radius=11,
+    wandering=True,
+    aoe_radius=3,
+    can_melee=False,
+    abilities=[SimpleAbility("ranged")],
+    needs_los=True,
+)
+emax = Actor(
+    char="X",
+    color=colors.emacs,
+    name="Emax",
+    summary="Like Emacs, only moreso.",
+    fighter=Fighter(hp=30,AC=0,strength=10,attack_text="C-x h C-w"), #TODO dynamic text
+    hp_buff=True,
+    ai_cls=VimlikeEnemy,
+    fov_radius=11,
+    wandering=True,
+    aoe_radius=3,
+    aoe_cross=True,
+    can_melee=False,
     abilities=[SimpleAbility("ranged")],
     needs_los=True,
 )

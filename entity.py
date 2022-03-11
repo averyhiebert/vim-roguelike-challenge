@@ -107,7 +107,10 @@ class Actor(Entity):
             wandering:bool=False, # Whether to wander when not tracking player
             abilities:List[Ability]=[],
             moves_per_turn:int=1,
-            omnidirectional_attack:bool=False,
+            aoe_radius:Optional[int]=None,
+            aoe_cross:bool=False,
+            will_flee:bool=False,
+            can_melee:bool=True,
             inventory:Optional[Inventory]=None):
         super().__init__(
             x=x,y=y,
@@ -129,10 +132,15 @@ class Actor(Entity):
         self.hp_buff = hp_buff
         self.moves_per_turn = moves_per_turn
 
-        # Some things that only matter if ai is HostileEnemy
+        # Some things that only matter for certain enemy AI 
         self.needs_los = needs_los # Whether this being needs line-of-sight
         self.wandering = wandering
-        self.omnidirectional_attack = omnidirectional_attack
+
+        # Only for vimlike AI:
+        self.aoe_radius = aoe_radius
+        self.aoe_cross = aoe_cross # Whether aoe includes cross shape
+        self.can_melee = can_melee
+        self.will_flee = will_flee
 
         # Some stats:
         self.fov_radius = fov_radius

@@ -1,5 +1,8 @@
 """Just some helpful utils that I'm not sure belong to any particular class."""
+from typing import Iterator, Tuple
+
 import random
+from itertools import product
 
 def roll_dice(dice:str) -> int:
     """ Rolls strings of the form 1d4+3d6+72 """
@@ -17,4 +20,12 @@ def roll_dice(dice:str) -> int:
 def a_or_an(s:str) -> str:
     """ Return 'a [str]' or 'an [str]' as appropriate."""
     return f"an {s}" if s[0] in "aeiouAEIOU" else f"a {s}"
-    
+
+def aoe_by_radius(center:Tuple[int,int],radius:int) -> Iterator[Tuple[int,int]]:
+    """ Iterator of points starting at `center`, tracing out a square
+    area of the given radius, and returning to center."""
+    x,y = center
+
+    yield center
+    yield from ((x+i,y+j)  for i,j in product(range(-radius,radius+1),repeat=2))
+    yield center

@@ -17,6 +17,7 @@ from actions import (
     ActionMoveAlongPath
 )
 from path import Path
+import utils
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -138,12 +139,30 @@ class VimlikeEnemy(HostileEnemy):
             "$":(1000,self.entity.y),
         }
         flee = False # Whether to flee.
-        dest = None  # Direction to possibly move to.
-        if self.entity.fighter.hp > self.entity.fighter.max_hp/4:
-            if self.entity.x == target.x:
-                dest = directions["H" if self.entity.y > target.y else "L"]
-            elif self.entity.y == target.y:
-                dest = directions["0" if self.entity.x > target.x else "$"]
+        dest:Optional[Tuple[int,int]] = None  # Direction to possibly move to.
+        if self.entity.fighter.hp > self.entity.fighter.max_hp/4 or not self.entity.will_flee:
+            if self.entity.aoe_radius:
+                dx, dy = target.x - self.entity.x, target.y - self.entity.y
+                distance = max(abs(dx),abs(dy)) #Chebyshev distance
+                if distance <= self.entity.aoe_radius - 1:
+                    # Perform aoe attack
+                    points = list(utils.aoe_by_radius(self.entity.pos,self.entity.aoe_radius))
+                    if self.entity.aoe_cross:
+                        # Also add in cross pattern
+                        points.pop()
+                        w,h = self.entity.gamemap.width,self.entity.gamemap.height
+                        points.extend([(x,self.entity.y) for x in range(w)])
+                        points.extend([(self.entity.x,y) for y in range(h)])
+                        points.extend([self.entity.pos])
+                    path = Path(points,game_map=self.entity.gamemap)
+                    dest = self.entity.pos
+                else:
+                    return None # Just move towards player
+            else:
+                if self.entity.x == target.x:
+                    dest = directions["H" if self.entity.y > target.y else "L"]
+                elif self.entity.y == target.y:
+                    dest = directions["0" if self.entity.x > target.x else "$"]
         else:
             flee = True
             # Run away in random direction orthogonal to player, if in line
@@ -159,9 +178,15 @@ class VimlikeEnemy(HostileEnemy):
 
         if dest and not flee:
             # Start a d action (takes 2 turns)
-            path = self.entity.gamemap.get_mono_path(self.entity.pos,dest)
-            action = ActionDeleteAlongPath(self.entity,path)
-            self.set_timeout(1,action)
+            if not self.entity.aoe_radius:
+                # Path to chosen direction
+                path = self.entity.gamemap.get_mono_path(self.entity.pos,dest)
+            else:
+                # Actually, instead of a path, just use AOE
+                # path is already set?
+                pass
+            action = ActionDeleteAlongPath(self.entity,path,no_truncate=True)
+            self.set_timeout(0,action)
             return WaitAction(self.entity)
         elif dest and flee:
             # Flee immediately
@@ -193,7 +218,7 @@ class VimlikeEnemy(HostileEnemy):
         # see the player.
         if self.engine.game_map.visible[self.entity.x,self.entity.y]:
             # Is in fov of player, but maybe not of self
-            if distance <= 1:
+            if distance <= 1 and self.entity.can_melee:
                 return MeleeAction(self.entity,(dx,dy)).perform()
             elif euclidean_distance <= self.entity.fov_radius:
                 # Can see player

@@ -70,7 +70,8 @@ class GameMap:
             color:Tuple[int,int,int]=colors.default_trace) -> None:
         """ Add a trace to draw on the map. Points should be a list
         of (x,y) tuples to add a trace to."""
-        self.traces.append(MapTrace(points,fade_time=0.5,color=color))
+        self.traces.append(MapTrace([p for p in points if self.in_bounds(p)]
+            ,fade_time=0.5,color=color))
 
     def is_navigable(self,location:Tuple[int,int],
             entity:Entity=None) -> Optional[Entity]:
