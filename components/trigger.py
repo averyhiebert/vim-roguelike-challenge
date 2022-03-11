@@ -70,6 +70,8 @@ class LandmineTrigger(Trigger):
     def __init__(self):
         super().__init__()
         self.activated = False
+        self.radius = 2
+        self.damage = 12
 
     def entered(self,entity:Actor) -> None:
         if entity == entity.engine.player:
@@ -103,4 +105,4 @@ class LandmineTrigger(Trigger):
         entity.engine.message_log.add_message(
             f"The landmine detonates!"
         )
-        raise NotImplementedError("Explosion not implemented.")
+        entity.gamemap.explosion(self.parent.pos,self.radius,self.damage)

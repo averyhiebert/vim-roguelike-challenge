@@ -14,7 +14,7 @@ import colors
 import exceptions
 
 from path import Path
-from utils import a_or_an
+from utils import a_or_an, aoe_by_radius
 from map_traces import MapTrace
 
 if TYPE_CHECKING:
@@ -69,6 +69,17 @@ class GameMap:
         """Iterate over the map's living actors."""
         yield from (e for e in self.entities 
             if isinstance(e,Actor) and e.is_alive)
+
+    def explosion(self,center:Tuple[int,int],radius:int,damage:int) -> None:
+        """ An explosion somewhere on the map."""
+        points = list(aoe_by_radius(center,radius))
+        for a in list(self.actors):
+            if a.pos in points:
+                self.engine.message_log.add_message(
+                    f"{a.name} was hurt by the explosion."
+                )
+                a.fighter.take_damage(damage)
+        self.add_trace(points,color=colors.explosion_trace)
 
     def add_trace(self,points:List[Tuple[int,int]],
             color:Tuple[int,int,int]=colors.default_trace) -> None:
