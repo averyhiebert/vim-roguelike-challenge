@@ -64,3 +64,43 @@ class GoldTrigger(Trigger):
         entity.gold += self.value
         inventory = self.parent.parent # Should be an inventory, anyways
         inventory.remove(self.parent)
+
+class LandmineTrigger(Trigger):
+    """ Trigger unique to the landmine object."""
+    def __init__(self):
+        super().__init__()
+        self.activated = False
+
+    def entered(self,entity:Actor) -> None:
+        if entity == entity.engine.player:
+            self.activated = True
+            entity.engine.message_log.add_message(
+                "You hear the click of a landmine!"
+            )
+            # Make trap visible
+            self.parent.char = "^"
+
+    def exited(self,entity:Actor) -> None:
+        if self.activated and entity == entity.engine.player:
+            self.parent.gamemap.entities.remove(self.parent)
+            self.explode(entity)
+
+    def yanked(self,entity:Actor) -> None:
+        """ Note: safe to yank, as long as it's not activated."""
+        if self.activated:
+            inventory = self.parent.parent
+            inventory.remove(self.parent)
+            self.explode(entity)
+
+    def dropped(self,entity:Actor) -> None:
+        # TODO I suppose in the future it might be possible to
+        #  drop something at a distance, but for now we assume
+        #  that it was dropped on the same tile as the actor,
+        #  in which case it will be immediately triggered.
+        self.entered(entity)
+
+    def explode(self,entity:Actor) -> None:
+        entity.engine.message_log.add_message(
+            f"The landmine detonates!"
+        )
+        raise NotImplementedError("Explosion not implemented.")

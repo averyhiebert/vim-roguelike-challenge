@@ -288,6 +288,7 @@ class TestDungeon(LevelGenerator):
         ef.scrolls[3].spawn(dungeon,39,23)
         ef.scrolls[0].spawn(dungeon,39,23)
         ef.medium_gold.spawn(dungeon,40,20)
+        ef.landmine.spawn(dungeon,42,25)
 
         room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
         room_2 = RectangularRoom(x=35,y=15,width=10,height=15)

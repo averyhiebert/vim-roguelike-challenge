@@ -8,7 +8,9 @@ from components.fighter import Fighter
 from components.consumable import HealingConsumable, CommandConsumable
 from components.inventory import Inventory
 from components.ability import Omnipotent, SimpleAbility, AllCommands
+from components.trigger import LandmineTrigger
 from entity import Actor, Item, Amulet, Gold
+from render_order import RenderOrder
 import colors
 
 # A "Family" of comparable-value items; useful for uniformly
@@ -170,14 +172,24 @@ emax = Actor(
     needs_los=True,
 )
 
-# Define items here =======================================================
+# Traps =========================================================
+
+landmine = Item(
+    char=" ",color=colors.default_bg,
+    name="landmine",
+    summary="Explodes when you step off it.",
+    trigger=LandmineTrigger(),
+)
+landmine.render_order = RenderOrder.TRAP
+
+# Items =========================================================
 
 some_gold = Gold(5)
 medium_gold = Gold(10)
 much_gold = Gold(20)
 
 
-# Amulets ============================================== 
+# Amulets ============
 amulet = {}
 for command in ["h","j","k","l","H","M","L","0","$","`","'","dd","t","f","w","e",";","u","m"]:
     amulet[command] = Amulet(ability_str=command)
@@ -189,7 +201,7 @@ amulet_of_yendor = Item(
     ability=AllCommands(),
 )
 
-# Scrolls ============================================
+# Scrolls =============
 #  (a list, since it's not convenient to type out entire names)
 scrolls = []
 scroll_commands = [
