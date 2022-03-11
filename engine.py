@@ -142,6 +142,9 @@ class Engine:
             algorithm=tcod.FOV_BASIC,
         )
         self.game_map.explored |= self.game_map.visible
+
+        # Also update other stuff here 'cause I'm not sure where else to do it.
+        self.include_invisible_characters = self.player.fulfills("echolocate")
             
 
     def render(self, console:Console, context:Context):

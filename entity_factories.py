@@ -245,6 +245,6 @@ moderate_item = Family(scrolls[3:] + [amulet[s] for s in "tw;m'`"]
     + [some_gold])
 good_amulet = Family([amulet[s] for s in "feHML0$u"] + scrolls[1:3]
     + [medium_gold])
-great_item = Family([amulet["dd"],arquebus,scrolls[0],much_gold])
+great_item = Family([amulet["dd"],arquebus,scrolls[0],much_gold,bat_ears])
 
 # TODO Spellbooks?
