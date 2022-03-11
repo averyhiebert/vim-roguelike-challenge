@@ -196,6 +196,12 @@ amulet_of_yendor = Item(
     summary="A powerful and mysterious artifact.",
     ability=AllCommands(),
 )
+amulet_of_vimtutor = Item(
+    char='"',name="Amulet of vimtutor",
+    color=colors.amulet,
+    summary="A powerful and mysterious artifact.",
+    ability=AllCommands(),
+)
 
 # Scrolls =============
 #  (a list, since it's not convenient to type out entire names)
@@ -233,6 +239,14 @@ arquebus = Item(
     summary="A ranged weapon.",
     ability=SimpleAbility("ranged")
 )
+# Magnet - yank when deleting
+magnet = Item(
+    char="(",
+    color=colors.equipment,
+    name="arquebus",
+    summary="When equipped, automatically yank while deleting.",
+    ability=SimpleAbility("magnetic")
+)
 
 # Families of items
 
@@ -240,7 +254,8 @@ weak_amulet = Family([amulet[s] for s in "hjkl"])
 moderate_item = Family(scrolls[3:] + [amulet[s] for s in "tw;m'`"] 
     + [Gold(1),Gold(2),Gold(4),Gold(3)])
 good_item = Family([amulet[s] for s in "feHML0$"] + scrolls[1:3]
-    + [Gold(8),Gold(9),Gold(10),Gold(11)])
+    + [Gold(8),Gold(9),Gold(10),Gold(11),magnet])
 great_item = Family([amulet["dd"],amulet["u"],arquebus,scrolls[0],bat_ears,Gold(30)])
+amazing_item = Family([amulet_of_vimtutor,Gold(50)])
 
 # TODO Spellbooks?

@@ -481,13 +481,15 @@ class VimCommandParser:
                     points.extend([(x,player.y + i) 
                         for x in range(engine.game_map.width)])
                 path = Path(points,game_map=engine.game_map)
-                action = actions.ActionDeleteAlongPath(player,path)
+                action = actions.ActionDeleteAlongPath(player,path,
+                    register=register)
                 action.requirements = ["d","dd"]
             elif main_command[0] == "d":
                 movement = match.group("movement")
                 path = self.parse_movement(movement,prev_n=n)
 
-                action = actions.ActionDeleteAlongPath(player,path)
+                action = actions.ActionDeleteAlongPath(player,path,
+                    register=register)
                 action.requirements = movement_reqs(movement) + ["d"]
             elif main_command == "yy":
                 path = Path([player.pos],game_map = engine.game_map)

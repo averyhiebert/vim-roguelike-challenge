@@ -295,8 +295,9 @@ class TestDungeon(LevelGenerator):
         #ef.emax.spawn(dungeon,28,20)
 
 
-        ef.amulet_of_yendor.spawn(dungeon,39,24)
+        ef.amulet_of_vimtutor.spawn(dungeon,39,24)
         ef.arquebus.spawn(dungeon,39,22)
+        ef.magnet.spawn(dungeon,38,22)
         ef.scrolls[1].spawn(dungeon,39,23)
         ef.scrolls[2].spawn(dungeon,39,23)
         ef.scrolls[3].spawn(dungeon,39,23)

@@ -237,9 +237,11 @@ class ActionMoveAlongPath(ActionWithPath):
             self.entity.gamemap.add_trace(self.path.points)
 
 class ActionDeleteAlongPath(ActionWithPath):
-    def __init__(self,*args,no_truncate:bool=False,**kwargs):
+    def __init__(self,*args,no_truncate:bool=False,
+            register:Optional[str]=None,**kwargs):
         super().__init__(*args,**kwargs)
         self.no_truncate = no_truncate
+        self.register=register
 
     def perform(self) -> None:
         if not self.no_truncate:
@@ -257,6 +259,12 @@ class ActionDeleteAlongPath(ActionWithPath):
                 target_x,target_y = point
                 direction = (target_x - self.entity.x, target_y - self.entity.y)
                 MeleeAction(self.entity,direction).perform()
+
+        # Yank, if magnetic
+        if self.entity.fulfills("magnetic"):
+            PickupAlongPath(self.entity,self.path,
+                register=self.register,
+                draw_trace=False).perform()
         
         # Draw trace
         if len(self.path.points) > 1:
@@ -265,9 +273,12 @@ class ActionDeleteAlongPath(ActionWithPath):
 
 class PickupAlongPath(ActionWithPath):
 
-    def __init__(self, entity:Entity, path:Path, register:Optional[str]=None):
+    def __init__(self, entity:Entity, path:Path,
+            register:Optional[str]=None,
+            draw_trace=True):
         super().__init__(entity,path)
         self.register = register
+        self.draw_trace=draw_trace
 
     def perform(self) -> None:
         inventory = self.entity.inventory
@@ -289,7 +300,7 @@ class PickupAlongPath(ActionWithPath):
         # TODO: Should have a single combined message for all actions.
 
         # Draw trace
-        if len(self.path.points) > 1:
+        if len(self.path.points) > 1 and self.draw_trace:
             self.entity.gamemap.add_trace(self.path.points,
                 color=colors.yank_trace)
 
