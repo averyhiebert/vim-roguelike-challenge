@@ -99,25 +99,39 @@ needle = Actor(
     color=colors.needle,
     name="magnetized needle",
     summary="See xkcd #378",
-    fighter=Fighter(hp=1,AC=0,strength=8,attack_text="stabbed"),
+    fighter=Fighter(hp=4,AC=0,strength=8,attack_text="stabbed"),
     ai_cls=HostileEnemy,
     fov_radius=10,
     needs_los=False,
     wandering=False,
     moves_per_turn=2
 )
-# Plan: will use dH etc to attack player, or will flee if at less than half
-#  health
+# Plan: will use dH etc to attack player, or will flee if at less than 1/3 health
 vimic = Actor(
     char="v",
-    color=colors.sed,
+    color=colors.vimic,
     name="vimic",
     summary="A monster that mimics the features of vim.",
-    fighter=Fighter(hp=10,AC=0,strength=4,attack_text="d"), #TODO dynamic text
+    fighter=Fighter(hp=15,AC=0,strength=4,attack_text="d"), #TODO dynamic text
+    ai_cls=VimlikeEnemy,
+    fov_radius=11,
+    wandering=True,
+    needs_los=True,
+)
+# Like a vimic, but ranged and moves faster.
+# TODO Ability to make you forget an intrinsic command.
+vimpire = Actor(
+    char="V",
+    color=colors.vimpire,
+    name="Vimpire",
+    summary="A vile, corrupted vim-like entity.",
+    fighter=Fighter(hp=20,AC=0,strength=6,attack_text="d"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
     fov_radius=11,
     wandering=True,
+    moves_per_turn=2,
+    abilities=[SimpleAbility("ranged")],
     needs_los=True,
 )
 
@@ -142,7 +156,15 @@ amulet_of_yendor = Item(
     ability=AllCommands(),
 )
 
-# Arquebus - lets you d without moving
+# Bat ears: lets you t/f/w/e outside of fov
+# TODO Actually implement this.
+bat_ears = Item(
+    char="(",name="bat ears",
+    color=colors.equipment,
+    summary="When equipped, gives you the power of echolocation.",
+    ability=SimpleAbility("echolocation")
+)
+# Arquebus - a ranged item
 arquebus = Item(
     char=")",
     name="arquebus",

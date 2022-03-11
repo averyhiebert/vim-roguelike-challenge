@@ -17,9 +17,12 @@ nano = (0,255,255)
 gedit = nano
 emacs = (255,50,50)
 needle = (200,0,0)
+vimic = needle
+vimpire = needle
 
 # Items
 amulet = default_fg 
+equipment = default_fg
 
 # Map trace colours
 default_trace = (0,100,100) # A fairly neutral faint teal

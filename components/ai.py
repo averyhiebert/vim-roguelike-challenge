@@ -126,6 +126,8 @@ class VimlikeEnemy(HostileEnemy):
 
         For now, we attack if possible, but may add additional
          features (e.g. running away, or special AOE attack for Emacs)
+
+        Note: returns an action, but does not perform it!
         """
         path_endpoint = None
 
@@ -137,7 +139,7 @@ class VimlikeEnemy(HostileEnemy):
         }
         flee = False # Whether to flee.
         dest = None  # Direction to possibly move to.
-        if self.entity.fighter.hp > self.entity.fighter.max_hp//2:
+        if self.entity.fighter.hp > self.entity.fighter.max_hp/4:
             if self.entity.x == target.x:
                 dest = directions["H" if self.entity.y > target.y else "L"]
             elif self.entity.y == target.y:
@@ -160,12 +162,12 @@ class VimlikeEnemy(HostileEnemy):
             path = self.entity.gamemap.get_mono_path(self.entity.pos,dest)
             action = ActionDeleteAlongPath(self.entity,path)
             self.set_timeout(1,action)
-            return WaitAction(self.entity).perform()
+            return WaitAction(self.entity)
         elif dest and flee:
             # Flee immediately
             # Note: does not take 2 turns as this is only one keystroke.
             path = self.entity.gamemap.get_mono_path(self.entity.pos,dest)
-            return ActionMoveAlongPath(self.entity,path).perform()
+            return ActionMoveAlongPath(self.entity,path)
         else:
             # Continue moving towards player
             return None
@@ -198,7 +200,7 @@ class VimlikeEnemy(HostileEnemy):
                 self.target_last_seen = target.pos
                 action = self.target_in_view(target)
                 if action:
-                    return action
+                    return action.perform()
                 else:
                     # Nothing in particular needs to happen here
                     pass

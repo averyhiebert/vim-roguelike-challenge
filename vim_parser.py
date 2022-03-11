@@ -426,9 +426,9 @@ class VimCommandParser:
             action.requirements = movement_reqs(command)
             return action
         elif re.match(valid_pyd_re, command):
+            self.reset()
             self.on_non_movement()
             # A yank, pull, or delete
-            self.reset()
             match = re.match(valid_pyd_re,command)
             main_command = match.group("command")
 
@@ -451,31 +451,28 @@ class VimCommandParser:
                 )
                 action = actions.ActionDeleteAlongPath(player,aoe_path)
                 action.requirements = ["d","dd"]
-                return action
             elif main_command[0] == "d":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
 
                 action = actions.ActionDeleteAlongPath(player,path)
                 action.requirements = movement_reqs(movement) + ["d"]
-                return action
             elif main_command == "yy":
                 path = Path([player.pos],game_map = engine.game_map)
                 action = actions.PickupAlongPath(player,path,register)
                 # No yy requirement, as that could be game-breaking
-                return action
             elif main_command[0] == "y":
                 movement = match.group("movement")
                 path = self.parse_movement(movement)
                 action = actions.PickupAlongPath(player,path,register)
                 action.requirements = movement_reqs(movement) + ["y"]
-                return action
             elif main_command == "p":
                 item = player.inventory.get_item(register)
-                return actions.DropItem(player,item)
+                action = actions.DropItem(player,item)
             else:
                 print(main_command)
                 raise NotImplementedError("This command not implemented")
+            return action
         elif re.match("m.",command):
             self.on_non_movement()
             # Set a mark in register .
@@ -492,6 +489,11 @@ class VimCommandParser:
                 self.reset()
                 return actions.WaitAction(player)
             target = self.past_player_locations.pop()
+
+            # If we are already there (sometimes happens with ranged attacks)
+            if target and target == player.pos and len(self.past_player_locations) > 0:
+                target = self.past_player_locations.pop()
+                
             self.reset(update_history=False)
             path = self.engine.game_map.get_mono_path(player.pos,
                 target)

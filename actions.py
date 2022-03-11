@@ -214,7 +214,7 @@ class ActionDeleteAlongPath(ActionWithPath):
                 MeleeAction(self.entity,direction).perform()
         
         # Draw trace
-        if len(self.path.points) > 2:
+        if len(self.path.points) > 1:
             self.entity.gamemap.add_trace(self.path.points,
                 color=colors.delete_trace)
 

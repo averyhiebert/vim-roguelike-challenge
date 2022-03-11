@@ -107,6 +107,7 @@ class Actor(Entity):
             wandering:bool=False, # Whether to wander when not tracking player
             abilities:List[Ability]=[],
             moves_per_turn:int=1,
+            omnidirectional_attack:bool=False,
             inventory:Optional[Inventory]=None):
         super().__init__(
             x=x,y=y,
@@ -131,6 +132,7 @@ class Actor(Entity):
         # Some things that only matter if ai is HostileEnemy
         self.needs_los = needs_los # Whether this being needs line-of-sight
         self.wandering = wandering
+        self.omnidirectional_attack = omnidirectional_attack
 
         # Some stats:
         self.fov_radius = fov_radius
