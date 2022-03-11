@@ -135,8 +135,10 @@ class VimCommandParser:
             # Enable all player abilities, turn on hlsearch, 
             #  and also automatically get ready to search walls.
             self.entity.enable_all()
+            self.entity.fighter.AC = 1000
             self.entity.engine.hlsearch = True
-            return actions.EnterCommandMode(self.entity,"/wall")
+            #return actions.EnterCommandMode(self.entity,"/wall")
+            return actions.WaitAction(self.entity,skip_turn=True)
         elif re.match(":debug (.*)",command):
             # For debugging: execute arbitrary code, with access to the
             #  engine or the player.

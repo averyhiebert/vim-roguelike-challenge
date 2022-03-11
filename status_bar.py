@@ -58,9 +58,9 @@ class StatusBar:
             #  Maybe progress towards the final level?
             x,y = self.engine.coords_to_show
             position_text = f"{x:2d},{y:2d}"
-            console.print(x=35,y=38,string=position_text,fg=fg,bg=bg)
-            position = "Top"
-            console.print(50-len(position) - 1,y=38,string="Top",fg=fg,bg=bg)
+            console.print(x=33,y=38,string=position_text,fg=fg,bg=bg)
+            progress = self.engine.game_world.progress_summary
+            console.print(x=42,y=38,string=f"{progress:>6}",fg=fg,bg=bg)
             console.print(x=1,y=38,string=self.short_message,fg=fg,bg=bg)
 
 

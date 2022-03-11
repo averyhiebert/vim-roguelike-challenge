@@ -11,7 +11,8 @@ if TYPE_CHECKING:
     from engine import Engine
 
 level_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
-  0:[(lf.default,100)],
+  #0:[(lf.default,100)],
+  0:[(lf.cellar,100)],
   3:[(lf.tunnels,10)],
   5:[(lf.mines,100),(lf.tunnels,100),(lf.default,0)],
   8:[(lf.default,100),
@@ -38,7 +39,7 @@ class GameWorld:
             map_width:int,
             map_height:int,
             current_floor:int=-1,
-            max_floors:int=12):
+            max_floors:int=13):
         self.engine = engine
         self.map_width = map_width
         self.map_height = map_height
@@ -49,6 +50,20 @@ class GameWorld:
         #  low priority at the moment, seeing as time is running out and I
         #  need most of the last day for UI/polish, rather than new features.
         self.floors = []
+
+    @property
+    def progress_summary(self) -> None:
+        """ Return a vim-style summary of progress through the level,
+        e.g. Top, Bottom, or a percentage."""
+        if self.current_floor == 0:
+            return "Top"
+        elif self.current_floor == self.max_floors:
+            return "Bottom"
+        elif self.current_floor > self.max_floors:
+            return "??????"
+        else:
+            percentage = int(100*(self.current_floor/self.max_floors))
+            return f"{percentage:d}%"
     
     def generate_floor(self,level:int) -> GameMap:
         """ Generate a floor, according to the distribution of floor types."""
@@ -68,6 +83,7 @@ class GameWorld:
         self.engine.set_game_map(new_floor)
         
         if self.current_floor == self.max_floors:
+            # TODO Also don't place down stair 
             new_floor.place_randomly(ef.amulet_of_yendor,spawn=True)
         
 

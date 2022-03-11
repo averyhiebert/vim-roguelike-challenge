@@ -24,6 +24,7 @@ def render_bar(console:Console,position:Tuple[int,int],
         string=f"HP: {current_value}/{maximum_value}",fg=colors.ui_fg)
 
 def render_stat_box(console:Console,
+        level_name:str,
         health:int, max_health:int,
         gold:int,
         strength:int,
@@ -38,7 +39,7 @@ def render_stat_box(console:Console,
     )
     # TODO Dungeon level number?
     render_bar(console,(52,13),health,max_health,total_width=22)
-    console.print(52,1,string="Player Stats")
+    console.print(52,1,string=level_name)
     console.print(52,2,string=22*"-")
     console.print(52,3,string=f"Gold     : {gold}")
     console.print(52,4,string=f"Range    : {max_range}")

@@ -157,6 +157,7 @@ class Engine:
 
         # Render UI stuff
         render_stat_box(console,
+            level_name=self.game_map.name,
             health=self.player.fighter.hp,
             max_health=self.player.fighter.max_hp,
             strength=self.player.fighter.strength,

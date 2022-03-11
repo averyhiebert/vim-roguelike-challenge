@@ -358,11 +358,11 @@ class MeleeAction(ActionWithDirection):
         damage = self.entity.fighter.strength
 
         # Deal full damage for anything above target AC
-        full_damage = max(damage,damage-target.fighter.AC)
+        full_damage = max(0,damage-target.fighter.AC)
         remaining = damage - full_damage
         # Deal half damage for anything above half of target AC
         #  (No damage from attacks below a quarter of AC)
-        half_damage = (remaining - (target.fighter.AC//2))//2
+        half_damage = (max(0,remaining - (target.fighter.AC//2)))//2
         total_damage = full_damage + half_damage
         flavourtext = self.entity.fighter.attack_text
         self.engine.message_log.add_message(

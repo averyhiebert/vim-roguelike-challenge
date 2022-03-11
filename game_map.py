@@ -24,7 +24,8 @@ if TYPE_CHECKING:
 class GameMap:
     def __init__(self, engine:Engine,
             width:int, height: int,
-            entities: Iterable[Entity] = ()):
+            entities: Iterable[Entity] = (),
+            name="Dungeon"):
         self.engine = engine
         self.width, self.height = width, height
         self.entities = set(entities)
@@ -32,6 +33,7 @@ class GameMap:
             fill_value=tile_types.wall,order="F")
         self.downstairs_location:Optional[Tuple[int,int]] = (0,0)
         self.upstairs_location:Optional[Tuple[int,int]] = None
+        self.name=name
 
         # Can currently see:
         self.visible = np.full((width,height),fill_value=False,order="F")

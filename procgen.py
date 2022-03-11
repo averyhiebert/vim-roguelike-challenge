@@ -142,8 +142,6 @@ def tunnel_between(start:Tuple[int,int],
 
 # Base class for generating levels
 class LevelGenerator:
-
-
     def __init__(self,name:str):
         self.name=name
         self.difficulty=1 # Should be set by "set difficulty" function at time of generation
@@ -215,7 +213,8 @@ class LevelGenerator:
         self.difficulty = difficulty
 
         player = engine.player
-        dungeon = GameMap(engine,map_width, map_height,entities=[player])
+        dungeon = GameMap(engine,map_width, map_height,entities=[player],
+            name=f"{self.name} (L{self.difficulty})")
         mask = self.room_mask(shape)
         dungeon.tiles[mask] = tile_types.floor # Set floor based on mask
         
