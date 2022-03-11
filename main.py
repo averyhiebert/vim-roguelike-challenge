@@ -100,7 +100,7 @@ def main() -> None:
                 #engine.message_log.add_message(str(err))
                 engine.show_error_message(str(err))
                 # TEMP: While working on UI stuff:
-                raise err
+                #raise err
 
 
 if __name__=="__main__":

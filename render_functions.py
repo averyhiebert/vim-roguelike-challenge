@@ -50,7 +50,7 @@ def render_stat_box(console:Console,
         abilities,width=22,
         initial_indent="  ",subsequent_indent="  ")
     )
-    console.print(52,7,string=ability_str)
+    console.print(52,8,string=ability_str)
 
 def render_cursor(console:Console,position:Tuple[int,int],
         in_fov:bool):

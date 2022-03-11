@@ -195,7 +195,7 @@ bat_ears = Item(
     char="(",name="bat ears",
     color=colors.equipment,
     summary="When equipped, gives you the power of echolocation.",
-    ability=SimpleAbility("echolocation")
+    ability=SimpleAbility("echolocate")
 )
 # Arquebus - a ranged item
 arquebus = Item(

@@ -37,9 +37,14 @@ item_chances: Dict[int,List[Tuple[Union[Entity,ef.Family],int]]] = {
 enemy_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
   0:[(ef.nano,100)],
   1:[(ef.ed,100)],
-  3:[(ef.sed,100),(ef.ed,50)],
-  4:[(ef.gedit,100),(ef.ed,10),(ef.nano,10)],
-  6:[(ef.needle,50)],
+  2:[(ef.sed,100),(ef.ed,50)],
+  3:[(ef.gedit,100),(ef.ed,10),(ef.nano,10)],
+  4:[(ef.needle,50),(ef.vimic,10)],
+  5:[(ef.vimic,30)],
+  6:[(ef.needle,100)],
+  8:[(ef.emacs,50),(ef.vimic,50)],
+  10:[(ef.vimpire,50)],
+  12:[(ef.emax,200)],
 }
 
 def sample_from_dist(
