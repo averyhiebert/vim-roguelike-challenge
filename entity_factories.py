@@ -116,7 +116,7 @@ vimic = Actor(
     fighter=Fighter(hp=10,AC=0,strength=4,attack_text="d"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
-    fov_radius=12,
+    fov_radius=11,
     wandering=True,
     needs_los=True,
 )

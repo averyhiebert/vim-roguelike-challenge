@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Tuple
 from typing import List, Tuple, TYPE_CHECKING
 import math
+import random
 
 import numpy as np # type: ignore
 import tcod
@@ -65,7 +66,7 @@ class HostileEnemy(BaseAI):
             # Is in fov of player, but maybe not of self
             if distance <= 1:
                 return MeleeAction(self.entity,(dx,dy)).perform()
-            elif euclidean_distance <= self.entity.fov_radius:
+            elif euclidean_distance <= self.entity.fov_radius + 0.00001:
                 # Can see player
                 self.target_last_seen = target.pos
         elif self.target_last_seen and not self.entity.needs_los:
@@ -126,26 +127,47 @@ class VimlikeEnemy(HostileEnemy):
         For now, we attack if possible, but may add additional
          features (e.g. running away, or special AOE attack for Emacs)
         """
-        # TODO Implement
         path_endpoint = None
-        if self.entity.x == target.x:
-            if self.entity.y > target.y:
-                path_endpoint = (self.entity.x,0)
+
+        directions = {
+            "0":(0,self.entity.y),
+            "L":(self.entity.x,1000),
+            "H":(self.entity.x,0),
+            "$":(1000,self.entity.y),
+        }
+        flee = False # Whether to flee.
+        dest = None  # Direction to possibly move to.
+        if self.entity.fighter.hp > self.entity.fighter.max_hp//2:
+            if self.entity.x == target.x:
+                dest = directions["H" if self.entity.y > target.y else "L"]
+            elif self.entity.y == target.y:
+                dest = directions["0" if self.entity.x > target.x else "$"]
+        else:
+            flee = True
+            # Run away in random direction orthogonal to player, if in line
+            #  of fire, or else just a random direction
+            if self.entity.x == target.x:
+                dest = directions[random.choice(["0","$"])]
+            elif self.entity.y == target.y:
+                dest = directions[random.choice(["H","L"])]
             else:
-                path_endpoint = (self.entity.x,1000) # i.e. all the way down
-        elif self.entity.y == target.y:
-            if self.entity.x > target.x:
-                path_endpoint = (0, self.entity.y)
-            else:
-                path_endpoint = (10000, self.entity.y) # i.e. all the way right
-        if path_endpoint:
+                # TODO Maybe pick the destination which goes furthest from
+                #  the player?
+                dest = directions[random.choice(["0","$","H","L"])]
+
+        if dest and not flee:
             # Start a d action (takes 2 turns)
-            path = self.entity.gamemap.get_mono_path(self.entity.pos,
-                path_endpoint)
+            path = self.entity.gamemap.get_mono_path(self.entity.pos,dest)
             action = ActionDeleteAlongPath(self.entity,path)
             self.set_timeout(1,action)
             return WaitAction(self.entity).perform()
+        elif dest and flee:
+            # Flee immediately
+            # Note: does not take 2 turns as this is only one keystroke.
+            path = self.entity.gamemap.get_mono_path(self.entity.pos,dest)
+            return ActionMoveAlongPath(self.entity,path).perform()
         else:
+            # Continue moving towards player
             return None
 
     def perform(self) -> None:
