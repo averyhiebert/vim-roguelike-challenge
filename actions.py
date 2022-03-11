@@ -380,7 +380,7 @@ class RegexSearch(Action):
 
 class SwapRegisters(Action):
     def __init__(self,entity:Entity,reg_a:str,reg_b:str):
-        super().__init__(entity,skip_turn=True)
+        super().__init__(entity,skip_turn=False)
         self.reg_a = reg_a
         self.reg_b = reg_b
 
