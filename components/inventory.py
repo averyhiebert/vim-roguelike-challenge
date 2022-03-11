@@ -134,6 +134,8 @@ class Inventory(Ability):
         item.place(self.parent.pos, self.gamemap)
         self.engine.message_log.add_message(
             f"You dropped the {item.name} (\"{register})")
+        # Trigger drop behaviour, if any.
+        item.trigger.dropped(self.parent)
 
     def insert(self, item:Item,register:Optional[str]=None,
             silent=False) -> None:
@@ -162,3 +164,6 @@ class Inventory(Ability):
         self.register_history.append(register)
         if not silent:
             self.parent.gamemap.engine.message_log.add_message(f"You yanked the {item.name} (\"{register})")
+
+        # Trigger yank behaviour, if any.
+        item.trigger.yanked(self.parent)

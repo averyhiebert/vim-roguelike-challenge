@@ -6,7 +6,7 @@ import random
 from components.base_component import BaseComponent
 from render_order import RenderOrder
 from input_handlers import GameOverEventHandler
-from entity import Corpse
+from entity import Corpse, Gold
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -54,6 +54,11 @@ class Fighter(BaseComponent):
         if random.random() < self.parent.corpse_drop_chance:
             corpse = Corpse(self.parent)
             corpse.spawn(corpse.gamemap,*corpse.pos)
+        # Drop any gold we had
+        if self.parent.gold > 0:
+            gold = Gold(self.parent.gold)
+            gold.spawn(self.parent.gamemap,*self.parent.pos)
+
         # Remove self from map
         self.parent.gamemap.entities.remove(self.parent)
 

@@ -10,6 +10,7 @@ from utils import a_or_an
 from components.consumable import HealingConsumable, NotConsumable
 from components.inventory import Inventory
 from components.ability import SimpleAbility, AllCommands
+from components.trigger import Trigger, GoldTrigger
 
 import utils
 
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from components.ability import Ability
     from game_map import GameMap
     from engine import Engine
+    from entity import Item
 
 T = TypeVar("T",bound="Entity")
 
@@ -85,8 +87,14 @@ class Entity:
             gamemap.entities.add(self)
 
     def move_to(self,dest_x,dest_y) -> None:
+        old_pos = self.x,self.y
         self.x = dest_x
         self.y = dest_y
+        for item in self.gamemap.items:
+            if item.pos == (self.pos):
+                item.trigger.entered(self)
+            elif item.pos == old_pos:
+                item.trigger.exited(self)
 
     @property
     def pos(self) -> Tuple[int,int]:
@@ -130,6 +138,7 @@ class Actor(Entity):
             inventory = Inventory(capacity=0)
         self.inventory = inventory
         self.inventory.parent = self
+
         self.hp_buff = hp_buff
         self.moves_per_turn = moves_per_turn
         self.corpse_drop_chance = corpse_drop_chance
@@ -184,6 +193,7 @@ class Item(Entity):
             name:str="<Unnamed>",
             summary:str="An unknown item.",
             consumable: Optional[Consumable]=None,
+            trigger: Optional[Trigger]=None,
             ability:Optional[Ability]=None):
         super().__init__(
             x=x,y=y,char=char,color=color,name=name,
@@ -192,13 +202,18 @@ class Item(Entity):
             render_order=RenderOrder.ITEM
         )
         if not ability:
-            ability = SimpleAbility("")
+            ability = SimpleAbility("") # Should have a "nonability" class
         if not consumable:
             consumable = NotConsumable(f"You can't eat {utils.a_or_an(name)}.")
+        if not trigger:
+            trigger = Trigger() # Does nothing.
         # TODO: Set default do-nothing consumable by default
         self.consumable=consumable
         self.consumable.parent = self
         self.ability = ability
+        self.ability.parent = self
+        self.trigger = trigger
+        self.trigger.parent = self
 
     def fulfills(self,req:str) -> bool:
         return self.ability.fulfills(req)
@@ -250,3 +265,13 @@ class Corpse(Item):
         )
         self.parent = a.parent
         self.render_order=RenderOrder.CORPSE
+
+class Gold(Item):
+    def __init__(self,n:int):
+        super().__init__(
+            color=colors.gold,
+            char="$",
+            name=f"{n} gold",
+            summary=f"Money can be exchanged for goods and services.",
+            trigger=GoldTrigger(n)
+        )

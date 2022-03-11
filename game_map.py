@@ -51,8 +51,10 @@ class GameMap:
 
     @property
     def items(self) -> Iterator[item]:
-        yield from (entity for entity in self.entities 
-            if isinstance(entity,Item))
+        """ Return list, not iterator, to facilitate removing
+        from the list if necessary."""
+        return [entity for entity in self.entities 
+            if isinstance(entity,Item)]
 
     @property
     def gamemap(self) -> GameMap:

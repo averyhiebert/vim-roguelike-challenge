@@ -8,7 +8,7 @@ from components.fighter import Fighter
 from components.consumable import HealingConsumable, CommandConsumable
 from components.inventory import Inventory
 from components.ability import Omnipotent, SimpleAbility, AllCommands
-from entity import Actor, Item, Amulet
+from entity import Actor, Item, Amulet, Gold
 import colors
 
 # A "Family" of comparable-value items; useful for uniformly
@@ -172,6 +172,10 @@ emax = Actor(
 
 # Define items here =======================================================
 
+some_gold = Gold(5)
+medium_gold = Gold(10)
+much_gold = Gold(20)
+
 
 # Amulets ============================================== 
 amulet = {}
@@ -190,9 +194,11 @@ amulet_of_yendor = Item(
 scrolls = []
 scroll_commands = [
     ":set hlsearch",
-    ":s/[a-zA-Z]//g",  # Eliminate all enemies in fov (no corpse)
-    ":s/[a-zA-Z]/%/g", # Kill all enemies in fov (+ corpse)
-    ":s/[\"?]/$/g",     # Convert dropped amulets into gold
+    r":%s/\a//g",    # (note the %s)
+    r":%s/\a/%/g",   #
+    r":s/\a//g",     # Eliminate all enemies in fov (no corpse)
+    r":s/\a/%/g",    # Kill all enemies in fov (+ corpse)
+    r":s/[\"?]/$/g", # Convert visible dropped items into gold
 ]
 for c in scroll_commands:
     scrolls.append(Item(
@@ -223,8 +229,10 @@ arquebus = Item(
 # Families of items
 
 weak_amulet = Family([amulet[s] for s in "hjkl"])
-moderate_item = Family(scrolls[1:] + [amulet[s] for s in "tw;m'`"])
-good_amulet = Family([amulet[s] for s in "feHML0$u"])
-great_item = Family([amulet["dd"],arquebus,scrolls[0]])
+moderate_item = Family(scrolls[3:] + [amulet[s] for s in "tw;m'`"] 
+    + [some_gold])
+good_amulet = Family([amulet[s] for s in "feHML0$u"] + scrolls[1:3]
+    + [medium_gold])
+great_item = Family([amulet["dd"],arquebus,scrolls[0],much_gold])
 
 # TODO Spellbooks?
