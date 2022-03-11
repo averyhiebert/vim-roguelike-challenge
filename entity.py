@@ -253,7 +253,7 @@ class Amulet(PassiveAbilityItem):
 class Corpse(Item):
     def __init__(self,a:Actor):
         consumable = HealingConsumable(
-            int(1.5*a.fighter.strength),
+            a.fighter.strength,
             hp_buff=a.hp_buff
         )
         super().__init__(
@@ -275,3 +275,4 @@ class Gold(Item):
             summary=f"Money can be exchanged for goods and services.",
             trigger=GoldTrigger(n)
         )
+        self.render_order=RenderOrder.GOLD

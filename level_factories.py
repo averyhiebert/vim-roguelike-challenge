@@ -6,11 +6,11 @@ from procgen import BasicDungeon, TestDungeon
 #  (Maybe easiest to just make it a multiplicative factor on the base rate)
 
 default= BasicDungeon("Dungeon")
-maze = BasicDungeon("Dungeon",
+maze = BasicDungeon("TCP Tunnels",
         room_size_range=((4,4),(4,4)),
         max_rooms=30,
         allow_overlap=True)
-crisscross = BasicDungeon("Dungeon", # Probably good for lower levels
+mines = BasicDungeon("GNOMEish Mines", # Probably good for lower levels
         room_size_range=((4,4),(4,4)),
         max_rooms=30,
         diagonal=True,
@@ -20,18 +20,18 @@ bigrooms = BasicDungeon("Dungeon",
         max_rooms=4,
         allow_overlap=True)
 # TODO Make a better cellar, or remove this
-cellar = BasicDungeon("Dungeon",
+cellar = BasicDungeon("Cellar",
         room_size_range=((30,48),(6,8)),
         max_rooms=30)
 # TODO Should have more monsters than usual
-great_hall = BasicDungeon("Dungeon",
+great_hall = BasicDungeon("Great Hall",
         room_size_range=((4,4),(4,5)),
         invert=True,
         do_tunnels=False,
         max_rooms=15)
 # TODO Goes below the lowest level, as a trap/bonus once you have AoY
 # TODO Should have more items than usual.
-disconnected = BasicDungeon("Dungeon",
+disconnected = BasicDungeon("Treasury",
         invert=False,
         do_tunnels=False,
         max_rooms=40)

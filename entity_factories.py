@@ -184,10 +184,6 @@ landmine.render_order = RenderOrder.TRAP
 
 # Items =========================================================
 
-some_gold = Gold(5)
-medium_gold = Gold(10)
-much_gold = Gold(20)
-
 
 # Amulets ============
 amulet = {}
@@ -210,7 +206,7 @@ scroll_commands = [
     r":%s/\a/%/g",   #
     r":s/\a//g",     # Eliminate all enemies in fov (no corpse)
     r":s/\a/%/g",    # Kill all enemies in fov (+ corpse)
-    r":s/[\"?]/$/g", # Convert visible dropped items into gold
+    r':s/["?]/$/g', # Convert visible dropped items into gold
 ]
 for c in scroll_commands:
     scrolls.append(Item(
@@ -242,9 +238,9 @@ arquebus = Item(
 
 weak_amulet = Family([amulet[s] for s in "hjkl"])
 moderate_item = Family(scrolls[3:] + [amulet[s] for s in "tw;m'`"] 
-    + [some_gold])
-good_amulet = Family([amulet[s] for s in "feHML0$u"] + scrolls[1:3]
-    + [medium_gold])
-great_item = Family([amulet["dd"],arquebus,scrolls[0],much_gold,bat_ears])
+    + [Gold(1),Gold(2),Gold(4),Gold(3)])
+good_item = Family([amulet[s] for s in "feHML0$"] + scrolls[1:3]
+    + [Gold(8),Gold(9),Gold(10),Gold(11)])
+great_item = Family([amulet["dd"],amulet["u"],arquebus,scrolls[0],bat_ears,Gold(30)])
 
 # TODO Spellbooks?

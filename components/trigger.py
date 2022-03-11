@@ -76,11 +76,11 @@ class LandmineTrigger(Trigger):
     def entered(self,entity:Actor) -> None:
         if entity == entity.engine.player:
             self.activated = True
-            entity.engine.message_log.add_message(
-                "You hear the click of a landmine!"
-            )
+            text = "You hear the click of a landmine!"
+            entity.engine.message_log.add_message(text)
             # Make trap visible
             self.parent.char = "^"
+            entity.engine.show_error_message(text)
 
     def exited(self,entity:Actor) -> None:
         if self.activated and entity == entity.engine.player:

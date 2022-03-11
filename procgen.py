@@ -20,19 +20,18 @@ if TYPE_CHECKING:
 # Heuristic: 100 is "typical" weight, so 50 is half as common etc.
 # TODO: Make a distribution of individual commands, rather than amulets,
 #  so that it can be re-used for spellbooks, scrolls, etc.
+
+# TODO Should be based on item-assigned "rarity" or "value," rather than
+#  these vague classes
 item_chances: Dict[int,List[Tuple[Union[Entity,ef.Family],int]]] = {
-  0: [(ef.weak_amulet,10), # Boring, so we don't want too many
-      (ef.moderate_item,100),
-      (ef.good_amulet,20),
+  0: [(ef.moderate_item,100),
+      (ef.good_item,20),
      ],
-  2: [(ef.good_amulet,50)],
-  4: [(ef.good_amulet,100),
+  2: [(ef.good_item,50)],
+  4: [(ef.good_item,100),
       (ef.great_item,30),
      ],
   6: [(ef.great_item,50),
-      (ef.weak_amulet,0), # No point wasting the player's time
-     ],
-  8: [(ef.great_item,100),
       (ef.moderate_item,50)
      ],
 }
@@ -62,6 +61,34 @@ def sample_from_dist(
     items = list(weights.keys())
     weight_list = list(weights.values())
     return random.choices(items,weights=weight_list,k=k)
+
+# Number of enemies, items, and landmines
+enemies_per_level = [
+ (0,6),
+ (2,7),
+ (4,8), # After this point, placing more enemies is probably excessive
+]
+items_per_level = [
+ (0,3),
+ (5,4),
+]
+traps_per_level = [
+ (0,0),
+ (1,1),
+ (3,2),
+ (6,3),
+ (9,4),
+]
+
+# Helper for interpreting these lists:
+def get_level_val(stat_list:List[Tuple[int,int]],level:int):
+    val = 0
+    for k,v in stat_list:
+        if k > level: 
+            return val
+        else:
+            val = v
+    return val
 
 
 # Map generation  ========================================================
@@ -106,40 +133,16 @@ def tunnel_between(start:Tuple[int,int],
         yield from tcod.los.bresenham(start,corner)
         yield from tcod.los.bresenham(corner,end)
 
-def place_randomly(dungeon:GameMap,entity:Entity,max_tries=100,
-        restricted_range:Optional(Tuple[int,int,int,int])=None,
-        spawn=True) -> None:
-    """Try up to max_tries times to place the entity somewhere that
-    it is allowed to be. Throws an exception otherwise.
-
-    If spawn=True, use the "spawn" function (e.g. for items and enemies).
-    Otherwise, place the entity itself (e.g. for the player).
-
-    TODO: I could instead iterate over the valid locations and then pick
-    one at random, but in most cases I'm pretty sure this should be faster
-    and also reasonably safe.
-    """
-    # TODO Switch to using GameMap.get_random_navigable
-    if not restricted_range:
-        restricted_range = (0,dungeon.width-1,0,dungeon.height-1)
-    xmin,xmax,ymin,ymax = restricted_range
-    for i in range(max_tries):
-        location = (random.randint(xmin,xmax),random.randint(ymin,ymax))
-        if dungeon.is_navigable(location,entity):
-            if spawn:
-                entity.spawn(dungeon,*location)
-            else:
-                entity.place(location,dungeon)
-            return entity.pos
-    else:
-        # TODO A sensible default.
-        raise RuntimeError("Dungeon generation failed.")
-
 # Base class for generating levels
 class LevelGenerator:
+
+
     def __init__(self,name:str):
         self.name=name
         self.difficulty=1 # Should be set by "set difficulty" function at time of generation
+        # TODO Either set num_items etc. here, or remove this function from
+        #  the class entirely and just pass difficulty in to the various
+        #  sub-functions manually.
 
     def room_mask(self,shape:Tuple[int,int]) -> np.ndarray:
         """ Should return a boolean array that is True for
@@ -150,26 +153,34 @@ class LevelGenerator:
         could be used for other things, maybe?"""
         raise NotImplementedError()
 
-    def place_items(self,dungeon:GameMap) -> List[Tuple[Item]]:
+    def place_items(self,dungeon:GameMap) -> None:
         """ Place items in the dungeon."""
-        # TODO Logic about how many items to sample
-        # TODO Optional min distance from player
-        num_items = 3
+        # TODO possible landmine under item at higher levels?
+        num_items = get_level_val(items_per_level,self.difficulty)
         for item in sample_from_dist(item_chances,k=num_items,
             difficulty=self.difficulty):
             if isinstance(item,ef.Family):
                 item = item.sample()
             dungeon.place_randomly(item,spawn=True)
 
-    def place_enemies(self,dungeon:GameMap) -> List[Tuple[Item]]:
+    def place_enemies(self,dungeon:GameMap) -> None:
         """ Place enemies in the dungeon."""
         # TODO Avoid duplicated code between this and place_items
-        num_enemies = 8
+        #  (Sampling from families should happen in sample_from_dist.)
+        num_enemies = get_level_val(enemies_per_level,self.difficulty)
         for enemy in sample_from_dist(enemy_chances,k=num_enemies,
             difficulty=self.difficulty):
             if isinstance(enemy,ef.Family):
                 enemy = enemy.sample()
-            dungeon.place_randomly(enemy,spawn=True)
+            dungeon.place_randomly(enemy,spawn=True,
+                stay_away_center=dungeon.engine.player.pos,
+                stay_away_radius=9)
+
+    def place_traps(self,dungeon:GameMap) -> None: 
+        num_traps = get_level_val(traps_per_level,self.difficulty)
+        for i in range(num_traps):
+            dungeon.place_randomly(ef.landmine,spawn=True)
+
 
     def place_player(self,dungeon:GameMap,upstairs:bool=True) -> None:
         dungeon.place_randomly(dungeon.engine.player,spawn=False)
@@ -181,7 +192,9 @@ class LevelGenerator:
             dungeon.tiles[location] = tile_types.up_stairs
 
     def place_stairs(self,dungeon:GameMap) -> None:
-        location = dungeon.get_random_navigable(dungeon.engine.player)
+        location = dungeon.get_random_navigable(dungeon.engine.player,
+                stay_away_center=dungeon.engine.player.pos,
+                stay_away_radius=15)
         dungeon.downstairs_location = location
         dungeon.tiles[location] = tile_types.down_stairs
 
@@ -202,6 +215,7 @@ class LevelGenerator:
         self.place_stairs(dungeon)
         self.place_items(dungeon)
         self.place_enemies(dungeon)
+        self.place_traps(dungeon)
 
         return dungeon
 
@@ -287,7 +301,6 @@ class TestDungeon(LevelGenerator):
         ef.scrolls[2].spawn(dungeon,39,23)
         ef.scrolls[3].spawn(dungeon,39,23)
         ef.scrolls[0].spawn(dungeon,39,23)
-        ef.medium_gold.spawn(dungeon,40,20)
         ef.bat_ears.spawn(dungeon,41,20)
         ef.landmine.spawn(dungeon,42,25)
 

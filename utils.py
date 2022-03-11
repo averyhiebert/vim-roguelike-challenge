@@ -2,6 +2,7 @@
 from typing import Iterator, Tuple
 
 import random
+import math
 from itertools import product
 
 def roll_dice(dice:str) -> int:
@@ -29,3 +30,8 @@ def aoe_by_radius(center:Tuple[int,int],radius:int) -> Iterator[Tuple[int,int]]:
     yield center
     yield from ((x+i,y+j)  for i,j in product(range(-radius,radius+1),repeat=2))
     yield center
+
+def distance(p1,p2):
+    x1,y1 = p1
+    x2,y2 = p2
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)

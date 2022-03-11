@@ -19,22 +19,28 @@ class StatusBar:
         self.long_message = ""  #(e.g. an error or / and : commands)
         self.short_message = "" #(e.g. "register q", -- INSERT --, etc.
         self.error = False # Whether we're showing an error message.
+        self.skip_next_reset = False # To ensure error messages stick around
 
-    def reset(self):
+    def reset(self) -> None:
+        if self.skip_next_reset:
+            self.skip_next_reset = False
+            return
         self.short_message = ""
         self.long_message = ""
         self.error = False
 
-    def set_short_message(self,text:str,error=False):
+    def set_short_message(self,text:str,error=False) -> None:
         self.short_message = text
         self.long_message = ""
         self.error=error
 
-    def set_long_message(self,text:str,error=False):
+    def set_long_message(self,text:str,error=False) -> None:
         self.long_message = text
         self.error=error
+        if error:
+            self.skip_next_reset=True
 
-    def render(self,console:Console):
+    def render(self,console:Console) -> None:
         """ Render to screen."""
         #
         fg = colors.ui_fg

@@ -14,7 +14,7 @@ import colors
 import exceptions
 
 from path import Path
-from utils import a_or_an, aoe_by_radius
+import utils
 from map_traces import MapTrace
 
 if TYPE_CHECKING:
@@ -72,7 +72,7 @@ class GameMap:
 
     def explosion(self,center:Tuple[int,int],radius:int,damage:int) -> None:
         """ An explosion somewhere on the map."""
-        points = list(aoe_by_radius(center,radius))
+        points = list(utils.aoe_by_radius(center,radius))
         for a in list(self.actors):
             if a.pos in points:
                 self.engine.message_log.add_message(
@@ -106,7 +106,9 @@ class GameMap:
         return True
 
     def get_random_navigable(self,entity:Entity,max_tries=1000,
-            restricted_range:Optional[Tuple[int,int,int,int]]=None) -> Tuple[int,int]:
+            restricted_range:Optional[Tuple[int,int,int,int]]=None,
+            stay_away_center:Optional[Tuple[int,int]]=None,
+            stay_away_radius:int=8) -> None:
         """ Return a random location that the given Entity could
         navigate to."""
         if not restricted_range:
@@ -114,16 +116,23 @@ class GameMap:
         xmin,xmax,ymin,ymax = restricted_range
         for i in range(max_tries):
             location = (random.randint(xmin,xmax),random.randint(ymin,ymax))
-            if self.is_navigable(location,entity):
-                return location
+            if not self.is_navigable(location,entity):
+                continue
+            elif stay_away_center and utils.distance(stay_away_center,location) < stay_away_radius:
+                continue
+            return location
         else:
             # TODO A sensible default.
             raise RuntimeError("Couldn't find navigable location.")
 
-    def place_randomly(self,entity:Entity,max_tries:int=1000,spawn=False) -> None:
+    def place_randomly(self,entity:Entity,max_tries:int=1000,spawn=False,
+            stay_away_center:Optional[Tuple[int,int]]=None,
+            stay_away_radius:int=8) -> None:
         """ Attempt to place the given entity somewhere in
         the level."""
-        location = self.get_random_navigable(entity=entity,max_tries=max_tries)
+        location = self.get_random_navigable(entity=entity,max_tries=max_tries,
+            stay_away_center=stay_away_center,
+            stay_away_radius=stay_away_radius)
         if spawn:
             # TODO Fix this inconsistent ordering and tuple-ness
             entity.spawn(self,*location)
@@ -288,7 +297,7 @@ class GameMap:
 
             entities = self.get_entities_at_location(location,sort=True,
                 visible_only=visible_only)
-            text = ", ".join([f"{a_or_an(e.name)}" 
+            text = ", ".join([f"{utils.a_or_an(e.name)}" 
                 for e in reversed(entities)])
             if len(text) > 0:
                 text += f", {tile_name}"
