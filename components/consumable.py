@@ -6,6 +6,7 @@ import actions
 from components.base_component import BaseComponent
 from components.inventory import Inventory
 from components.ability import Ability
+from vim_parser import VimCommandParser
 
 import exceptions
 import utils
@@ -68,3 +69,20 @@ class HealingConsumable(Consumable):
             self.consume()
         else:
             raise exceptions.Impossible(f"Your health is already full.")
+
+class CommandConsumable(Consumable):
+    def __init__(self,command:str):
+        super().__init__()
+        self.command = command
+
+    def activate(self, action:actions.ItemAction) -> None:
+        """Invoke this item's ability.
+        """
+        consumer = action.entity
+        parser = VimCommandParser(consumer.engine,entity=consumer)
+        action = parser.colon_command(self.command)
+        action.requirements = [] # Make sure player can do it
+        # (Although I'm not sure whether requirements even get checked during
+        #  perform(), vs at some other point?)
+        action.perform()
+        self.consume()

@@ -51,7 +51,7 @@ class Fighter(BaseComponent):
             self.engine.message_log.add_message(death_message)
 
         # Possibly spawn a corpse
-        if random.random() < 0.5:
+        if random.random() < self.parent.corpse_drop_chance:
             corpse = Corpse(self.parent)
             corpse.spawn(corpse.gamemap,*corpse.pos)
         # Remove self from map

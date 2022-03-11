@@ -23,6 +23,7 @@ vimpire = needle
 # Items
 amulet = default_fg 
 equipment = default_fg
+scroll = default_fg
 
 # Map trace colours
 default_trace = (0,100,100) # A fairly neutral faint teal

@@ -53,7 +53,7 @@ class AllCommands(Ability):
 
         TODO Improve this if I add short status effects that aren't commands
         """
-        return len(requirement) <= 2
+        return len(requirement) <= 2 or requirement[0:1] == ":"
 
     @property
     def ability_string(self) -> str:

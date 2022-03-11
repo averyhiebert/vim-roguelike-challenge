@@ -8,11 +8,12 @@ import colors
 from engine import Engine
 import entity_factories
 from procgen import TestDungeon, BasicDungeon
+from game_world import GameWorld
 import level_factories as lf
 import exceptions
 
 # Some constants for development
-USE_TEST_ROOM = True 
+USE_TEST_ROOM = True
 ALWAYS_NEW_GAME = True
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
@@ -24,22 +25,25 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     map_width = screen_width - 25
     map_height = screen_height - 2
 
-
-
     player = copy.deepcopy(entity_factories.player)
 
     engine = Engine(player=player)
+    engine.game_world = GameWorld(
+        engine=engine,
+        map_width=map_width,
+        map_height=map_height
+    )
+
     if USE_TEST_ROOM:
-        """
-        engine.set_game_map(test_dungeon(map_width, 
-            map_height,engine=engine,
-        ))
-        """
         level_gen = TestDungeon("Test")
+        engine.set_game_map(level_gen.generate((map_width,map_height),
+            engine,difficulty=1)
+        )
     else:
-        level_gen = lf.default
-    engine.set_game_map(level_gen.generate((map_width,map_height),
-        engine,difficulty=1))
+        engine.game_world.next_floor()
+
+    #engine.set_game_map(level_gen.generate((map_width,map_height),
+    #    engine,difficulty=6))
     engine.update_fov()
 
     engine.message_log.add_message(

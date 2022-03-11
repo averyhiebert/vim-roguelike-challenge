@@ -130,12 +130,52 @@ class TextScrollAction(Action):
 
     def perform(self) -> None:
         self.engine.text_window.scroll(self.text)
-        
+
+# "Spells"/colon command actions:
+class KillAll(Action):
+    def __init__(self,entity:Actor,visible_only=True,drop_corpse=False):
+        super().__init__(entity,skip_turn=False)
+        self.visible_only = visible_only
+        self.drop_corpse=drop_corpse
+        self.requirements = [":s"]
+
+    def perform(self):
+        gm = self.entity.gamemap
+        targets = [a for a in gm.actors 
+            if a != self.entity and (gm.entity_visible(a) or not self.visible_only)]
+        for t in targets:
+            t.corpse_drop_chance = float(self.drop_corpse)
+            t.fighter.die()
+
+class SellDroppedItems(Action):
+    def perform(self) -> None:
+        """ Convert all visible dropped amulets and spells to gold."""
+        raise NotImplementedError("Gold not yet implemented.")
+
+class SetHLSearchAction(Action):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.requirements = [":set hlsearch"]
+
+    def perform(self) -> None:
+        self.entity.engine.hlsearch=True
+        self.entity.engine.message_log.add_message("hlsearch is now on.")
 
 # Player actions =======================================================
 class WaitAction(Action):
     def perform(self) -> None:
         pass
+
+class TakeStairsAction(Action):
+    def perform(self) -> None:
+        """ Take the stairs, if any exist here."""
+        if self.entity.pos == self.engine.game_map.downstairs_location:
+            self.engine.game_world.next_floor()
+            self.engine.message_log.add_message(
+                "You descend the staircase."
+            )
+        else:
+            raise exceptions.Impossible("There are no stairs here.")
 
 class DummyAction(Action):
     """ An action that does nothing, but can potentially signal that

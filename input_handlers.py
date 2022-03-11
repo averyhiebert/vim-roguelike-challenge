@@ -209,6 +209,8 @@ class TextWindowPagingEventHandler(EventHandler):
             pass
         elif event.sym == tcod.event.K_ESCAPE:
             action = actions.EscapeAction(self.engine.player)
+        else:
+            action = actions.WaitAction(self.engine.player,skip_turn=True)
         return action
 
 class GameOverEventHandler(EventHandler):

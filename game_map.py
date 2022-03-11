@@ -30,6 +30,8 @@ class GameMap:
         self.entities = set(entities)
         self.tiles = np.full((width,height),
             fill_value=tile_types.wall,order="F")
+        self.downstairs_location:Optional[Tuple[int,int]] = (0,0)
+        self.upstairs_location:Optional[Tuple[int,int]] = None
 
         # Can currently see:
         self.visible = np.full((width,height),fill_value=False,order="F")
@@ -104,6 +106,16 @@ class GameMap:
         else:
             # TODO A sensible default.
             raise RuntimeError("Couldn't find navigable location.")
+
+    def place_randomly(self,entity:Entity,max_tries:int=1000,spawn=False) -> None:
+        """ Attempt to place the given entity somewhere in
+        the level."""
+        location = self.get_random_navigable(entity=entity,max_tries=max_tries)
+        if spawn:
+            # TODO Fix this inconsistent ordering and tuple-ness
+            entity.spawn(self,*location)
+        else:
+            entity.place(location,self)
 
     def entity_visible(self,entity:Entity):
         """ Return true if entity should be visible, and false otherwise.
@@ -328,3 +340,4 @@ class GameMap:
                 r,g,b = console.bg[entity.x,entity.y]
                 bg = (r,g,b) # Converting np to tuple
                 console.print(x=entity.x,y=entity.y,string=entity.char,fg=bg)
+

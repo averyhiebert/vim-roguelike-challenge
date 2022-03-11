@@ -107,6 +107,7 @@ class Actor(Entity):
             wandering:bool=False, # Whether to wander when not tracking player
             abilities:List[Ability]=[],
             moves_per_turn:int=1,
+            corpse_drop_chance:float=0.5,
             aoe_radius:Optional[int]=None,
             aoe_cross:bool=False,
             will_flee:bool=False,
@@ -131,6 +132,7 @@ class Actor(Entity):
         self.inventory.parent = self
         self.hp_buff = hp_buff
         self.moves_per_turn = moves_per_turn
+        self.corpse_drop_chance = corpse_drop_chance
 
         # Some things that only matter for certain enemy AI 
         self.needs_los = needs_los # Whether this being needs line-of-sight

@@ -45,7 +45,8 @@ def movement_reqs(command:str):
 class VimCommandParser:
 
     def __init__(self,engine:Engine,movement_only=False,
-            entity:Optional[Entity]=None):
+            entity:Optional[Entity]=None,
+            override_requirements:bool=False):
         """ Use movement_only mode for situations that only require a movement,
         and not an action.
 
@@ -62,19 +63,19 @@ class VimCommandParser:
 
         # History needed for implementing "u"
         # Note: first position is a lie, ignore it.
-        self.past_player_locations = []
+        self.past_player_locations = [] # TODO Should be tied to game map
         self.reset(update_history=False)
 
         self.last_tf_command = "" # For implementing ;
 
-    def on_non_movement(self):
+    def on_non_movement(self) -> None:
         """ Called every time we parse a partial command that is valid only as
         part of a non-movement action."""
         if self.movement_only:
             raise UserError(" Not a valid movement. ")
 
 
-    def reset(self,update_history:bool=True):
+    def reset(self,update_history=True,erase_history=False) -> None:
         """ Only resets us back to be able to receive new commands, and
         updates the past location information.
 
@@ -87,6 +88,10 @@ class VimCommandParser:
             if self.entity.pos != self.past_player_locations[-1]:
                 # Update history
                 self.past_player_locations.append(self.entity.pos)
+        elif erase_history:
+            # I.e. when moving between maps
+            # TODO This needs to be handled/encapsulated better somehow
+            self.past_player_locations=[]
         self.partial_command = "" # i.e. command so far
 
     def colon_command(self,command:str) -> Optional[Action]:
@@ -114,10 +119,17 @@ class VimCommandParser:
             m = re.match(":swap (.) (.)", command)
             return actions.SwapRegisters(self.entity,m.group(1),m.group(2))
         elif command == ":set hlsearch":
-            # TODO: This, and others, should be part of a general
-            #  "GameCommandAction" with appropriate requirements.
-            self.entity.engine.hlsearch = True
-            return actions.WaitAction(self.entity)
+            # TODO: Make this a dedicated command, which can have requirements 
+            return actions.SetHLSearchAction(self.entity)
+        elif re.match(r":(%)?s/(\[a-zA-Z\]|\\a)/(%)?/g?",command):
+            m = re.match(r":(%)?s/(\[a-zA-Z\]|\\a)/(%)?/g?",command)
+            visible_only = not bool(m.group(1))
+            drop_corpse = bool(m.group(3))
+            return actions.KillAll(self.entity,visible_only=visible_only,
+                drop_corpse = drop_corpse)
+        elif re.match(r':s/\["\?\]/\$/g?',command):
+            return actions.SellDroppedItems(self.entity)
+
         # Bonus: some cheats for development
         elif command == ":godmode":
             # Enable all player abilities, turn on hlsearch, 
@@ -528,6 +540,10 @@ class VimCommandParser:
             register = command[1]
             item = player.inventory.get_item(register)
             return actions.ItemAction(player,item)
+        elif command == ">":
+            # Down stairs movement
+            self.reset(erase_history=True)
+            return actions.TakeStairsAction(player)
         elif command in ":?/":
             self.on_non_movement()
             # Enter command mode

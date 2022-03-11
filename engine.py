@@ -25,11 +25,13 @@ from render_functions import render_stat_box, render_cursor
 if TYPE_CHECKING:
     from entity import Entity, Actor
     from gamemap import GameMap
+    from game_world import GameWorld
     from input_handlers import EventHandler
 
 
 class Engine:
     game_map: GameMap
+    game_world: GameWorld
 
     def __init__(self,player:Actor):
         self.player = player

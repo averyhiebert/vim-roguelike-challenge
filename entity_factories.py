@@ -5,7 +5,7 @@ import random
 
 from components.ai import HostileEnemy, VimlikeEnemy
 from components.fighter import Fighter
-from components.consumable import HealingConsumable
+from components.consumable import HealingConsumable, CommandConsumable
 from components.inventory import Inventory
 from components.ability import Omnipotent, SimpleAbility, AllCommands
 from entity import Actor, Item, Amulet
@@ -51,6 +51,7 @@ nano = Actor(
     summary="A harmless text editor.",
     fighter=Fighter(hp=2,AC=0,strength=2,attack_text="bit"),
     ai_cls=HostileEnemy,
+    corpse_drop_chance=0.25,
     fov_radius=10,
     needs_los=False,
     wandering=False,
@@ -74,7 +75,7 @@ sed = Actor(
     color=colors.sed,
     name="sed",
     summary="A feral stream editor.",
-    fighter=Fighter(hp=6,AC=0,strength=4,attack_text="s/@/%/"),
+    fighter=Fighter(hp=6,AC=0,strength=5,attack_text="s/@/%/"),
     hp_buff=True,
     ai_cls=HostileEnemy,
     fov_radius=11,
@@ -87,7 +88,7 @@ gedit = Actor(
     color=colors.gedit,
     name="gedit",
     summary="A primitive graphical text editor.",
-    fighter=Fighter(hp=6,AC=0,strength=4,attack_text="deleted"),
+    fighter=Fighter(hp=6,AC=0,strength=5,attack_text="deleted"),
     ai_cls=HostileEnemy,
     fov_radius=10,
     needs_los=False,
@@ -107,12 +108,13 @@ needle = Actor(
     moves_per_turn=2
 )
 # Plan: will use dH etc to attack player, or will flee if at less than 1/3 health
+# TODO Steal something
 vimic = Actor(
     char="v",
     color=colors.vimic,
     name="vimic",
     summary="A monster that mimics the features of vim.",
-    fighter=Fighter(hp=15,AC=0,strength=4,attack_text="d"), #TODO dynamic text
+    fighter=Fighter(hp=15,AC=0,strength=6,attack_text="d"), #TODO dynamic text
     ai_cls=VimlikeEnemy,
     fov_radius=11,
     wandering=True,
@@ -126,7 +128,7 @@ vimpire = Actor(
     color=colors.vimpire,
     name="Vimpire",
     summary="A vile, corrupted vim-like entity.",
-    fighter=Fighter(hp=20,AC=0,strength=6,attack_text="d"), #TODO dynamic text
+    fighter=Fighter(hp=20,AC=0,strength=8,attack_text="d"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
     fov_radius=11,
@@ -141,7 +143,7 @@ emacs = Actor(
     color=colors.emacs,
     name="Emacs",
     summary="A lumbering monstrosity created by mad scientists.",
-    fighter=Fighter(hp=30,AC=0,strength=10,attack_text="C-x h C-w"), #TODO dynamic text
+    fighter=Fighter(hp=25,AC=0,strength=10,attack_text="C-x h C-w"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
     fov_radius=11,
@@ -171,23 +173,36 @@ emax = Actor(
 # Define items here =======================================================
 
 
-# Dictionary of amulet items
+# Amulets ============================================== 
 amulet = {}
 for command in ["h","j","k","l","H","M","L","0","$","`","'","dd","t","f","w","e",";","u","m"]:
     amulet[command] = Amulet(ability_str=command)
-# Families of aforementioned amulets
-basic_movement_amulet = Family([amulet[s] for s in "hjkl"])
-capital_amulet = Family([amulet[s] for s in "HML0$"])
-mark_amulet = Family([amulet[s] for s in "m`'"])
-f_amulet = Family([amulet[s] for s in "tfwe;"])
-special_amulet = Family([amulet[s] for s in ["dd","u"]])
 # Special!
 amulet_of_yendor = Item(
-    char='"',name="amulet of Yendor",
+    char='"',name="Amulet of Yendor",
     color=colors.amulet,
-    summary="A powerful and mysterious amulet.",
+    summary="A powerful and mysterious artifact.",
     ability=AllCommands(),
 )
+
+# Scrolls ============================================
+#  (a list, since it's not convenient to type out entire names)
+scrolls = []
+scroll_commands = [
+    ":set hlsearch",
+    ":s/[a-zA-Z]//g",  # Eliminate all enemies in fov (no corpse)
+    ":s/[a-zA-Z]/%/g", # Kill all enemies in fov (+ corpse)
+    ":s/[\"?]/$/g",     # Convert dropped amulets into gold
+]
+for c in scroll_commands:
+    scrolls.append(Item(
+        name=f"scroll of {c}",
+        summary=f"Single-use scroll that performs the command {c}",
+        char="?",
+        color=colors.scroll,
+        consumable=CommandConsumable(c)
+    ))
+scroll_family = Family(scrolls)
 
 # Bat ears: lets you t/f/w/e outside of fov
 # TODO Actually implement this.
@@ -202,7 +217,14 @@ arquebus = Item(
     char=")",
     name="arquebus",
     summary="A ranged weapon.",
-    ability = SimpleAbility("ranged")
+    ability=SimpleAbility("ranged")
 )
+
+# Families of items
+
+weak_amulet = Family([amulet[s] for s in "hjkl"])
+moderate_item = Family(scrolls[1:] + [amulet[s] for s in "tw;m'`"])
+good_amulet = Family([amulet[s] for s in "feHML0$u"])
+great_item = Family([amulet["dd"],arquebus,scrolls[0]])
 
 # TODO Spellbooks?

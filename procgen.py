@@ -21,17 +21,20 @@ if TYPE_CHECKING:
 # TODO: Make a distribution of individual commands, rather than amulets,
 #  so that it can be re-used for spellbooks, scrolls, etc.
 item_chances: Dict[int,List[Tuple[Union[Entity,ef.Family],int]]] = {
-  0: [(ef.basic_movement_amulet,20), # Boring, so we don't want too many
-      (ef.capital_amulet,100),
-      (ef.f_amulet,100),
+  0: [(ef.weak_amulet,10), # Boring, so we don't want too many
+      (ef.moderate_item,100),
+      (ef.good_amulet,20),
      ],
-  3: [(ef.mark_amulet,50),
-      (ef.amulet["dd"],30),
-      (ef.arquebus,30)
+  2: [(ef.good_amulet,50)],
+  4: [(ef.good_amulet,100),
+      (ef.great_item,30),
      ],
-  4: [(ef.basic_movement_amulet,0), # No point wasting the player's time
-      (ef.amulet["u"],30)
-     ]
+  6: [(ef.great_item,50),
+      (ef.weak_amulet,0), # No point wasting the player's time
+     ],
+  8: [(ef.great_item,100),
+      (ef.moderate_item,50)
+     ],
 }
 
 enemy_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
@@ -104,7 +107,8 @@ def tunnel_between(start:Tuple[int,int],
         yield from tcod.los.bresenham(corner,end)
 
 def place_randomly(dungeon:GameMap,entity:Entity,max_tries=100,
-        restricted_range:Optional(Tuple[int,int,int,int])=None,spawn=True):
+        restricted_range:Optional(Tuple[int,int,int,int])=None,
+        spawn=True) -> None:
     """Try up to max_tries times to place the entity somewhere that
     it is allowed to be. Throws an exception otherwise.
 
@@ -126,14 +130,14 @@ def place_randomly(dungeon:GameMap,entity:Entity,max_tries=100,
                 entity.spawn(dungeon,*location)
             else:
                 entity.place(location,dungeon)
-            return
+            return entity.pos
     else:
         # TODO A sensible default.
         raise RuntimeError("Dungeon generation failed.")
 
 # Base class for generating levels
 class LevelGenerator:
-    def __init__(self,name):
+    def __init__(self,name:str):
         self.name=name
         self.difficulty=1 # Should be set by "set difficulty" function at time of generation
 
@@ -155,7 +159,7 @@ class LevelGenerator:
             difficulty=self.difficulty):
             if isinstance(item,ef.Family):
                 item = item.sample()
-            place_randomly(dungeon,item,max_tries=100)
+            dungeon.place_randomly(item,spawn=True)
 
     def place_enemies(self,dungeon:GameMap) -> List[Tuple[Item]]:
         """ Place enemies in the dungeon."""
@@ -165,13 +169,24 @@ class LevelGenerator:
             difficulty=self.difficulty):
             if isinstance(enemy,ef.Family):
                 enemy = enemy.sample()
-            place_randomly(dungeon,enemy,max_tries=100)
+            dungeon.place_randomly(enemy,spawn=True)
 
-    def place_player(self,dungeon:GameMap) -> None:
-        place_randomly(dungeon,dungeon.engine.player,max_tries=100,spawn=False)
+    def place_player(self,dungeon:GameMap,upstairs:bool=True) -> None:
+        dungeon.place_randomly(dungeon.engine.player,spawn=False)
+        # TODO Maybe also place up stairs at this location?
+        #  Not a priority, though.
+        if upstairs:
+            location = dungeon.engine.player.pos
+            dungeon.upstairs_location = location
+            dungeon.tiles[location] = tile_types.up_stairs
+
+    def place_stairs(self,dungeon:GameMap) -> None:
+        location = dungeon.get_random_navigable(dungeon.engine.player)
+        dungeon.downstairs_location = location
+        dungeon.tiles[location] = tile_types.down_stairs
 
     def generate(self,shape:Tuple[int,int],
-            engine:Engine,difficulty:int) -> GameMap:
+            engine:Engine,difficulty:int,upstairs:bool=True) -> GameMap:
         map_width, map_height = shape
         # Set difficulty first, as other functions may use it
         self.difficulty = difficulty
@@ -183,7 +198,8 @@ class LevelGenerator:
         
         # Place player first, so that we can (maybe) ensure you don't start
         #  right next to monsters or the exit.
-        self.place_player(dungeon)
+        self.place_player(dungeon,upstairs=upstairs)
+        self.place_stairs(dungeon)
         self.place_items(dungeon)
         self.place_enemies(dungeon)
 
@@ -254,19 +270,23 @@ class TestDungeon(LevelGenerator):
         dungeon = GameMap(engine,map_width, map_height,entities=[player])
         player.place((40,26),dungeon)
 
-        #ef.nano.spawn(dungeon,29,19)
-        #ef.ed.spawn(dungeon,28,19)
-        #ef.gedit.spawn(dungeon,29,21)
+        ef.nano.spawn(dungeon,29,19)
+        ef.ed.spawn(dungeon,28,19)
+        ef.gedit.spawn(dungeon,29,21)
         #ef.sed.spawn(dungeon,28,20)
         #ef.needle.spawn(dungeon,28,20)
         #ef.vimic.spawn(dungeon,28,20)
         #ef.vimpire.spawn(dungeon,28,20)
-        ef.emacs.spawn(dungeon,28,20)
+        #ef.emacs.spawn(dungeon,28,20)
         #ef.emax.spawn(dungeon,28,20)
 
 
         ef.amulet_of_yendor.spawn(dungeon,39,24)
         ef.arquebus.spawn(dungeon,39,22)
+        ef.scrolls[1].spawn(dungeon,39,23)
+        ef.scrolls[2].spawn(dungeon,39,23)
+        ef.scrolls[3].spawn(dungeon,39,23)
+        ef.scrolls[0].spawn(dungeon,39,23)
 
         room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
         room_2 = RectangularRoom(x=35,y=15,width=10,height=15)

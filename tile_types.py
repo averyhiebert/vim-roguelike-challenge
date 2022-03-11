@@ -44,7 +44,9 @@ def new_tile(
 # Define tiles here =========================
 tile_names = [
     "floor",
-    "wall"
+    "wall",
+    "stairs (down)",
+    "stairs (up)",
 ]
 floor = new_tile(
     walkable=True, transparent=True,
@@ -57,5 +59,17 @@ wall = new_tile(
     dark=(ord("#"),colors.default_dim_fg,colors.default_bg),
     light=(ord("#"),colors.default_fg,colors.default_FOV_bg),
     name=tile_names.index("wall"),
+)
+down_stairs = new_tile(
+    walkable=True, transparent=True,
+    dark=(ord(">"),colors.default_dim_fg,colors.default_bg),
+    light=(ord(">"),colors.default_fg,colors.default_FOV_bg),
+    name=tile_names.index("stairs (down)"),
+)
+up_stairs = new_tile(
+    walkable=True, transparent=True,
+    dark=(ord("<"),colors.default_dim_fg,colors.default_bg),
+    light=(ord("<"),colors.default_fg,colors.default_FOV_bg),
+    name=tile_names.index("stairs (up)"),
 )
 tile_names = np.array(tile_names) # To support fancy indexing
