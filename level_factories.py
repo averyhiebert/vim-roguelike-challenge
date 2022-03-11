@@ -6,7 +6,7 @@ from procgen import BasicDungeon, TestDungeon
 #  (Maybe easiest to just make it a multiplicative factor on the base rate)
 
 default= BasicDungeon("Dungeon")
-maze = BasicDungeon("TCP Tunnels",
+tunnels = BasicDungeon("TCP Tunnels",
         room_size_range=((4,4),(4,4)),
         max_rooms=30,
         allow_overlap=True)
@@ -20,11 +20,15 @@ bigrooms = BasicDungeon("Dungeon",
         max_rooms=4,
         allow_overlap=True)
 # TODO Make a better cellar, or remove this
-cellar = BasicDungeon("Cellar",
-        room_size_range=((30,48),(6,8)),
-        max_rooms=30)
+cellar = BasicDungeon("Standard Library", 
+        room_size_range=((30,48),(6,6)),
+        max_rooms=100) # Need to try real hard
+cellar_vertical = BasicDungeon("Standard Library",
+        room_size_range=((6,6),(25,36)),
+        max_rooms=100)
 # TODO Should have more monsters than usual
-great_hall = BasicDungeon("Great Hall",
+# TODO Maybe hide something inside one of the solid blocks
+great_hall = BasicDungeon("/dev/null",
         room_size_range=((4,4),(4,5)),
         invert=True,
         do_tunnels=False,
@@ -34,4 +38,4 @@ great_hall = BasicDungeon("Great Hall",
 disconnected = BasicDungeon("Treasury",
         invert=False,
         do_tunnels=False,
-        max_rooms=40)
+        max_rooms=50)

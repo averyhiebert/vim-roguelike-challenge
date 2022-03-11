@@ -79,6 +79,13 @@ traps_per_level = [
  (6,3),
  (9,4),
 ]
+landmine_chance_per_level = [
+ (0,0),
+ (1,0.05),
+ (2,0.1),
+ (5,0.15),
+ (7,0.2)
+]
 
 # Helper for interpreting these lists:
 def get_level_val(stat_list:List[Tuple[int,int]],level:int):
@@ -157,11 +164,14 @@ class LevelGenerator:
         """ Place items in the dungeon."""
         # TODO possible landmine under item at higher levels?
         num_items = get_level_val(items_per_level,self.difficulty)
+        landmine_chance = get_level_val(landmine_chance_per_level,self.difficulty)
         for item in sample_from_dist(item_chances,k=num_items,
             difficulty=self.difficulty):
             if isinstance(item,ef.Family):
                 item = item.sample()
-            dungeon.place_randomly(item,spawn=True)
+            location = dungeon.place_randomly(item,spawn=True)
+            if random.random() < landmine_chance:
+                ef.landmine.spawn(dungeon,*location)
 
     def place_enemies(self,dungeon:GameMap) -> None:
         """ Place enemies in the dungeon."""

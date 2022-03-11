@@ -127,7 +127,7 @@ class GameMap:
 
     def place_randomly(self,entity:Entity,max_tries:int=1000,spawn=False,
             stay_away_center:Optional[Tuple[int,int]]=None,
-            stay_away_radius:int=8) -> None:
+            stay_away_radius:int=8) -> Tuple[int,int]:
         """ Attempt to place the given entity somewhere in
         the level."""
         location = self.get_random_navigable(entity=entity,max_tries=max_tries,
@@ -138,6 +138,7 @@ class GameMap:
             entity.spawn(self,*location)
         else:
             entity.place(location,self)
+        return location
 
     def entity_visible(self,entity:Entity):
         """ Return true if entity should be visible, and false otherwise.
