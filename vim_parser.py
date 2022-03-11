@@ -190,13 +190,18 @@ class VimCommandParser:
 
         return action
 
-    def parse_movement(self,command:str) -> Path:
+    def parse_movement(self,command:str,prev_n:int=None) -> Path:
         """ Given the re match for a valid movement,
         return a Path corresponding to the given movement.
 
         Note: I assume path truncation is the job of the movement Action.
 
         In cases where the player goes nowhere, returns a length 1 path.
+
+        prev_n refers to a number that is not found in the movement command
+        itself.  This is becaus I previously didn't realize that numbers can
+        go anywhere in the command (except 0 at the start). If I were to
+        redo this, I would handle numbers better, obviously.
         """
         engine = self.engine
         match = re.match(MOVEMENT_RE,command)
@@ -217,9 +222,13 @@ class VimCommandParser:
         
         n:Optional[int] = None # Note: n will never be 0, so "if n:" is fine
         if match.group("repeat"):
+            if prev_n:
+                raise UserError("Not a valid command.")
             n = int(match.group("repeat"))
             # Take into account player max range
             n = min(n,player.max_range)
+        elif prev_n:
+            n = prev_n
 
         base = match.group("base")
 
@@ -409,14 +418,16 @@ class VimCommandParser:
 
         # Note also: You *can* specify a register before deleting, but I don't know
         #  what exactly it'll do.  Maybe attack with whatever's in that register?
-        valid_pyd_re = r'(?P<register>".)?(?P<command>p|yy|dd|[yd](?P<movement>' + valid_movement_re + '))'
+        # AND SUCH AND THINGS
+        valid_pyd_re = r'(?P<num1>[0-9]+)?(?P<register>".)?(?P<num2>[0-9]+)?(?P<command>p|yy|dd|[yd](?P<movement>' + valid_movement_re + '))'
 
         # To understand the partial regexes, see:
         #  https://stackoverflow.com/questions/42461651/partial-matching-a-string-against-a-regex
         # I'm sure it could be simplified, but I simply do not want to think about
         #  this any longer.
         partial_valid_movement_re = r"([0-9]|$)*(([hjkl]|$)|([tf;]|$)(.|$)|([we]|$)|([HML$]|$)|([`']|$)(.|$))"
-        partial_valid_pyd_re = r'(("|$)(.|$))?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
+        #partial_valid_pyd_re = r'(("|$)(.|$))?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
+        partial_valid_pyd_re = r'([0-9]+)?(("|$)(.|$))?([0-9]+)?((p|$)|(y|$)(y|$)|(d|$)(d|$)|([yd]|$)(' + partial_valid_movement_re + '))'
 
         if re.match(valid_movement_re,command):
             # Basic movement
@@ -430,7 +441,18 @@ class VimCommandParser:
             self.on_non_movement()
             # A yank, pull, or delete
             match = re.match(valid_pyd_re,command)
+            num1 = match.group("num1")
+            num2 = match.group("num2")
             main_command = match.group("command")
+            
+            n:Optional[int] = None
+            if num1 and not num2:
+                n = int(num1)
+            elif num2 and not num1:
+                n = int(num2)
+            elif num1 and num2:
+                # can't have 2 numbers in same command
+                raise VimError(command)
 
             # May or may not be a register
             register = None
@@ -438,22 +460,20 @@ class VimCommandParser:
                 register = match.group("register")[1]
 
             if main_command == "dd":
-                # A little area of effect attack for tight situations.
-                #  (Currently, register does nothing.)
-                #  (Maybe the register should, if specified, also yank
-                #   the corpse when something dies? TODO that, maybe)
-                offsets = [(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1)]
-                start = player.pos
-                sx,sy = start
-                aoe_path = Path(
-                    [(sx+x,sy+y) for x,y in offsets] + [start],
-                    game_map = engine.game_map
-                )
-                action = actions.ActionDeleteAlongPath(player,aoe_path)
+                points = []
+                if not n:
+                    n = 1
+                for i in range(n):
+                    if player.y +i > engine.game_map.height:
+                        break
+                    points.extend([(x,player.y + i) 
+                        for x in range(engine.game_map.width)])
+                path = Path(points,game_map=engine.game_map)
+                action = actions.ActionDeleteAlongPath(player,path)
                 action.requirements = ["d","dd"]
             elif main_command[0] == "d":
                 movement = match.group("movement")
-                path = self.parse_movement(movement)
+                path = self.parse_movement(movement,prev_n=n)
 
                 action = actions.ActionDeleteAlongPath(player,path)
                 action.requirements = movement_reqs(movement) + ["d"]
@@ -463,7 +483,7 @@ class VimCommandParser:
                 # No yy requirement, as that could be game-breaking
             elif main_command[0] == "y":
                 movement = match.group("movement")
-                path = self.parse_movement(movement)
+                path = self.parse_movement(movement,prev_n=n)
                 action = actions.PickupAlongPath(player,path,register)
                 action.requirements = movement_reqs(movement) + ["y"]
             elif main_command == "p":

@@ -41,9 +41,10 @@ def render_stat_box(console:Console,
     console.print(52,1,string="Player Stats")
     console.print(52,2,string=22*"-")
     console.print(52,3,string=f"Gold     : {gold}")
-    console.print(52,4,string=f"Armour   : {AC}")
-    console.print(52,5,string=f"Strength : {strength}")
-    console.print(52,6,string=f"Abilities:")
+    console.print(52,4,string=f"Range    : {max_range}")
+    console.print(52,5,string=f"Armour   : {AC}")
+    console.print(52,6,string=f"Strength : {strength}")
+    console.print(52,7,string=f"Abilities:")
     # TODO Wrap abilities
     ability_str = "\n".join(textwrap.wrap(
         abilities,width=22,
