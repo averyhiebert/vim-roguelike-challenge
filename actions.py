@@ -176,8 +176,6 @@ class ActionMoveAlongPath(ActionWithPath):
         self.ignore_blocking = ignore_blocking
 
     def perform(self) -> None:
-        """ TODO Figure out best way to still check for out-of-bounds in
-        ignore_blocking mode."""
         if self.ignore_blocking:
             self.path.truncate_to_navigable(self.entity)
             destination = self.path.end
@@ -294,6 +292,7 @@ class MovementAction(ActionWithDirection):
         self.entity.move_to(*self.dest)
 
 class MeleeAction(ActionWithDirection):
+    # TODO Add optional steal=True flag to allow stealing.
     def perform(self) -> None:
         target = self.target_actor
 
@@ -319,7 +318,6 @@ class MeleeAction(ActionWithDirection):
 #  Although, enemies still use it even if player doesn't.
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:
-
         if self.target_actor:
             return MeleeAction(self.entity,self.direction).perform()
         else:

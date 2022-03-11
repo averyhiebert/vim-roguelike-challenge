@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Any
 import random
 
-from components.ai import HostileEnemy
+from components.ai import HostileEnemy, VimlikeEnemy
 from components.fighter import Fighter
 from components.consumable import HealingConsumable
 from components.inventory import Inventory
@@ -105,6 +105,20 @@ needle = Actor(
     needs_los=False,
     wandering=False,
     moves_per_turn=2
+)
+# Plan: will use dH etc to attack player, or will flee if at less than half
+#  health
+vimic = Actor(
+    char="v",
+    color=colors.sed,
+    name="vimic",
+    summary="A monster that mimics the features of vim.",
+    fighter=Fighter(hp=10,AC=0,strength=4,attack_text="d"), #TODO dynamic text
+    hp_buff=True,
+    ai_cls=VimlikeEnemy,
+    fov_radius=12,
+    wandering=True,
+    needs_los=True,
 )
 
 # Define items here =======================================================

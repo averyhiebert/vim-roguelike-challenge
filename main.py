@@ -12,7 +12,7 @@ import level_factories as lf
 import exceptions
 
 # Some constants for development
-USE_TEST_ROOM = False
+USE_TEST_ROOM = True 
 ALWAYS_NEW_GAME = True
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
