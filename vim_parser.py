@@ -237,10 +237,10 @@ class VimCommandParser:
             if prev_n:
                 raise UserError("Not a valid command.")
             n = int(match.group("repeat"))
-            # Take into account player max range
             n = min(n,player.max_range)
         elif prev_n:
             n = prev_n
+            n = min(n,player.max_range)
 
         base = match.group("base")
 
