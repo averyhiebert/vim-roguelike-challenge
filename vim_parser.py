@@ -576,7 +576,11 @@ class VimCommandParser:
             return actions.WaitAction(player)
         elif re.match(partial_valid_pyd_re,command):
             self.on_non_movement()
-            return actions.WaitAction(player)
+            action = actions.WaitAction(player)
+            if command[-1:] == '"' or command[-2:-1] == '"':
+                # Selecting register does not take a turn.
+                action.skip_turn=True
+            return action
         elif command in "m@Z":
             # Some straggler/singleton possibilities
             self.on_non_movement()
