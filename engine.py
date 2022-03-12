@@ -55,6 +55,7 @@ class Engine:
         self.top_box_space = 15
         self.status_bar = StatusBar(self)
         self.status_bar.set_long_message("New game started.")
+
         self.text_window = TextWindow(self,
             x=51,y=1 + self.top_box_space,
             width=23, height=38 - 2 - self.top_box_space

@@ -1,6 +1,8 @@
 ''' A roguelike based on vim. '''
 import copy
 import traceback
+import sys
+import os
 
 import tcod
 
@@ -50,11 +52,18 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     return engine
 
 
+# See:  https://stackoverflow.com/questions/7674790/bundling-data-files-with-pyinstaller-onefile/44352931#44352931
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 def main() -> None:
     screen_width = 75
     screen_height = 40
-    tileset = tcod.tileset.load_tilesheet("images/dejavu_wide16x16_gs_tc.png",32,8,
+
+    image_path = resource_path("images/dejavu_wide16x16_gs_tc.png")
+    tileset = tcod.tileset.load_tilesheet(image_path,32,8,
         tcod.tileset.CHARMAP_TCOD)
 
     try:
