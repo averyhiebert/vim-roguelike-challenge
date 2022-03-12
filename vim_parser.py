@@ -19,7 +19,7 @@ import tcod
 import actions
 from exceptions import VimError, UserError
 from path import Path
-from help_text import help_text
+from help_text import help_text, synonyms
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -133,13 +133,24 @@ class VimCommandParser:
                 drop_corpse = drop_corpse)
         elif re.match(r':s/\["\?\]/\$/g?',command):
             return actions.SellDroppedItems(self.entity)
-        elif re.match(r":help (.*)",command):
-            m = re.match(r":help (.*)",command)
-            query = m.group(1)
+        elif re.match(r":h(?:elp)? (.*)",command):
+            m = re.match(r":h(?:elp)? (.*)",command)
+            query = m.group(1).lower()
             if query in help_text:
-                self.engine.text_window.show([help_text[query]])
+                # TODO Line breaks
+                text = help_text[query].split("\n")
+                self.engine.text_window.show(text)
+            elif query in synonyms and synonyms[query] in help_text:
+                text = help_text[synonyms[query]].split("\n")
+                self.engine.text_window.show(text)
+            elif query[:10] == "scroll of ":
+                self.engine.text_window.show(["Try it and find out."])
+            elif query[:6] == "amulet":
+                self.engine.text_window.show(["No documentation for individual amulets (try :help amulet)"])
             else:
-                self.engine.text_window.show([f"Sorry, no documentation for {query}.  Maybe try being less specific?"])
+                self.engine.text_window.show([f"Sorry, I can't help with {query}."])
+        elif command == ":help":
+            self.engine.text_window.show([f"Use :help [query] for more information about specific features (e.g. :help controls to learn about controls)."])
 
         # Bonus: some cheats for development
         elif command == ":godmode":

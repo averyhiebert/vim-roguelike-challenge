@@ -117,7 +117,7 @@ vimic = Actor(
     color=colors.vimic,
     name="vimic",
     summary="A monster that mimics the features of vim.",
-    fighter=Fighter(hp=15,AC=0,strength=6,attack_text="d"), #TODO dynamic text
+    fighter=Fighter(hp=15,AC=0,strength=10,attack_text="d"), #TODO dynamic text
     ai_cls=VimlikeEnemy,
     fov_radius=11,
     wandering=True,
@@ -131,7 +131,7 @@ vimpire = Actor(
     color=colors.vimpire,
     name="Vimpire",
     summary="A vile, corrupted vim-like entity.",
-    fighter=Fighter(hp=20,AC=0,strength=8,attack_text="d"), #TODO dynamic text
+    fighter=Fighter(hp=20,AC=0,strength=12,attack_text="d"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
     fov_radius=11,
@@ -146,7 +146,7 @@ emacs = Actor(
     color=colors.emacs,
     name="Emacs",
     summary="A lumbering monstrosity created by mad scientists.",
-    fighter=Fighter(hp=25,AC=0,strength=10,attack_text="C-x h C-w"), #TODO dynamic text
+    fighter=Fighter(hp=30,AC=0,strength=15,attack_text="C-x h C-w"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
     fov_radius=11,
@@ -161,7 +161,7 @@ emax = Actor(
     color=colors.emacs,
     name="Emax",
     summary="Like Emacs, only moreso.",
-    fighter=Fighter(hp=30,AC=0,strength=10,attack_text="C-x h C-w"), #TODO dynamic text
+    fighter=Fighter(hp=50,AC=0,strength=20,attack_text="C-x h C-w"), #TODO dynamic text
     hp_buff=True,
     ai_cls=VimlikeEnemy,
     fov_radius=11,
