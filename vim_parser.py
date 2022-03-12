@@ -19,6 +19,7 @@ import tcod
 import actions
 from exceptions import VimError, UserError
 from path import Path
+from help_text import help_text
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -132,6 +133,13 @@ class VimCommandParser:
                 drop_corpse = drop_corpse)
         elif re.match(r':s/\["\?\]/\$/g?',command):
             return actions.SellDroppedItems(self.entity)
+        elif re.match(r":help (.*)",command):
+            m = re.match(r":help (.*)",command)
+            query = m.group(1)
+            if query in help_text:
+                self.engine.text_window.show([help_text[query]])
+            else:
+                self.engine.text_window.show([f"Sorry, no documentation for {query}.  Maybe try being less specific?"])
 
         # Bonus: some cheats for development
         elif command == ":godmode":

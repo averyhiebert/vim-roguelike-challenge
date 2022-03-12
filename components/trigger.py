@@ -104,7 +104,7 @@ class LandmineTrigger(Trigger):
 
     def explode(self,entity:Actor) -> None:
         entity.engine.message_log.add_message(
-            f"The landmine detonates!",colors.bad
+            f"The landmine detonated!",colors.bad
         )
         entity.gamemap.explosion(self.parent.pos,self.radius,self.damage)
 

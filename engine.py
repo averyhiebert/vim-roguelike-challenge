@@ -107,7 +107,7 @@ class Engine:
         """ Return cursor coordinates."""
         return self.cursor_entity.pos
 
-    def save_as(self,fname:str="save.sav") -> None:
+    def save_as(self,fname:str="vimrc.sav") -> None:
         """ Save self to file.
 
         Using pickles is not ideal long-term (versioning issues etc), but

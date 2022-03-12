@@ -63,11 +63,14 @@ def main() -> None:
     screen_height = 40
 
     image_path = resource_path("images/dejavu_wide16x16_gs_tc.png")
-    tileset = tcod.tileset.load_tilesheet(image_path,32,8,
-        tcod.tileset.CHARMAP_TCOD)
+    tileset = tcod.tileset.load_tilesheet(image_path,
+        32,8,tcod.tileset.CHARMAP_TCOD)
+    #image_path = resource_path("images/dwarf_fortress.png")
+    #tileset = tcod.tileset.load_tilesheet(image_path,
+    #    16,16,tcod.tileset.CHARMAP_CP437)
 
     try:
-        engine = Engine.load("save.sav")
+        engine = Engine.load("vimrc.sav")
         assert(not ALWAYS_NEW_GAME)
     except:
         #Save file dow not exist, or we're in always-new testing mode.

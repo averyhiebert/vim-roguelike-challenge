@@ -67,7 +67,7 @@ class StartGame(Action):
 class SaveGame(Action):
     def perform(self) -> None:
         self.skip_turn = True # No turn on save
-        self.engine.save_as(fname="save.sav")
+        self.engine.save_as(fname="vimrc.sav")
         self.engine.status_bar.set_short_message(
             f" Game written to <save.sav>")
 
