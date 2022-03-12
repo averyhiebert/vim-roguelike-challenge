@@ -30,27 +30,34 @@ def render_stat_box(console:Console,
         max_range:int,
         AC:int,
         abilities:str) -> None:
+    fg = colors.ui_fg
     # TODO Not sure if I actually like the box outline.
+    """
     console.draw_frame(x=51,y=0,
         width=24,height=15,
         decoration="/-\| |\-/",
         fg=colors.ui_fg
     )
+    """
     # TODO Dungeon level number?
-    render_bar(console,(52,13),health,max_health,total_width=22)
-    console.print(52,1,string=level_name)
-    console.print(52,2,string=22*"-")
-    console.print(52,3,string=f"Gold     : {gold}")
-    console.print(52,4,string=f"Range    : {max_range}")
-    console.print(52,5,string=f"Armour   : {AC}")
-    console.print(52,6,string=f"Strength : {strength}")
-    console.print(52,7,string=f"Abilities:")
-    # TODO Wrap abilities
+    render_bar(console,(51,13),health,max_health,total_width=22)
+    console.print(51,1,string=level_name,fg=fg)
+    console.print(51,2,string=22*"-",fg=fg)
+    console.print(51,3,string=f"Gold     : {gold}",fg=fg)
+    console.print(51,4,string=f"Range    : {max_range}",fg=fg)
+    console.print(51,5,string=f"Armour   : {AC}",fg=fg)
+    console.print(51,6,string=f"Strength : {strength}",fg=fg)
+    console.print(51,7,string=f"Abilities:",fg=fg)
     ability_str = "\n".join(textwrap.wrap(
         abilities,width=22,
         initial_indent="  ",subsequent_indent="  ")
     )
-    console.print(52,8,string=ability_str)
+    console.print(51,8,string=ability_str,fg=fg)
+    console.print(51,14,string=22*"-",fg=fg)
+
+    # Left bar
+    console.ch[49,0:38] = ord("~")
+    console.fg[49,0:38] = colors.medium_blue
 
 def render_cursor(console:Console,position:Tuple[int,int],
         in_fov:bool):
@@ -65,6 +72,29 @@ def render_cursor(console:Console,position:Tuple[int,int],
 
 def render_main_menu(console:Console):
     """ Render a main menu screen. """
+
+    console.print(0,5,string="VimRC - Vim Roguelike Challenge".center(75)
+        ,fg=colors.ui_fg)
+    console.print(0,7,string="version 0.0.1".center(75),
+        fg=colors.ui_fg)
+    console.print(0,8,string="by Avery Hiebert".center(75),
+        fg=colors.ui_fg)
+    console.print(0,9,string="VimRC is open source and freely distributable".center(75),
+        fg=colors.ui_fg)
+
+    console.print(0,13,string="Choose your starting class:".center(75),
+        fg=colors.ui_fg)
+
+    subwidth = 15
+    console.print(0,17,string=f"     f: {'fighter':<15}{'(recommended)':<21}".center(75),fg=colors.ui_fg)
+    console.print(0,18,string=f"     r: {'ranger':<15}{'':<21}".center(75),fg=colors.ui_fg)
+    console.print(0,19,string=f"     c: {'chaos wizard':<15}{'':21}".center(75),fg=colors.ui_fg)
+    console.print(0,21,string=f"     p: {'pacifist':<15}{'':<21}".center(75),fg=colors.ui_fg)
+    console.print(0,22,string=f"     s: {'sapper':<15}{'':<21}".center(75),fg=colors.ui_fg)
+
+    console.print(0,24,string=f"     v: {'vimtutor':<15}{'(access all commands)':<21}".center(75),fg=colors.ui_fg)
+
+    """
     # TODO Make it look semi-presentable.
     console.print(1,1,string= "Welcome to the Vim Roguelike Challenge (VimRC).")
     console.print(1,2,string= "Please choose your starting class:")
@@ -78,4 +108,8 @@ def render_main_menu(console:Console):
     console.print(3,12,string="sapper        (s)       (hard)")
     console.print(3,13,string="chaos wizard  (c)       (hard)")
     console.print(3,38,string="(type q to quit)")
+    """
 
+    # Left bar
+    console.ch[0,0:40] = ord("~")
+    console.fg[0,0:40] = colors.medium_blue
