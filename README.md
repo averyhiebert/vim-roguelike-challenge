@@ -13,11 +13,11 @@ Consult the "cursor movement" section of a [vim cheat sheet](https://vim.rtorr.c
 VimRC is self-documenting in the form of a `:help` command.  For
 instance, to learn about controls try `:help controls`.  A text version of the
 documentation that you can browse through, as well as a summary or changes
-intended specifically for vim users,
+intended specifically for vim users, may arrive in the future.
 
 ## License
 
-Just for fun, in addition to the MIT license this project is also available under the vim license (i.e. you may use/distribute it under the terms of any of these licenses, at your discretion). Hopefully this doesn't cause some sort of headach in the future.
+Just for fun, in addition to the MIT license this project is also available under the vim license (i.e. you may use/distribute it under the terms of either of these licenses, at your discretion). Hopefully this doesn't cause some sort of headach in the future.
 
 
 ## About
