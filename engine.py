@@ -11,6 +11,7 @@ from tcod.context import Context
 from tcod.console import Console
 from tcod.map import compute_fov
 
+import colors
 import exceptions
 import entity_factories as ef
 from input_handlers import (
@@ -97,11 +98,8 @@ class Engine:
     def win_game(self) -> None:
         """ Win the game.  Trigger game over screen."""
         self.message_log.add_message(
-           "You successfully retrieved the Amulet of Yendor!\nCongratulations on your powerful vim-fu."
-        )
-        self.message_log.add_message(
-           "Press (q) to quit, or (n) to start a new game."
-        )
+           "You successfully retrieved the Amulet of Yendor!\nCongratulations on your powerful vim-fu.",colors.important)
+        self.message_log.add_message("Press (q) to quit, or (n) to start a new game.",colors.important)
         self.event_handler = GameOverEventHandler(self)
 
     @property

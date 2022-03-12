@@ -7,6 +7,7 @@ from components.base_component import BaseComponent
 from render_order import RenderOrder
 from input_handlers import GameOverEventHandler
 from entity import Corpse, Gold
+import colors
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -44,11 +45,11 @@ class Fighter(BaseComponent):
             death_message = "You died! Press (q) to quit, or (n) to start a new game."
             self.engine.event_handler = GameOverEventHandler(self.engine)
             # Note: must log BEFORE saving
-            self.engine.message_log.add_message(death_message)
+            self.engine.message_log.add_message(death_message,colors.very_bad)
             self.engine.save_as()
         else:
             death_message = f"{self.parent.name} is dead!"
-            self.engine.message_log.add_message(death_message)
+            self.engine.message_log.add_message(death_message,colors.important)
 
         # Possibly spawn a corpse
         if random.random() < self.parent.corpse_drop_chance:

@@ -138,7 +138,7 @@ class TextWindow:
             lines_to_print.append(("    -- More --",colors.ui_fg))
 
         for i,(text,color) in enumerate(lines_to_print):
-            console.print(x=self.x,y=self.y+i,string=text,fg=colors.ui_fg)
+            console.print(x=self.x,y=self.y+i,string=text,fg=color)
             
             
 

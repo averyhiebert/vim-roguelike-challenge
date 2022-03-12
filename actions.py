@@ -121,7 +121,6 @@ class ShowInventory(Action):
 
     def perform(self) -> None:
         summary = self.entity.inventory.get_summary()
-        #self.engine.text_window.show(summary,message_log_mode=True)
         self.engine.text_window.show(summary,message_log_mode=False)
 
 class NextPageAction(Action):
@@ -176,7 +175,8 @@ class SetHLSearchAction(Action):
 
     def perform(self) -> None:
         self.entity.engine.hlsearch=True
-        self.entity.engine.message_log.add_message("hlsearch is now on.")
+        self.entity.engine.message_log.add_message(
+            "hlsearch is now on.",fg=colors.important)
 
 class Upgrade(Action):
     def __init__(self,*args,to_upgrade:str,**kwargs):
@@ -193,7 +193,7 @@ class Upgrade(Action):
                 raise exceptions.UserError(f"It was worth a shot.")
             else:
                 raise exceptions.UserError(f"Unknown property {self.to_upgrade}")
-        if self.entity.gold >= 5:
+        if self.entity.gold >= 10:
             if self.to_upgrade == "strength":
                 self.entity.fighter.strength += 1
             elif self.to_upgrade in ["ac","armour","armor"]:
@@ -202,9 +202,9 @@ class Upgrade(Action):
                 self.entity.max_range += 1
             else:
                 raise RuntimeError("Something went wrong.")
-            self.entity.gold -= 5
+            self.entity.gold -= 10
         else:
-            raise exceptions.Impossible(f"Upgrading costs 5 gold")
+            raise exceptions.Impossible(f"Upgrading costs 10 gold")
 
 # Player actions =======================================================
 class WaitAction(Action):
@@ -222,7 +222,7 @@ class TakeStairsAction(Action):
             if self.entity.pos == self.engine.game_map.upstairs_location:
                 self.engine.game_world.prev_floor()
                 self.engine.message_log.add_message(
-                    "You ascend the staircase."
+                    "You ascend the staircase.",
                 )
             else:
                 raise exceptions.Impossible("There are no stairs here.")
@@ -432,8 +432,12 @@ class MeleeAction(ActionWithDirection):
         half_damage = (max(0,remaining - (target.fighter.AC//2)))//2
         total_damage = full_damage + half_damage
         flavourtext = self.entity.fighter.attack_text
+        if target == self.engine.player:
+            fg = colors.bad
+        else:
+            fg=colors.normal
         self.engine.message_log.add_message(
-            f"{self.entity.name} {flavourtext} {target.name} ({total_damage} hp)."
+            f"{self.entity.name} {flavourtext} {target.name} ({total_damage} hp).",fg
         )
         target.fighter.hp -= total_damage
 
@@ -524,7 +528,7 @@ class ObserveAction(CursorAction):
         target = self.engine.cursor
         text = self.engine.game_map.describe_tile(target,visible_only=True)
         text = f"You see: {text}"
-        self.engine.message_log.add_message(text)
+        self.engine.message_log.add_message(text,colors.important)
 
 # Item Actions =========================================================
 

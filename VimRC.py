@@ -81,6 +81,7 @@ def main() -> None:
             tileset=tileset,title="Vim Roguelike Challenge (VimRC)",
             vsync=True) as context:
         root_console = tcod.Console(screen_width,screen_height,order="F")
+        root_console.default_bg=colors.dark
         while True:
             try:
                 engine.render(console=root_console,context=context)

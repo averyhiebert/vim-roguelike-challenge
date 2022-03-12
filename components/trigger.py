@@ -9,6 +9,7 @@ from typing import Optional, TYPE_CHECKING
 from components.base_component import BaseComponent
 from components.inventory import Inventory
 import exceptions
+import colors
 
 if TYPE_CHECKING:
     from entity import Actor, Item
@@ -77,7 +78,7 @@ class LandmineTrigger(Trigger):
         if entity == entity.engine.player:
             self.activated = True
             text = "You hear the click of a landmine!"
-            entity.engine.message_log.add_message(text)
+            entity.engine.message_log.add_message(text,colors.very_bad)
             # Make trap visible
             self.parent.char = "^"
             entity.engine.show_error_message(text)
@@ -103,7 +104,7 @@ class LandmineTrigger(Trigger):
 
     def explode(self,entity:Actor) -> None:
         entity.engine.message_log.add_message(
-            f"The landmine detonates!"
+            f"The landmine detonates!",colors.bad
         )
         entity.gamemap.explosion(self.parent.pos,self.radius,self.damage)
 
@@ -111,8 +112,4 @@ class AltarTrigger(Trigger):
     def entered(self,entity:Actor) -> None:
         if entity == entity.engine.player and entity.fulfills("can win"):
             entity.engine.win_game()
-            """
-
-            """
-            #WinGame(entity).perform()
 
