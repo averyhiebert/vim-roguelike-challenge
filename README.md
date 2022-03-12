@@ -13,7 +13,7 @@ Consult the "cursor movement" section of a [vim cheat sheet](https://vim.rtorr.c
 VimRC is self-documenting in the form of a `:help` command.  For
 instance, to learn about controls try `:help controls`.  A text version of the
 documentation that you can browse through, as well as a summary or changes
-intended specifically for vim users, may arrive in the future.
+intended specifically for vim users, is in the works. 
 
 ## License
 
