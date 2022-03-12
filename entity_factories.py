@@ -251,7 +251,7 @@ arquebus = Item(
 magnet = Item(
     char="(",
     color=colors.equipment,
-    name="arquebus",
+    name="magnet",
     summary="When equipped, automatically yank while deleting.",
     ability=SimpleAbility("magnetic")
 )

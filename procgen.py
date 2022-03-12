@@ -306,15 +306,16 @@ class TestDungeon(LevelGenerator):
         #ef.emax.spawn(dungeon,28,20)
 
 
-        ef.amulet_of_vimtutor.spawn(dungeon,39,24)
+        ef.amulet_of_yendor.spawn(dungeon,39,24)
         ef.arquebus.spawn(dungeon,39,22)
         ef.magnet.spawn(dungeon,38,22)
         ef.scrolls[1].spawn(dungeon,39,23)
         ef.scrolls[2].spawn(dungeon,39,23)
-        ef.scrolls[3].spawn(dungeon,39,23)
+        ef.scrolls[5].spawn(dungeon,39,23)
         ef.scrolls[0].spawn(dungeon,39,23)
         ef.bat_ears.spawn(dungeon,41,20)
         ef.landmine.spawn(dungeon,42,25)
+        ef.altar.spawn(dungeon,37,25)
 
         room_1 = RectangularRoom(x=10,y=10,width=20,height=15)
         room_2 = RectangularRoom(x=35,y=15,width=10,height=15)

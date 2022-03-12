@@ -5,6 +5,7 @@ from typing import Optional, Tuple, TYPE_CHECKING
 from utils import roll_dice
 import exceptions
 import colors
+from entity import Gold
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -151,7 +152,14 @@ class KillAll(Action):
 class SellDroppedItems(Action):
     def perform(self) -> None:
         """ Convert all visible dropped amulets and spells to gold."""
-        raise NotImplementedError("Gold not yet implemented.")
+        # TODO Varying values
+        gm = self.entity.gamemap
+        for item in list(gm.items):
+            if item.char in '"?' and gm.entity_visible(item):
+                # TODO Remove self and spawn gold
+                gold = Gold(5)
+                gold.spawn(gm,*item.pos)
+                gm.entities.remove(item)
 
 class SetHLSearchAction(Action):
     def __init__(self,*args,**kwargs):
