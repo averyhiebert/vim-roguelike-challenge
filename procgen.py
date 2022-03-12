@@ -307,7 +307,6 @@ class TestDungeon(LevelGenerator):
 
 
         ef.amulet_of_yendor.spawn(dungeon,39,24)
-        ef.arquebus.spawn(dungeon,39,22)
         ef.magnet.spawn(dungeon,38,22)
         ef.scrolls[1].spawn(dungeon,39,23)
         ef.scrolls[2].spawn(dungeon,39,23)

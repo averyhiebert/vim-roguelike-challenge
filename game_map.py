@@ -146,6 +146,9 @@ class GameMap:
         """ Return true if entity should be visible, and false otherwise.
         Specifically, Actors are only visible when in fov, while Items are
         visible as long as they were explored."""
+        if entity.char == " ":
+            # Special case for landmines (and potentially other traps in future)
+            return False
         if isinstance(entity,Item):
             return self.explored[entity.pos]
         elif isinstance(entity,Actor):

@@ -138,8 +138,11 @@ class Inventory(Ability):
         item.trigger.dropped(self.parent)
 
     def insert(self, item:Item,register:Optional[str]=None,
-            silent=False) -> None:
+            silent=False,startup=False) -> None:
         """ Add an item to the inventory.
+
+        Startup should be true when we are inserting items at startup, rather
+        than within a game, i.e. for starting classes.
         """
         if not item.yankable:
             # Do nothing
@@ -163,12 +166,14 @@ class Inventory(Ability):
                     self.registers[key] = item
                     break
         # Remove item from old parent
-        item.parent.gamemap.entities.remove(item)
+        if not startup:
+            item.parent.gamemap.entities.remove(item)
         item.parent = self
 
         self.register_history.append(register)
-        if not silent:
+        if not (silent or startup):
             self.parent.gamemap.engine.message_log.add_message(f"You yanked the {item.name} (\"{register})")
 
         # Trigger yank behaviour, if any.
-        item.trigger.yanked(self.parent)
+        if not startup:
+            item.trigger.yanked(self.parent)

@@ -19,7 +19,6 @@ def render_bar(console:Console,position:Tuple[int,int],
     if bar_width > 0:
         console.draw_rect(x=x,y=y,width=bar_width,height=1,ch=1,
             bg=colors.bar_filled)
-    #console.print(x=0+total_width+1, y=map_height,
     console.print(x=x+1, y=y,
         string=f"HP: {current_value}/{maximum_value}",fg=colors.ui_fg)
 
@@ -63,3 +62,20 @@ def render_cursor(console:Console,position:Tuple[int,int],
     else:
         console.fg[position] = colors.ui_fg
         console.bg[position] = colors.ui_fg
+
+def render_main_menu(console:Console):
+    """ Render a main menu screen. """
+    # TODO Make it look semi-presentable.
+    console.print(1,1,string= "Welcome to the Vim Roguelike Challenge (VimRC).")
+    console.print(1,2,string= "Please choose your starting class:")
+
+    console.print(3,5,string= "vimtutor      (v)       (OP class for beginners)")
+    console.print(3,7,string= "fighter       (f)       (recommended)")
+    console.print(3,8,string= "ranger        (r)")
+
+
+    console.print(3,11,string="pacifist      (p)       (hard)")
+    console.print(3,12,string="sapper        (s)       (hard)")
+    console.print(3,13,string="chaos wizard  (c)       (hard)")
+    console.print(3,38,string="(type q to quit)")
+

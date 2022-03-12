@@ -28,7 +28,7 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
 
     player = copy.deepcopy(entity_factories.player)
 
-    engine = Engine(player=player)
+    engine = Engine(player=player,main_menu_mode=True)
     engine.game_world = GameWorld(
         engine=engine,
         map_width=map_width,
@@ -43,10 +43,7 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     else:
         engine.game_world.next_floor()
 
-    #engine.set_game_map(level_gen.generate((map_width,map_height),
-    #    engine,difficulty=6))
     engine.update_fov()
-
     engine.message_log.add_message(
         "Welcome to the Vim Roguelike Challenge (VimRC)!"
     )

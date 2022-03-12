@@ -62,6 +62,9 @@ class Entity:
     def engine(self) -> Engine:
         return self.gamemap.engine
 
+    def copy(self) -> Engine:
+        return copy.deepcopy(self)
+
     def enable_all(self) -> None:
         """ Add AllCommands to existing abilities."""
         self.abilities.append(AllCommands())

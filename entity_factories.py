@@ -26,10 +26,9 @@ class Family():
     def __hash__(self) -> int:
         return hash(str(self))
 
-
-# TODO Multiple differing starting classes
+# Base player (starting classes are defined at the end, since some of them
+#  require items.
 starting_abilities = ["h","j","k","l","yy","y","d"]
-
 player = Actor(
     char="@",
     color=colors.player,
@@ -111,6 +110,8 @@ needle = Actor(
 )
 # Plan: will use dH etc to attack player, or will flee if at less than 1/3 health
 # TODO Steal something
+# TODO Make it more dangerous, but also show up a bit later.
+#  Same for the magnetized needle.  And all monsters, really, I guess.
 vimic = Actor(
     char="v",
     color=colors.vimic,
@@ -241,9 +242,9 @@ bat_ears = Item(
     ability=SimpleAbility("echolocate")
 )
 # Arquebus - a ranged item
-arquebus = Item(
+crossbow = Item(
     char=")",
-    name="arquebus",
+    name="crossbow",
     summary="A ranged weapon.",
     ability=SimpleAbility("ranged")
 )
@@ -263,7 +264,58 @@ moderate_item = Family(scrolls[3:] + [amulet[s] for s in "tw;m'`"]
     + [Gold(1),Gold(2),Gold(4),Gold(3)])
 good_item = Family([amulet[s] for s in "feHML0$"] + scrolls[1:3]
     + [Gold(8),Gold(9),Gold(10),Gold(11),magnet])
-great_item = Family([amulet["dd"],amulet["u"],arquebus,scrolls[0],bat_ears,Gold(30)])
-amazing_item = Family([amulet_of_vimtutor,Gold(50)])
+great_item = Family([amulet["dd"],amulet["u"],crossbow,bat_ears,scrolls[0],Gold(20)])
+amazing_item = Family([amulet_of_vimtutor,Gold(40)])
 
 # TODO Spellbooks?
+
+# Starting classes.
+#  They are functions so as to be randomized.
+
+def starting_class(s:str) -> Actor:
+    p = player.copy()
+    if s == "fighter":
+        pass
+    elif s == "vimtutor":
+        p.inventory.insert(
+            amulet_of_vimtutor.copy(),startup=True)
+    elif s == "ranger":
+        p.max_range = 3
+        p.inventory.insert(crossbow,startup=True)
+        p.abilities.append(SimpleAbility(random.choice(["f","e"])))
+    elif s == "berserker":
+        p = player.copy()
+        p.max_range = 4
+        p.fighter.AC = 2
+        p.fighter.strength = 4
+        p.abilities.extend(
+            [SimpleAbility("f"),SimpleAbility("e")]
+        )
+    elif s == "pacifist":
+        # pac
+        p = player.copy()
+        p.abilities = [SimpleAbility(s) 
+            for s in ["h","j","k","l","H","L","0","$","yy","y"]]
+        p.range=6
+        p.fighter.max_hp = 20
+        p.fighter.hp = 20   
+    elif s == "sapper":
+        p.range = 6
+        p.abilities = [SimpleAbility(s) 
+            for s in ["h","j","k","l","yy","y","t"]] #i.e. "t" but no d
+        if random.random() < 0.5:
+            # Magnet + bat ears.
+            # This might be a bit OP, honestly.
+            p.inventory.insert(magnet.copy(),startup=True)
+            p.inventory.insert(bat_ears.copy(),startup=True)
+        else:
+            # Scroll of hlsearch
+            p.inventory.insert(scrolls[0].copy(),startup=True)
+        for r in "abcdefgh":
+            p.inventory.insert(landmine.copy(),startup=True,register=r)
+    elif s == "chaos wizard":
+        p.abilities = [SimpleAbility(s) 
+            for s in ["H","L","0","$","M","m","'","f","t","e","w","yy","y","d"]]
+        p.max_range=6
+    return p
+

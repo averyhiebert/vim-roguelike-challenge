@@ -97,13 +97,42 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
 
     def ev_quit(self,event:tcod.event.Quit) -> Optional[Action]:
         actions.EscapeAction(self.engine.player).perform()
-        #actions.QuitGame(self.engine.player).perform()
+
+class MainMenuEventHandler(EventHandler):
+    def ev_quit(self,event:tcod.event.QUit) -> Optional[Action]:
+        raise SystemExit()
+
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
+        action: Optional[Action] = None
+        player = self.engine.player
+
+        key = event.sym
+        usable_key = keydown_to_char(event) # i.e. an ascii char
+
+        if usable_key in "vVJ":
+            return actions.StartGame(player,"vimtutor")
+        elif usable_key in "fF":
+            return actions.StartGame(player,"fighter")
+        elif usable_key in "rR":
+            return actions.StartGame(player,"ranger")
+
+        elif usable_key in "pP":
+            return actions.StartGame(player,"pacifist")
+        elif usable_key in "sS":
+            return actions.StartGame(player,"sapper")
+        elif usable_key in "cC":
+            return actions.StartGame(player,"chaos wizard")
+        elif usable_key == "q":
+            raise SystemExit()
+        elif key == tcod.event.K_ESCAPE:
+            raise SystemExit()
+
+        return action
 
 class MainGameEventHandler(EventHandler):
     def __init__(self, engine:Engine):
         super().__init__(engine)
         self.command_parser = VimCommandParser(engine=engine)
-        #self.do_enemy_turn = False
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Tuple[Optional[Action],bool]:
         action: Optional[Action] = None

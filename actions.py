@@ -56,6 +56,13 @@ class EscapeAction(Action):
         #QuitGame(self.entity).perform()
         raise exceptions.UserError("Type :quit<Enter> to exit vim")
 
+class StartGame(Action):
+    def __init__(self,entity:Actor,starter_class:str):
+        super().__init__(entity,skip_turn=True)
+        self.starter_class = starter_class
+
+    def perform(self) -> None:
+        self.engine.start_game(self.starter_class)
 
 class SaveGame(Action):
     def perform(self) -> None:
@@ -175,6 +182,7 @@ class Upgrade(Action):
     def __init__(self,*args,to_upgrade:str,**kwargs):
         super().__init__(*args,**kwargs)
         self.to_upgrade = to_upgrade.lower()
+        self.skip_turn = False
 
     def perform(self) -> None:
         if self.to_upgrade not in ["strength","ac","armour","armor","range"]:
@@ -185,9 +193,9 @@ class Upgrade(Action):
                 raise exceptions.UserError(f"It was worth a shot.")
             else:
                 raise exceptions.UserError(f"Unknown property {self.to_upgrade}")
-        if self.entity.gold > 5:
+        if self.entity.gold >= 5:
             if self.to_upgrade == "strength":
-                self.entity.fighter.strength += 2
+                self.entity.fighter.strength += 1
             elif self.to_upgrade in ["ac","armour","armor"]:
                 self.entity.fighter.AC += 2
             elif self.to_upgrade == "range":
@@ -263,6 +271,7 @@ class ActionMoveAlongPath(ActionWithPath):
         """
         super().__init__(entity=entity,path=path)
         self.ignore_blocking = ignore_blocking
+        self.register=None
 
     def perform(self) -> None:
         if self.ignore_blocking:
@@ -284,6 +293,12 @@ class ActionMoveAlongPath(ActionWithPath):
         self.entity.move_to(*destination)
         if len(self.path.points) > 2:
             self.entity.gamemap.add_trace(self.path.points)
+
+        # Yank, if magnetic
+        if self.entity.fulfills("magnetic"):
+            PickupAlongPath(self.entity,self.path,
+                register=self.register,
+                draw_trace=False).perform()
 
 class ActionDeleteAlongPath(ActionWithPath):
     def __init__(self,*args,no_truncate:bool=False,
@@ -336,8 +351,8 @@ class PickupAlongPath(ActionWithPath):
         inserted = 0
         first = True
         # TODO There is probably a more efficient way to do this.
-        # Must convert to list to iterate over,
-        #  or else error "set changed size during iteration"
+        # Note: Must convert iterator to list,
+        #  or else "set changed size during iteration" error
         for item in list(self.entity.gamemap.items):
             if item.pos in self.path.points:
                 if first:
@@ -347,8 +362,9 @@ class PickupAlongPath(ActionWithPath):
                     inventory.insert(item)
                 inserted += 1
         if inserted == 0:
-            raise exceptions.Impossible("There is nothing to yank.")
-        # TODO: Should have a single combined message for all actions.
+            #raise exceptions.Impossible("There is nothing to yank.")
+            # Actually, is there any real reason to consider this an error?
+            pass
 
         # Draw trace
         if len(self.path.points) > 1 and self.draw_trace:

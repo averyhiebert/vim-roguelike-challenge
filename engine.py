@@ -12,8 +12,10 @@ from tcod.console import Console
 from tcod.map import compute_fov
 
 import exceptions
+import entity_factories as ef
 from input_handlers import (
     MainGameEventHandler,
+    MainMenuEventHandler,
     CommandEntryEventHandler,
     CursorMovementEventHandler,
     GameOverEventHandler
@@ -21,7 +23,7 @@ from input_handlers import (
 from message_log import MessageLog
 from status_bar import StatusBar
 from text_window import TextWindow
-from render_functions import render_stat_box, render_cursor
+from render_functions import render_stat_box, render_cursor, render_main_menu
 
 if TYPE_CHECKING:
     from entity import Entity, Actor
@@ -34,9 +36,16 @@ class Engine:
     game_map: GameMap
     game_world: GameWorld
 
-    def __init__(self,player:Actor):
+    def __init__(self,player:Actor,main_menu_mode:bool=False):
         self.player = player
-        self.event_handler: EventHandler = MainGameEventHandler(self)
+        # The engine also handles the main menu.
+        # Ideally things would be more encapsulated, but I'm
+        #  running out of time here.
+        self.main_menu_mode = main_menu_mode
+        if main_menu_mode:
+            self.event_handler: EventHandler = MainMenuEventHandler(self)
+        else:
+            self.event_handler: EventHandler = MainGameEventHandler(self)
         self.char_array = None # TODO Figure out type
         self.turn = 0 # Turn counter
         self.last_save = -1
@@ -71,6 +80,18 @@ class Engine:
             return self.cursor
         else:
             return self.player.pos
+
+    def start_game(self,starting_class:str) -> None:
+        # Set player to given starting class.
+        old_pos = self.player.pos
+        self.game_map.entities.remove(self.player)
+        self.player = ef.starting_class(starting_class)
+        self.player.place(old_pos,self.game_map)
+
+        # Start the game
+        self.main_menu_mode = False
+        self.event_handler = MainGameEventHandler(self)
+        self.message_log.add_message(f"You are a novice {starting_class}.")
 
     def win_game(self) -> None:
         """ Win the game.  Trigger game over screen."""
@@ -161,6 +182,12 @@ class Engine:
             
 
     def render(self, console:Console, context:Context):
+        if self.main_menu_mode:
+            render_main_menu(console)
+            context.present(console)
+            console.clear()
+            return
+
         self.game_map.render(console)
         # A bit of a hack to enable t/f and possibly w/e movement
         # TODO Update this if I add any offset to the game map
