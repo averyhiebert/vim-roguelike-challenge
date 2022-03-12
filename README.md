@@ -6,14 +6,14 @@ An old-school roguelike inspired by the superior text editor.  Explore dungeons 
 
 # Controls
 
-Basically, most movement commands from vim will also work. Use `hjkl` (or arrow keys, if you insist) to move, `d`+movement to attack, `yy` to pick up items at your current location, and `"rp` to drop the item in register `r`. Familarity with vim is a plus, but not required; who knows, maybe this'll even have educational value? 
+Basically, most movement commands from vim will also work. Use `hjkl` (or arrow keys, if you insist) to move, `d`+movement to attack, `yy` to pick up items at your current location, and `"rp` to drop the item in register `r`.
 
-Many other commands exist, but they will generally require an amulet to use. Try out the "vimtutor" starting class to experiment with all available commands.
+Consult the "cursor movement" section of a [vim cheat sheet](https://vim.rtorr.com/) for more info. Not all commands are implemented, but many are (with some natural modifications to suit gameplay). However, they will generally require an amulet to use. Try out the "vimtutor" starting class to experiment with all available commands.
 
-VimRC has built-in documentation in the form of a `:help` command.  For
-instance, to learn about controls try `:help controls`.
-
-A text version of the documentation that you can browse through, as well as a summary or changes intended specifically for vim users,
+VimRC is self-documenting in the form of a `:help` command.  For
+instance, to learn about controls try `:help controls`.  A text version of the
+documentation that you can browse through, as well as a summary or changes
+intended specifically for vim users,
 
 # License
 
