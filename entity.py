@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from components.fighter import Fighter
     from components.inventory import Inventory
     from components.ability import Ability
-    from game_map import GameMap
     from engine import Engine
     from entity import Item
 
@@ -81,7 +80,7 @@ class Entity:
         self.x, self.y = location
         if gamemap:
             if hasattr(self,"parent"):
-                if self.parent is self.gamemap:
+                if self.parent is gamemap:
                     self.gamemap.entities.remove(self)
             self.parent = gamemap
             gamemap.entities.add(self)

@@ -31,7 +31,7 @@ class GameMap:
         self.entities = set(entities)
         self.tiles = np.full((width,height),
             fill_value=tile_types.wall,order="F")
-        self.downstairs_location:Optional[Tuple[int,int]] = (0,0)
+        self.downstairs_location:Optional[Tuple[int,int]] = None
         self.upstairs_location:Optional[Tuple[int,int]] = None
         self.name=name
 

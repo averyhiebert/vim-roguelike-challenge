@@ -118,6 +118,9 @@ class VimCommandParser:
         elif re.match(":swap (.) (.)", command):
             m = re.match(":swap (.) (.)", command)
             return actions.SwapRegisters(self.entity,m.group(1),m.group(2))
+        elif re.match(":(?:upgrade|buy) (.+)",command):
+            m = re.match(":(?:upgrade|buy) (.+)",command)
+            return actions.Upgrade(self.entity,to_upgrade=m.group(1))
         elif command == ":set hlsearch":
             # TODO: Make this a dedicated command, which can have requirements 
             return actions.SetHLSearchAction(self.entity)
@@ -548,6 +551,10 @@ class VimCommandParser:
             # Down stairs movement
             self.reset(erase_history=True)
             return actions.TakeStairsAction(player)
+        elif command == "<":
+            # Up stairs movement
+            self.reset(erase_history=True)
+            return actions.TakeStairsAction(player,up=True)
         elif command in ":?/":
             self.on_non_movement()
             # Enter command mode

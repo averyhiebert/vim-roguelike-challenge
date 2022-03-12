@@ -96,6 +96,8 @@ class Engine:
 
     def set_game_map(self,game_map:GameMap) -> None:
         self.game_map = game_map
+        #if not self.player.gamemap == self.game_map:
+        #    self.player.place(game_map.upstairs_location,game_map)
         self.cursor_entity.parent = self.game_map
 
     def show_error_message(self,text:str) -> None:

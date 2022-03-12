@@ -11,8 +11,7 @@ if TYPE_CHECKING:
     from engine import Engine
 
 level_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
-  #0:[(lf.default,100)],
-  0:[(lf.cellar,100)],
+  0:[(lf.default,100)],
   3:[(lf.tunnels,10)],
   5:[(lf.mines,100),(lf.tunnels,100),(lf.default,0)],
   8:[(lf.default,100),
@@ -78,12 +77,27 @@ class GameWorld:
 
     def next_floor(self) -> None:
         self.current_floor += 1
-        new_floor = self.generate_floor(level=self.current_floor)
-        #self.floors.append(new_floor)
-        self.engine.set_game_map(new_floor)
         
-        if self.current_floor == self.max_floors:
-            # TODO Also don't place down stair 
-            new_floor.place_randomly(ef.amulet_of_yendor,spawn=True)
+        if self.current_floor >= len(self.floors):
+            new_floor = self.generate_floor(level=self.current_floor)
+            self.floors.append(new_floor)
+            if self.current_floor == self.max_floors:
+                # TODO Also don't place down stair 
+                new_floor.place_randomly(ef.amulet_of_yendor,spawn=True)
+
+        floor = self.floors[self.current_floor]
+        self.engine.set_game_map(floor)
+        if floor.upstairs_location:
+            # Always the case, except at very beginning of game
+            self.engine.player.place(floor.upstairs_location,self.engine.game_map)
+
+    def prev_floor(self) -> None:
+        if self.current_floor == 0:
+            # This shouldn't happen, but just in case...
+            raise exceptions.Impossible("You are already on the top floor")
+        self.current_floor -= 1
+        self.engine.set_game_map(self.floors[self.current_floor])
+        self.engine.player.place(self.engine.game_map.downstairs_location,self.engine.game_map)
+
         
 

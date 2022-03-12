@@ -161,15 +161,54 @@ class SetHLSearchAction(Action):
         self.entity.engine.hlsearch=True
         self.entity.engine.message_log.add_message("hlsearch is now on.")
 
+class Upgrade(Action):
+    def __init__(self,*args,to_upgrade:str,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.to_upgrade = to_upgrade.lower()
+
+    def perform(self) -> None:
+        if self.to_upgrade not in ["strength","ac","armour","armor","range"]:
+            if self.to_upgrade in ["hp","health"]:
+                # Just in case someone tries
+                raise exceptions.UserError(f"Cannot upgrade {self.to_upgrade}")
+            elif self.to_upgrade == "gold":
+                raise exceptions.UserError(f"It was worth a shot.")
+            else:
+                raise exceptions.UserError(f"Unknown property {self.to_upgrade}")
+        if self.entity.gold > 5:
+            if self.to_upgrade == "strength":
+                self.entity.fighter.strength += 2
+            elif self.to_upgrade in ["ac","armour","armor"]:
+                self.entity.fighter.AC += 2
+            elif self.to_upgrade == "range":
+                self.entity.max_range += 1
+            else:
+                raise RuntimeError("Something went wrong.")
+            self.entity.gold -= 5
+        else:
+            raise exceptions.Impossible(f"Upgrading costs 5 gold")
+
 # Player actions =======================================================
 class WaitAction(Action):
     def perform(self) -> None:
         pass
 
 class TakeStairsAction(Action):
+    def __init__(self,*args,up=False,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.up = up
+
     def perform(self) -> None:
         """ Take the stairs, if any exist here."""
-        if self.entity.pos == self.engine.game_map.downstairs_location:
+        if self.up:
+            if self.entity.pos == self.engine.game_map.upstairs_location:
+                self.engine.game_world.prev_floor()
+                self.engine.message_log.add_message(
+                    "You ascend the staircase."
+                )
+            else:
+                raise exceptions.Impossible("There are no stairs here.")
+        elif self.entity.pos == self.engine.game_map.downstairs_location:
             self.engine.game_world.next_floor()
             self.engine.message_log.add_message(
                 "You descend the staircase."
