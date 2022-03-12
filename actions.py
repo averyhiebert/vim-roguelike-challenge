@@ -48,6 +48,7 @@ class Action:
 
 
 # UI/Modal actions ===================================================
+
 class EscapeAction(Action):
     def perform(self) -> None:
         # TODO Make sure this makes sense in other modes (e.g. cursor, :)

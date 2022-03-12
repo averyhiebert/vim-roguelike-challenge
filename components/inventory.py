@@ -141,6 +141,11 @@ class Inventory(Ability):
             silent=False) -> None:
         """ Add an item to the inventory.
         """
+        if not item.yankable:
+            # Do nothing
+            # TODO Some sort of exception, or maybe I just shouldn't use
+            #  the Item class for things that aren't meant to be yankable
+            return
         if len(self.items) >= self.capacity:
             raise exceptions.Impossible("Your inventory is full.")
 

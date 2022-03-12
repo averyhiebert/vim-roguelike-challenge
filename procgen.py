@@ -192,12 +192,14 @@ class LevelGenerator:
 
     def place_player(self,dungeon:GameMap,upstairs:bool=True) -> None:
         dungeon.place_randomly(dungeon.engine.player,spawn=False)
-        # TODO Maybe also place up stairs at this location?
-        #  Not a priority, though.
         if upstairs:
             location = dungeon.engine.player.pos
             dungeon.upstairs_location = location
             dungeon.tiles[location] = tile_types.up_stairs
+        elif self.difficulty == 0:
+            # Top level, place a victory altar
+            location = dungeon.engine.player.pos
+            ef.altar.spawn(dungeon,*location)
 
     def place_stairs(self,dungeon:GameMap) -> None:
         location = dungeon.get_random_navigable(dungeon.engine.player,

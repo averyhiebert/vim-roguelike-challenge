@@ -8,7 +8,7 @@ from components.fighter import Fighter
 from components.consumable import HealingConsumable, CommandConsumable
 from components.inventory import Inventory
 from components.ability import Omnipotent, SimpleAbility, AllCommands
-from components.trigger import LandmineTrigger
+from components.trigger import LandmineTrigger, AltarTrigger
 from entity import Actor, Item, Amulet, Gold
 from render_order import RenderOrder
 import colors
@@ -172,7 +172,7 @@ emax = Actor(
     needs_los=True,
 )
 
-# Traps =========================================================
+# Traps/triggerable =========================================================
 
 landmine = Item(
     char=" ",color=colors.default_bg,
@@ -181,6 +181,14 @@ landmine = Item(
     trigger=LandmineTrigger(),
 )
 landmine.render_order = RenderOrder.TRAP
+
+altar = Item(
+    char="_",color=colors.default_fg,
+    name="Altar of Victory",
+    summary="Bring the Amulet of Yendor to the altar to win.",
+    trigger=AltarTrigger(),
+    yankable=False,
+)
 
 # Items =========================================================
 
@@ -193,11 +201,11 @@ for command in ["h","j","k","l","H","M","L","0","$","`","'","dd","t","f","w","e"
 amulet_of_yendor = Item(
     char='"',name="Amulet of Yendor",
     color=colors.amulet,
-    summary="A powerful and mysterious artifact.",
-    ability=AllCommands(),
+    summary="A valuable MacGuffin.",
+    ability=SimpleAbility("can win"),
 )
 amulet_of_vimtutor = Item(
-    char='"',name="Amulet of vimtutor",
+    char='"',name="amulet of vimtutor",
     color=colors.amulet,
     summary="A powerful and mysterious artifact.",
     ability=AllCommands(),

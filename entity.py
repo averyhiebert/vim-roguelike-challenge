@@ -191,6 +191,7 @@ class Item(Entity):
             color:Tuple[int,int,int]=colors.default_fg,
             name:str="<Unnamed>",
             summary:str="An unknown item.",
+            yankable:bool=True,
             consumable: Optional[Consumable]=None,
             trigger: Optional[Trigger]=None,
             ability:Optional[Ability]=None):
@@ -206,13 +207,13 @@ class Item(Entity):
             consumable = NotConsumable(f"You can't eat {utils.a_or_an(name)}.")
         if not trigger:
             trigger = Trigger() # Does nothing.
-        # TODO: Set default do-nothing consumable by default
         self.consumable=consumable
         self.consumable.parent = self
         self.ability = ability
         self.ability.parent = self
         self.trigger = trigger
         self.trigger.parent = self
+        self.yankable = yankable
 
     def fulfills(self,req:str) -> bool:
         return self.ability.fulfills(req)
