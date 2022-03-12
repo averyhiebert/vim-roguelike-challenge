@@ -87,28 +87,13 @@ def render_main_menu(console:Console):
 
     subwidth = 15
     console.print(0,17,string=f"     f: {'fighter':<15}{'(recommended)':<21}".center(75),fg=colors.ui_fg)
-    console.print(0,18,string=f"     r: {'ranger':<15}{'':<21}".center(75),fg=colors.ui_fg)
-    console.print(0,19,string=f"     c: {'chaos wizard':<15}{'':21}".center(75),fg=colors.ui_fg)
+    console.print(0,18,string=f"     r: {'ranger':<15}{'(recommended)':<21}".center(75),fg=colors.ui_fg)
+    console.print(0,20,string=f"     c: {'chaos wizard':<15}{'':21}".center(75),fg=colors.ui_fg)
     console.print(0,21,string=f"     p: {'pacifist':<15}{'':<21}".center(75),fg=colors.ui_fg)
     console.print(0,22,string=f"     s: {'sapper':<15}{'':<21}".center(75),fg=colors.ui_fg)
 
     console.print(0,24,string=f"     v: {'vimtutor':<15}{'(access all commands)':<21}".center(75),fg=colors.ui_fg)
 
-    """
-    # TODO Make it look semi-presentable.
-    console.print(1,1,string= "Welcome to the Vim Roguelike Challenge (VimRC).")
-    console.print(1,2,string= "Please choose your starting class:")
-
-    console.print(3,5,string= "vimtutor      (v)       (OP class for beginners)")
-    console.print(3,7,string= "fighter       (f)       (recommended)")
-    console.print(3,8,string= "ranger        (r)")
-
-
-    console.print(3,11,string="pacifist      (p)       (hard)")
-    console.print(3,12,string="sapper        (s)       (hard)")
-    console.print(3,13,string="chaos wizard  (c)       (hard)")
-    console.print(3,38,string="(type q to quit)")
-    """
 
     # Left bar
     console.ch[0,0:40] = ord("~")

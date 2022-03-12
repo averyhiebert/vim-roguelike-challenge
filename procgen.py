@@ -28,11 +28,13 @@ item_chances: Dict[int,List[Tuple[Union[Entity,ef.Family],int]]] = {
       (ef.good_item,20),
      ],
   2: [(ef.good_item,50)],
-  4: [(ef.good_item,100),
+  5: [(ef.good_item,100),
       (ef.great_item,30),
      ],
-  6: [(ef.great_item,50),
+  7: [(ef.great_item,50),
       (ef.moderate_item,50)
+     ],
+  10: [(ef.amazing_item,50),
      ],
 }
 
@@ -41,9 +43,9 @@ enemy_chances: Dict[int,List[Tuple[Union[Entity,ef.Family]]]] = {
   1:[(ef.ed,100)],
   2:[(ef.sed,100),(ef.ed,50)],
   3:[(ef.gedit,100),(ef.ed,10),(ef.nano,10)],
-  4:[(ef.needle,50),(ef.vimic,10)],
-  5:[(ef.vimic,30)],
-  6:[(ef.needle,100)],
+  4:[(ef.needle,50),(ef.vimic,5)],
+  5:[(ef.needle,100)],
+  6:[(ef.vimic,30)],
   8:[(ef.emacs,50),(ef.vimic,50)],
   10:[(ef.vimpire,50)],
   12:[(ef.emax,200)],
