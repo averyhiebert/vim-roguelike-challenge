@@ -80,7 +80,10 @@ def main() -> None:
             screen_height=screen_height
         )
 
-    with tcod.context.new_terminal(screen_width,screen_height,
+    # Note: the font is 16 by 16, but I request a 12:16 aspect ratio for
+    #  the window it's displayed in, which more-or-less gives the effect of
+    #  a reasonable 12x16 font.
+    with tcod.context.new_terminal(int(0.75*screen_width),screen_height,
             tileset=tileset,title="Vim Roguelike Challenge (VimRC)",
             vsync=True) as context:
         root_console = tcod.Console(screen_width,screen_height,order="F")
