@@ -110,8 +110,9 @@ class LandmineTrigger(Trigger):
 class AltarTrigger(Trigger):
     def entered(self,entity:Actor) -> None:
         if entity == entity.engine.player and entity.fulfills("can win"):
-            entity.engine.message_log.add_message(
-               "You successfully retrieved the Amulet of Yendor! Congratulations!"
-            )
-            #raise NotImplementedError("Winning the game is not yet implemented.")
+            entity.engine.win_game()
+            """
+
+            """
+            #WinGame(entity).perform()
 

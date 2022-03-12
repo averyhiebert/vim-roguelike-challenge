@@ -16,6 +16,7 @@ from input_handlers import (
     MainGameEventHandler,
     CommandEntryEventHandler,
     CursorMovementEventHandler,
+    GameOverEventHandler
 )
 from message_log import MessageLog
 from status_bar import StatusBar
@@ -70,6 +71,16 @@ class Engine:
             return self.cursor
         else:
             return self.player.pos
+
+    def win_game(self) -> None:
+        """ Win the game.  Trigger game over screen."""
+        self.message_log.add_message(
+           "You successfully retrieved the Amulet of Yendor!\nCongratulations on your powerful vim-fu."
+        )
+        self.message_log.add_message(
+           "Press (q) to quit, or (n) to start a new game."
+        )
+        self.event_handler = GameOverEventHandler(self)
 
     @property
     def cursor(self) -> Tuple[int,int]:

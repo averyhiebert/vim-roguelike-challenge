@@ -237,3 +237,7 @@ class GameOverEventHandler(EventHandler):
             action = actions.HardQuitGame(self.engine.player)
 
         return action
+
+    # Since the player just won, we'll be nice and let them quit normally
+    def ev_quit(self,event:tcod.event.Quit) -> Optional[Action]:
+        raise SystemExit()

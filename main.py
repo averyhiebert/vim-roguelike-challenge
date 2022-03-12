@@ -14,8 +14,8 @@ import exceptions
 
 # Some constants for development
 # TODO Change these before final build...
-USE_TEST_ROOM = True
-ALWAYS_NEW_GAME = True
+USE_TEST_ROOM = False
+ALWAYS_NEW_GAME = False
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     """ Return a new game object (i.e. an Engine).

@@ -56,6 +56,7 @@ class EscapeAction(Action):
         #QuitGame(self.entity).perform()
         raise exceptions.UserError("Type :quit<Enter> to exit vim")
 
+
 class SaveGame(Action):
     def perform(self) -> None:
         self.skip_turn = True # No turn on save
@@ -308,16 +309,18 @@ class ActionDeleteAlongPath(ActionWithPath):
                 direction = (target_x - self.entity.x, target_y - self.entity.y)
                 MeleeAction(self.entity,direction).perform()
 
-        # Yank, if magnetic
-        if self.entity.fulfills("magnetic"):
-            PickupAlongPath(self.entity,self.path,
-                register=self.register,
-                draw_trace=False).perform()
-        
         # Draw trace
         if len(self.path.points) > 1:
             self.entity.gamemap.add_trace(self.path.points,
                 color=colors.delete_trace)
+
+        # Yank, if magnetic
+        # (We do this last since it might throw an error if there
+        #  is nothing to yank)
+        if self.entity.fulfills("magnetic"):
+            PickupAlongPath(self.entity,self.path,
+                register=self.register,
+                draw_trace=False).perform()
 
 class PickupAlongPath(ActionWithPath):
 
