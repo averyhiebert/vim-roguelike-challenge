@@ -71,8 +71,8 @@ help_text = {
     # Enemies
     # TODO Make this automatic as well
     "nano":"A hostile but weak text editor.\n2 hp, 2 strength",
-    "ed":"ed is the standard text editor.\n3 hp, 3 strength",
-    "sed":"A feral stream editor.\n2 hp, 2 strength",
+    "ed":"ed is the standard text editor.\n4 hp, 3 strength",
+    "sed":"A feral stream editor.\n6 hp, 5 strength",
     "gedit":"A feral stream editor.\n6 hp, 5 strength",
     "magnetized needle":"REAL programmers edit files using a magnetized needle and a steady hand (see xkcd#378). \n4 hp, 8 strength",
     "vimic":"A monster that mimics the features of vim. 15 hp, 10 strength",
