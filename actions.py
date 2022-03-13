@@ -290,15 +290,18 @@ class ActionMoveAlongPath(ActionWithPath):
             if not self.ignore_blocking:
                 MeleeAction(self.entity,direction).perform()
 
-        self.entity.move_to(*destination)
-        if len(self.path.points) > 2:
-            self.entity.gamemap.add_trace(self.path.points)
-
         # Yank, if magnetic
+        #  (Comes before move, so you don't automatically die to landmines)
         if self.entity.fulfills("magnetic"):
             PickupAlongPath(self.entity,self.path,
                 register=self.register,
                 draw_trace=False).perform()
+        
+        # Actually move
+        self.entity.move_to(*destination)
+        if len(self.path.points) > 2:
+            self.entity.gamemap.add_trace(self.path.points)
+
 
 class ActionDeleteAlongPath(ActionWithPath):
     def __init__(self,*args,no_truncate:bool=False,
@@ -312,10 +315,6 @@ class ActionDeleteAlongPath(ActionWithPath):
             self.path.truncate_to_navigable(self.entity)
         destination = self.path.last_occupiable_square(self.entity)
 
-        # Move, unless a ranged weapon is equipped
-        if not self.entity.fulfills("ranged"):
-            self.entity.move_to(*destination)
-
         # Attack everything along path.
         for point in self.path.points:
             target = self.entity.gamemap.get_actor_at_location(point)
@@ -324,18 +323,24 @@ class ActionDeleteAlongPath(ActionWithPath):
                 direction = (target_x - self.entity.x, target_y - self.entity.y)
                 MeleeAction(self.entity,direction).perform()
 
-        # Draw trace
-        if len(self.path.points) > 1:
-            self.entity.gamemap.add_trace(self.path.points,
-                color=colors.delete_trace)
-
         # Yank, if magnetic
-        # (We do this last since it might throw an error if there
-        #  is nothing to yank)
+        # (We do this before moving, so as to yank landmines before landing on
+        #  them, but after the attack so that we're yanking corpses and not
+        #  the enemies themselves.  Yanking enemies is not implemented yet,
+        #  but I have plans to possibly maybe add it in the future.)
         if self.entity.fulfills("magnetic"):
             PickupAlongPath(self.entity,self.path,
                 register=self.register,
                 draw_trace=False).perform()
+
+        # Move, unless a ranged weapon is equipped
+        if not self.entity.fulfills("ranged"):
+            self.entity.move_to(*destination)
+
+        # Draw trace
+        if len(self.path.points) > 1:
+            self.entity.gamemap.add_trace(self.path.points,
+                color=colors.delete_trace)
 
 class PickupAlongPath(ActionWithPath):
 
