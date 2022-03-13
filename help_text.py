@@ -61,7 +61,7 @@ help_text = {
     # Items
     # TODO Make this automatic in the future maybe
     "amulet":"An item that grants access to a certain ability when equipped.",
-    "scroll":"A single-use item that executes a command when consumed.",
+    "scroll":"A single-use item that executes a command when consumed.  Use @r to read the scroll in register r.",
     "crossbow":"Enables the ranged ability when equipped (see :help ranged)",
     "bat ears":"Enables echolocation when equipped (see :help echolocate)",
     "magnet":"Makes the player magnetic when equipped (see :help echolocate)",
