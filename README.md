@@ -2,7 +2,9 @@
 
 The roguelike you just can't quit!
 
-An old-school ascii-based dungeon crawler mechanically & thematically inspired by the best text editor, vim.  Explore dungeons using powerful navigation commands, yank loot, and delete enemies like the enigmatic `ed` and the dreaded `Emacs` in your quest to retrieve the Amulet of Yendor. 
+An old-school ascii-based dungeon crawler mechanically & thematically inspired by the best text editor, vim.  Explore dungeons using powerful navigation commands, yank loot, and delete enemies like the enigmatic `ed` and the dreaded `Emacs` in your quest to retrieve the Amulet of Yendor.
+
+[Download for linux & windows here!](https://averyhiebert.itch.io/vim-roguelike-challenge)
 
 ## Why?
 
