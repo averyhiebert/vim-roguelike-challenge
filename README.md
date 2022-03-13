@@ -4,6 +4,10 @@ The roguelike you just can't quit!
 
 An old-school ascii-based dungeon crawler mechanically & thematically inspired by the best text editor, vim.  Explore dungeons using powerful navigation commands, yank loot, and delete enemies like the enigmatic `ed` and the dreaded `Emacs` in your quest to retrieve the Amulet of Yendor. 
 
+## Why?
+
+Vim and classic roguelikes have a lot in common - a text based interface, steep learning curve, great potential for mastery, items/commands that combine in powerful ways, and a history of free and open source software.  So why not combine the two?  Being half-decent at vim make me feel like a powerful text editing wizard, so I thought it might be fun to try and carry that feeling over to a video game, and the 7 Day Roguelike Challenge presented the perfect opportunity.
+
 ## Controls
 
 Basically, I tried my best to implement vim movement in a roguelike context. Use `hjkl` (or arrow keys, if you insist) to move, `d`+movement to attack, `yy` to pick up items at your current location, and `"rp` to drop the item in register `r`.
