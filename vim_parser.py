@@ -565,7 +565,9 @@ class VimCommandParser:
             # Note: inventory may raise a vim error if register invalid.
             register = command[1]
             item = player.inventory.get_item(register)
-            return actions.ItemAction(player,item)
+            action = actions.ItemAction(player,item)
+            action.skip_turn = True
+            return action
         elif command == ">":
             # Down stairs movement
             self.reset(erase_history=True)
