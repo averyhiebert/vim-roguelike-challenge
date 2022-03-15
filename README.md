@@ -12,11 +12,14 @@ Vim and classic roguelikes have a lot in common - a text based interface, steep 
 
 ## Controls
 
-Basically, I tried my best to implement vim movement in a roguelike context. Use `hjkl` (or arrow keys, if you insist) to move, `d`+movement to attack, `yy` to pick up items at your current location, and `"rp` to drop the item in register `r`.
+For more detailed instructions, see [the documentation](docs/README.md).
+
+Basically, I tried my best to implement vim movement in a roguelike context. Use `hjkl` (or arrow keys, if you insist) to move, `d`+movement to attack, `yy` to pick up items at your current location, `"rp` to drop the item in register `r`, and `@r` to use/consume the item in register `r`.
 
 Consult the "cursor movement" section of a [vim cheat sheet](https://vim.rtorr.com/) for a wide range of additional options. Not all commands are implemented, but many are (with some natural modifications to suit gameplay). However, they will generally require an amulet to use. Try out the "vimtutor" starting class to experiment with all available commands.
 
-VimRC is self-documenting in the form of a `:help` command.  For instance, to learn about controls try `:help controls`.  A text version of the documentation that you can browse through, as well as a summary of differences intended specifically for vim users, is in the works. 
+VimRC is self-documenting in the form of a `:help` command.  For instance, to learn about controls try `:help controls`.
+
 
 ## License
 
