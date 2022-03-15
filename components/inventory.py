@@ -172,7 +172,7 @@ class Inventory(Ability):
 
         self.register_history.append(register)
         if not (silent or startup):
-            self.parent.gamemap.engine.message_log.add_message(f"You yanked the {item.name} (\"{register})")
+            self.parent.gamemap.engine.message_log.add_message(f"You yanked the {item.name} (@{register})")
 
         # Trigger yank behaviour, if any.
         if not startup:

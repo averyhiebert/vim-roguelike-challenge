@@ -1,11 +1,11 @@
 VIM LICENSE
 
-I)  There are no restrictions on distributing unmodified copies of VimRC
-    except that they must include this license text.  You can also distribute
-    unmodified parts of VimRC, likewise unrestricted except that they must
-    include this license text.  You are also allowed to include executables
-    that you made from the unmodified VimRC sources, plus your own usage
-    examples.
+I)  There are no restrictions on distributing unmodified copies of Vim
+    Roguelike Challenge (VimRC) except that they must include this license
+    text. You can also distribute unmodified parts of VimRC, likewise
+    unrestricted except that they must include this license text.
+    You are also allowed to include executables that you made from the
+    unmodified VimRC sources, plus your own usage examples.
 
 II) It is allowed to distribute a modified (or extended) version of VimRC,
     including executables and/or source code, when the following four
