@@ -24,8 +24,7 @@ the way.
 
 ## Items
 
-Pick up items by "yanking", i.e. `y5l` will pick up any items up to 5 tiles
-to the right. `yy` will pick up any items on the tile currently occupied by the player.  When you pick up an item, it will be placed into a "register" identified by a letter or number.  Numbered registers are considered to be "equipped" while alphabetic registers are not.  You can view the contents of your registers by typing `i`.
+Pick up items by "yanking" with `y` + a movement command.  For instance, `y5l` will pick up any items up to 5 tiles to the right. `yy` will pick up any items on the tile currently occupied by the player.  When you pick up an item, it will be placed into a "register" identified by a letter or number.  Numbered registers are considered to be "equipped" while alphabetic registers are not.  You can view the contents of your registers by typing `i`.
 
 You can use the item in register `r` by typing `@r`. This is how you consume
 corpses (to recover HP) or activate scrolls.
