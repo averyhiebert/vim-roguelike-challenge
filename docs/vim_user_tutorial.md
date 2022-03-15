@@ -23,14 +23,14 @@ Although regex search exists, you cannot currently move to the next search resul
 ### Range
 
 The player has a maximum "range," which is the largest number that you are
-allowed to use in a command. E.g. if you tried the command `10l` while only
-having a range fo 5, it would be interpreted as the command `5l` instead. You
+allowed to use in a command. E.g. if you tried the command `99l` while only
+having a range of 5, it would be interpreted as the command `5l` instead. You
 can upgrade your range for 10 gold using `upgrade range`.
 
 ## Attacking/Deleting
 
 Deleting (attacking) is performed with `d` + a movement command, as you would
-expected.  This moves the player as well as deleting anything in the path of
+expect.  This moves the player as well as attacking anything in the path of
 the movement. However, if the player has a ranged weapon equipped, they will
 not move when deleting.  I suppose it's philosophically debatable which of
 these two cases matches the usual behaviour of vim.
@@ -50,6 +50,11 @@ Deleting does not automatically yank, unless a magnet is equipped.
 ## Using items/macros
 
 Type `@r` to use/consume the item in register `r`. This is analogous to macros. Unfortunately, I didn't have time to implement macros
+
+## "Observing"
+
+Use `o` to "observe" the contents of a tile. Pressing `o` will enter "observe"
+mode.  Move the cursor to the tile of interest, and press `o` again (or enter).
 
 ## Searching
 

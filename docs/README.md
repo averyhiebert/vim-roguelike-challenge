@@ -29,6 +29,11 @@ Pick up items by "yanking" with `y` + a movement command.  For instance, `y5l` w
 You can use the item in register `r` by typing `@r`. This is how you consume
 corpses (to recover HP) or activate scrolls.
 
+## "Observing"
+
+Use `o` to observe the contents of a tile. Pressing `o` will enter "observe"
+mode.  Move the cursor to the tile of interest, and press `o` again (or enter).
+
 ## Quitting
 
 To quit, use the command `:wq`.
