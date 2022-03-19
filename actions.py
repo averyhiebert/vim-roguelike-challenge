@@ -281,15 +281,6 @@ class ActionMoveAlongPath(ActionWithPath):
             self.path.truncate_to_navigable(self.entity)
             destination = self.path.last_occupiable_square(self.entity)
         
-        if len(self.path.points) >= 2 and destination == self.path.points[-2]:
-            # Possibly a melee attack
-            target_x,target_y = self.path.points[-1]
-            direction = (target_x - self.entity.x, target_y - self.entity.y)
-            # Would be nicer if MeleeAction took a destination, not direction,
-            #  but oh well...
-            if not self.ignore_blocking:
-                MeleeAction(self.entity,direction).perform()
-
         # Yank, if magnetic
         #  (Comes before move, so you don't automatically die to landmines)
         if self.entity.fulfills("magnetic"):
