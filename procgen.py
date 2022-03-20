@@ -326,3 +326,26 @@ class TestDungeon(LevelGenerator):
         dungeon.tiles[15:36,18] = tile_types.floor
 
         return dungeon
+
+class TutorialDungeon(LevelGenerator):
+    """ A manually created dungeon to serve as a tutorial."""
+    def generate(self,shape:Tuple[int,int],engine:Engine,
+            difficulty:int):
+        map_width,map_height = shape
+
+        player = engine.player
+        dungeon = GameMap(engine,map_width, map_height,entities=[player])
+        player.place((3,3),dungeon)
+
+
+        room_1 = RectangularRoom(x=1,y=1,width=20,height=8)
+
+        # Dig out rooms
+        dungeon.tiles[room_1.inner] = tile_types.floor
+
+        # Room 1 water
+        dungeon.tiles[8:10,2:9] = tile_types.water
+        dungeon.tiles[13:16,2:9] = tile_types.water
+
+        return dungeon
+

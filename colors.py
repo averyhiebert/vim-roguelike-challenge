@@ -29,6 +29,10 @@ default_FOV_bg = off_dark # Used by default in background where visible
 default_dim_fg = beige # Might use for fg when not in FOV, maybe?
 default_fg = white  # Used by default for foreground colour
 
+# Specific tile colors
+water_fg = medium_blue
+water_dim_fg = medium_blue
+
 # Entity colours
 player = default_fg
 ed = orange 

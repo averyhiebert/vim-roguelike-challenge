@@ -9,7 +9,7 @@ import tcod
 import colors
 from engine import Engine
 import entity_factories
-from procgen import TestDungeon, BasicDungeon
+from procgen import TestDungeon, BasicDungeon, TutorialDungeon
 from game_world import GameWorld
 import level_factories as lf
 import exceptions
@@ -17,6 +17,7 @@ import exceptions
 # Some constants for development
 # TODO Change these before final build...
 USE_TEST_ROOM = False
+USE_TUTORIAL = True
 ALWAYS_NEW_GAME = False
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
@@ -39,6 +40,11 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
 
     if USE_TEST_ROOM:
         level_gen = TestDungeon("Test")
+        engine.set_game_map(level_gen.generate((map_width,map_height),
+            engine,difficulty=1)
+        )
+    elif USE_TUTORIAL:
+        level_gen = TutorialDungeon("Tutorial")
         engine.set_game_map(level_gen.generate((map_width,map_height),
             engine,difficulty=1)
         )

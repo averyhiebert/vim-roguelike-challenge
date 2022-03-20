@@ -60,6 +60,12 @@ wall = new_tile(
     light=(ord("#"),colors.default_fg,colors.default_FOV_bg),
     name=tile_names.index("wall"),
 )
+water = new_tile(
+    walkable=False, transparent=True,
+    dark=(ord("~"),colors.water_dim_fg,colors.default_bg),
+    light=(ord("~"),colors.water_fg,colors.default_FOV_bg),
+    name=tile_names.index("wall"),
+)
 down_stairs = new_tile(
     walkable=True, transparent=True,
     dark=(ord(">"),colors.default_dim_fg,colors.default_bg),
