@@ -8,7 +8,7 @@ from components.fighter import Fighter
 from components.consumable import HealingConsumable, CommandConsumable
 from components.inventory import Inventory
 from components.ability import Omnipotent, SimpleAbility, AllCommands
-from components.trigger import LandmineTrigger, AltarTrigger
+from components.trigger import LandmineTrigger, AltarTrigger, MessageTrigger
 from entity import Actor, Item, Amulet, Gold
 from render_order import RenderOrder
 import colors
@@ -203,6 +203,21 @@ altar = Item(
     trigger=AltarTrigger(),
     yankable=False,
 )
+
+# Needs to be done differently (can't pickle lambdas, apparently?)
+def tutorial_message(message):
+    def show_message(entity):
+        entity.engine.status_bar.set_long_message(message)
+
+    return Item(
+        char=" ",color=colors.default_fg,
+        name="tutorial message",
+        summary=f"A tutorial message: {message}",
+        render_order=RenderOrder.TRAP,
+        yankable=False,
+        trigger=MessageTrigger(message)
+    )
+
 
 # Items =========================================================
 

@@ -19,6 +19,7 @@ class StatusBar:
         self.long_message = ""  #(e.g. an error or / and : commands)
         self.short_message = "" #(e.g. "register q", -- INSERT --, etc.
         self.error = False # Whether we're showing an error message.
+        self.tutorial=False # Whether we're showing a tutorial message.
         self.skip_next_reset = False # To ensure error messages stick around
 
     def reset(self) -> None:
@@ -34,10 +35,11 @@ class StatusBar:
         self.long_message = ""
         self.error=error
 
-    def set_long_message(self,text:str,error=False) -> None:
+    def set_long_message(self,text:str,error=False,tutorial=False) -> None:
         self.long_message = text
         self.error=error
-        if error:
+        self.tutorial=tutorial
+        if error or tutorial:
             self.skip_next_reset=True
 
     def render(self,console:Console) -> None:

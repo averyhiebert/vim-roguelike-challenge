@@ -384,6 +384,7 @@ class TutorialDungeon(LevelGenerator):
         dungeon.tiles[8:10,2:9] = tile_types.water
         dungeon.tiles[15:16,2:7] = tile_types.wall
         dungeon.tiles[16:21,6] = tile_types.water
+        ef.tutorial_message("Eat the nano corpse (learn how using :help eat).").spawn(dungeon,2,2)
         
         # Room 2 dummies
         ef.dummy.spawn(dungeon,28,4)

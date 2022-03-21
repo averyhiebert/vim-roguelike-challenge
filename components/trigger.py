@@ -37,15 +37,19 @@ class Trigger(BaseComponent):
 class LambdaTrigger(Trigger):
     """ For making simple triggers quickly."""
     def __init__(self,*,
-            entered:Optional[Function[[Item,Actor],None]],
-            exited:Optional[Function[[Item,Actor],None]],
-            yanked:Optional[Function[[Item,Actor],None]],
-            dropped:Optional[Function[[Item,Actor],None]]):
-        super().__init__(entity)
-        self.entered = entered
-        self.exited = exited(x)
-        self.yanked = yanked(x)
-        self.dropped = dropped(x)
+            entered:Optional[Function[[Item,Actor],None]]=None,
+            exited:Optional[Function[[Item,Actor],None]]=None,
+            yanked:Optional[Function[[Item,Actor],None]]=None,
+            dropped:Optional[Function[[Item,Actor],None]]=None):
+        super().__init__()
+        if entered:
+            self.entered = entered
+        if exited:
+            self.exited = exited
+        if yanked:
+            self.yanked = yanked
+        if dropped:
+            self.dropped = dropped
 
 class GoldTrigger(Trigger):
     """ TODO Make enemies drop gold when they die."""
@@ -113,3 +117,12 @@ class AltarTrigger(Trigger):
         if entity == entity.engine.player and entity.fulfills("can win"):
             entity.engine.win_game()
 
+class MessageTrigger(Trigger):
+    def __init__(self,message:str):
+        super().__init__()
+        self.message = message
+
+    def entered(self,entity:Actor) -> None:
+        if entity == entity.engine.player:
+            #entity.engine.show_message(self.message)
+            entity.engine.show_tutorial_message(self.message)

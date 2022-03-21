@@ -135,6 +135,10 @@ class Engine:
         """ Show an error message to the user, in status bar (vim-style)."""
         self.status_bar.set_long_message(text,error=True)
 
+    def show_tutorial_message(self,text:str) -> None:
+        """ Show a message to the user in status bar."""
+        self.status_bar.set_long_message(text,tutorial=True)
+
     def enter_command_mode(self,text:str) -> None:
         self.event_handler = CommandEntryEventHandler(self,text)
         self.status_bar.set_long_message(text)

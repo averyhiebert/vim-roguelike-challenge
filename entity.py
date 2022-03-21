@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from components.inventory import Inventory
     from components.ability import Ability
     from engine import Engine
-    from entity import Item
+    #from entity import Item
 
 T = TypeVar("T",bound="Entity")
 
@@ -197,12 +197,13 @@ class Item(Entity):
             yankable:bool=True,
             consumable: Optional[Consumable]=None,
             trigger: Optional[Trigger]=None,
-            ability:Optional[Ability]=None):
+            ability:Optional[Ability]=None,
+            render_order=RenderOrder.ITEM):
         super().__init__(
             x=x,y=y,char=char,color=color,name=name,
             summary=summary,
             blocks_movement=False,
-            render_order=RenderOrder.ITEM
+            render_order=render_order
         )
         if not ability:
             ability = SimpleAbility("") # Should have a "nonability" class
