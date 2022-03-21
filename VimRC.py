@@ -18,7 +18,7 @@ import exceptions
 # TODO Change these before final build...
 USE_TEST_ROOM = False
 USE_TUTORIAL = True
-ALWAYS_NEW_GAME = False
+ALWAYS_NEW_GAME = True
 
 def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
     """ Return a new game object (i.e. an Engine).

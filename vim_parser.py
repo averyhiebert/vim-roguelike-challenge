@@ -135,7 +135,9 @@ class VimCommandParser:
             return actions.SellDroppedItems(self.entity)
         elif re.match(r":h(?:elp)? (.*)",command):
             m = re.match(r":h(?:elp)? (.*)",command)
-            query = m.group(1).lower()
+            query = m.group(1)
+            if len(query) > 1:
+                query = query.lower()
             if query in help_text:
                 # TODO Line breaks
                 text = help_text[query].split("\n")

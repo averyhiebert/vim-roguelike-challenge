@@ -45,6 +45,10 @@ class BaseAI(Action):
         path: List[List[int]] = pathfinder.path_to(dest)[1:].tolist()
         return [(x,y) for x,y in path]
 
+class Inanimate(BaseAI):
+    def perform(self) -> None:
+        return None
+
 class HostileEnemy(BaseAI):
     def __init__(self,entity:Actor):
         super().__init__(entity)

@@ -338,14 +338,73 @@ class TutorialDungeon(LevelGenerator):
         player.place((3,3),dungeon)
 
 
-        room_1 = RectangularRoom(x=1,y=1,width=20,height=8)
+        rooms = []
+        rooms.append(RectangularRoom(x=1,y=1,width=20,height=8))  # move
+        rooms.append(RectangularRoom(x=23,y=1,width=10,height=6)) # attack
+        rooms.append(RectangularRoom(x=35,y=1,width=10,height=6)) # attack
+        rooms.append(RectangularRoom(x=35,y=13,width=10,height=6)) # yank
+        rooms.append(RectangularRoom(x=35,y=24,width=10,height=6)) # help
+        rooms.append(RectangularRoom(x=20,y=16,width=10,height=6)) # middle
+        rooms.append(RectangularRoom(x=20,y=10,width=10,height=6)) # observe
+        rooms.append(RectangularRoom(x=1,y=10,width=14,height=10)) # fight
+        rooms.append(RectangularRoom(x=3,y=22,width=10,height=6)) # yank corpse
+        rooms.append(RectangularRoom(x=3,y=30,width=10,height=6)) # eat corpse
+        rooms.append(RectangularRoom(x=15,y=30,width=10,height=6)) # end
 
         # Dig out rooms
-        dungeon.tiles[room_1.inner] = tile_types.floor
+        for room in rooms:
+            dungeon.tiles[room.inner] = tile_types.floor
 
-        # Room 1 water
+        # TODO Add messages somehow
+        messages = [
+            "Use hjkl to move",
+            "Type 5l to move right by 5",
+            "Figure out how to cross this water",
+            "Use d + movement to delete (attack) the dummy",
+            "Figure out how to attack this dummy",
+            "Use y + movement to yank (pick up) the amulet",
+            "Type :help M (and hit <enter>) to learn about M",
+            "Many more commands await!",
+            "Look at something (learn how using :help look)",
+            "Fight the nano!",
+            "Yank the nano corpse.",
+            "Eat the nano corpse (learn how using :help eat).",
+            "You are ready. Use :new to start a new game.",
+        ]
+
+        # Tunnels
+        for i, (room1, room2) in enumerate(zip(rooms[:-1],rooms[1:])):
+            if i == 4:
+                # Skip tunnel for demonstrating power of M
+                continue
+            for x,y in tunnel_between(room1.center,room2.center):
+                dungeon.tiles[x,y] = tile_types.floor
+
+        # Room 1 water and walls
         dungeon.tiles[8:10,2:9] = tile_types.water
-        dungeon.tiles[13:16,2:9] = tile_types.water
+        dungeon.tiles[15:16,2:7] = tile_types.wall
+        dungeon.tiles[16:21,6] = tile_types.water
+        
+        # Room 2 dummies
+        ef.dummy.spawn(dungeon,28,4)
+
+        # Room 3 island and dummy
+        dungeon.tiles[39:42,3:6] = tile_types.water
+        dungeon.tiles[40,4] = tile_types.floor
+        ef.dummy.spawn(dungeon,40,4)
+
+        # Room 4 item
+        ef.amulet["M"].spawn(dungeon,*rooms[3].center)
+
+        # Room 6 items
+        ef.amulet["$"].spawn(dungeon,25,18)
+        ef.amulet["f"].spawn(dungeon,23,18)
+        ef.amulet["u"].spawn(dungeon,27,18)
+
+        # Room 8 ed
+        new_ed = ef.ed.spawn(dungeon,4,15)
+        new_ed.corpse_drop_chance = 1 # Force nano to drop corpse
+        new_ed.wandering = False # For convenience
 
         return dungeon
 

@@ -42,11 +42,14 @@ def new_tile(
     return np.array((walkable,transparent,dark,light,unseen,name),dtype=tile_dt)
 
 # Define tiles here =========================
+# (I know this is annoying, but the reason for this list is so that the
+#  name can be stored as an int in the tile array, for numpy reasons)
 tile_names = [
     "floor",
     "wall",
     "stairs (down)",
     "stairs (up)",
+    "water",
 ]
 floor = new_tile(
     walkable=True, transparent=True,

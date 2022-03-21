@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Any
 import random
 
-from components.ai import HostileEnemy, VimlikeEnemy
+from components.ai import HostileEnemy, VimlikeEnemy, Inanimate
 from components.fighter import Fighter
 from components.consumable import HealingConsumable, CommandConsumable
 from components.inventory import Inventory
@@ -43,6 +43,19 @@ player = Actor(
 )
 
 # Enemies ==================================================================
+
+dummy = Actor(
+    char="d",
+    color=colors.ed,
+    name="target dummy",
+    summary="An inanimate dummy, for target practice.",
+    fighter=Fighter(hp=10,AC=0,strength=0,attack_text="bit"),
+    ai_cls=Inanimate,
+    corpse_drop_chance=0,
+    fov_radius=10,
+    needs_los=False,
+    wandering=False,
+)
 
 # Remains stationary until player seen, then tracks indefinitely
 nano = Actor(
