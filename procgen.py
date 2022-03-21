@@ -358,20 +358,6 @@ class TutorialDungeon(LevelGenerator):
         rooms.append(RectangularRoom(x=15,y=30,width=10,height=6)) # end
 
         # TODO Add messages somehow
-        messages = [
-            "Use hjkl to move",
-            "Type 5l to move right by 5",
-            "Figure out how to cross this water",
-            "Figure out how to attack this dummy",
-            "Use y + movement to yank (pick up) the amulet",
-            "Type :help M (and hit <enter>) to learn about M",
-            "Many more commands await!",
-            "Look at something (learn how using :help look)",
-            "Fight the nano!",
-            "Yank the nano corpse.",
-            "Eat the nano corpse (learn how using :help eat).",
-            "You are ready. Use :new to start a new game.",
-        ]
 
         # Dig out rooms
         for room in rooms:
@@ -407,7 +393,16 @@ class TutorialDungeon(LevelGenerator):
         dungeon.tiles[8:10,2:9] = tile_types.water
         dungeon.tiles[15:16,2:7] = tile_types.wall
         dungeon.tiles[16:21,6] = tile_types.water
-        ef.tutorial_message("Eat the nano corpse (learn how using :help eat).").spawn(dungeon,2,2)
+        m1 = ef.tutorial_message("Use hjkl to move")
+        m2 = ef.tutorial_message("Type 5l to move right by 5")
+        m3 = ef.tutorial_message("Figure out how to cross this water")
+        for j in range(2,9):
+            for i in range(2,7):
+                m1.spawn(dungeon,i,j)
+            m2.spawn(dungeon,7,j)
+        for i in range(15,21):
+            for j in range(7,9):
+                m3.spawn(dungeon,i,j)
         
         # Room 2 dummies
         ef.dummy.spawn(dungeon,28,4)
