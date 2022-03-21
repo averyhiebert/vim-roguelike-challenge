@@ -52,6 +52,9 @@ class StatusBar:
             if self.error:
                 fg = colors.error_fg
                 bg = colors.error_bg
+            elif self.tutorial:
+                fg = colors.tutorial_fg
+                bg = colors.tutorial_bg
             text = self.long_message
             console.print(x=1,y=38,string=text,fg=fg,bg=bg)
         else:

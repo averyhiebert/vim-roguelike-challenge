@@ -72,6 +72,9 @@ normal = beige
 bad = light_red
 very_bad = red
 
+# Status bar
 error_fg = white 
 error_bg = red # Mimics vim error text, may change though.
+tutorial_fg = white 
+tutorial_bg = green
 
