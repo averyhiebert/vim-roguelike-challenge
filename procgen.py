@@ -115,9 +115,15 @@ class RectangularRoom:
         center_y = (self.y1 + self.y2)//2
         return center_x, center_y
 
-    @ property
+    @property
     def inner(self) -> Tuple[slice,slice]:
         return slice(self.x1+1,self.x2), slice(self.y1+1,self.y2)
+    
+    @property
+    def inner_list(self) -> List[Tuple[int,int]]:
+        """ Inner, but as a list of tuples."""
+        #return [(x,y) for x,y in np.transpose(self.inner.nonzero())]
+        return [(x,y) for x in range(self.x1+1,self.x2) for y in range(self.y1+1,self.y2)]
 
     def intersects(self, other: RectangularRoom) -> bool:
         """ Return true if this room overlaps with other room. """
@@ -351,16 +357,11 @@ class TutorialDungeon(LevelGenerator):
         rooms.append(RectangularRoom(x=3,y=30,width=10,height=6)) # eat corpse
         rooms.append(RectangularRoom(x=15,y=30,width=10,height=6)) # end
 
-        # Dig out rooms
-        for room in rooms:
-            dungeon.tiles[room.inner] = tile_types.floor
-
         # TODO Add messages somehow
         messages = [
             "Use hjkl to move",
             "Type 5l to move right by 5",
             "Figure out how to cross this water",
-            "Use d + movement to delete (attack) the dummy",
             "Figure out how to attack this dummy",
             "Use y + movement to yank (pick up) the amulet",
             "Type :help M (and hit <enter>) to learn about M",
@@ -372,6 +373,10 @@ class TutorialDungeon(LevelGenerator):
             "You are ready. Use :new to start a new game.",
         ]
 
+        # Dig out rooms
+        for room in rooms:
+            dungeon.tiles[room.inner] = tile_types.floor
+
         # Tunnels
         for i, (room1, room2) in enumerate(zip(rooms[:-1],rooms[1:])):
             if i == 4:
@@ -379,6 +384,24 @@ class TutorialDungeon(LevelGenerator):
                 continue
             for x,y in tunnel_between(room1.center,room2.center):
                 dungeon.tiles[x,y] = tile_types.floor
+
+        # Room-sized messages
+        messages:List[Tuple[int,str]] = [
+            (1,"Use d + movement to delete (attack) the dummy"),
+            (2,"Figure out how to attack this dummy"),
+            (3,"Use y + movement to yank (pick up) the amulet"),
+            (4,"Type :help M (and hit <enter>) to learn about M"),
+            (5,"Many more commands await!"),
+            (6,"Look at something (learn how using :help look)"),
+            (7,"Fight the ed!"),
+            (8,"Yank the ed corpse."),
+            (9,"Eat the ed corpse (learn how using :help eat)."),
+            (10,"You are ready. Use :new to start a new game."),
+        ]
+        for i, s in messages:
+            message = ef.tutorial_message(s)
+            for x,y in rooms[i].inner_list:
+                message.spawn(dungeon,x,y)
 
         # Room 1 water and walls
         dungeon.tiles[8:10,2:9] = tile_types.water
