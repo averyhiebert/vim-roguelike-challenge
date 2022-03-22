@@ -517,7 +517,7 @@ class VimCommandParser:
                 action = actions.ActionDeleteAlongPath(player,path,
                     register=register)
                 action.requirements = movement_reqs(movement) + ["d"]
-            elif main_command == "yy":
+            elif main_command == "yy" or main_command == "Y":
                 path = Path([player.pos],game_map = engine.game_map)
                 action = actions.PickupAlongPath(player,path,register)
                 # No yy requirement, as that could be game-breaking
