@@ -75,7 +75,7 @@ def render_main_menu(console:Console):
 
     console.print(0,5,string="VimRC - Vim Roguelike Challenge".center(75)
         ,fg=colors.ui_fg)
-    console.print(0,7,string="version 0.0.1".center(75),
+    console.print(0,7,string="version 0.1.0".center(75),
         fg=colors.ui_fg)
     console.print(0,8,string="by Avery Hiebert".center(75),
         fg=colors.ui_fg)
