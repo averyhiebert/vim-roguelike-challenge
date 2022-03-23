@@ -23,7 +23,7 @@ VimRC is self-documenting in the form of a `:help` command.  For instance, to le
 
 ## License
 
-Just for fun, in addition to the MIT license this project is also available under the vim license (i.e. you may use/distribute it under the terms of either of these licenses, at your discretion). Hopefully this doesn't cause some sort of headach in the future.
+Just for fun, in addition to the MIT license this project is also available under the vim license (i.e. you may use/distribute it under the terms of either of these licenses, at your discretion). Hopefully this doesn't cause some sort of headache in the future.
 
 
 ## About
