@@ -17,10 +17,10 @@ import exceptions
 # Some constants for development
 # TODO Change these before final build...
 USE_TEST_ROOM = False
-USE_TUTORIAL = True
+USE_TUTORIAL = False
 ALWAYS_NEW_GAME = True
 
-def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
+def new_game(tileset,screen_width:int=75,screen_height:int=40,use_tutorial=False) -> Engine:
     """ Return a new game object (i.e. an Engine).
 
     Note: due to hardcoded values in UI elements, please do not use
@@ -43,7 +43,7 @@ def new_game(tileset,screen_width:int=75,screen_height:int=40) -> Engine:
         engine.set_game_map(level_gen.generate((map_width,map_height),
             engine,difficulty=1)
         )
-    elif USE_TUTORIAL:
+    elif use_tutorial:
         level_gen = TutorialDungeon("Tutorial")
         engine.set_game_map(level_gen.generate((map_width,map_height),
             engine,difficulty=1)
@@ -99,15 +99,11 @@ def main() -> None:
                 engine.render(console=root_console,context=context)
                 engine.event_handler.handle_events()
             except exceptions.UserError as err:
-                # TODO Use the status bar, not message log.
-                #engine.message_log.add_message(str(err))
                 engine.show_error_message(str(err))
             except exceptions.Impossible as err:
                 engine.message_log.add_message(str(err))
-                #engine.show_error_message(str(err))
             except NotImplementedError as err:
                 traceback.print_exc()
-                #engine.message_log.add_message(str(err))
                 engine.show_error_message(str(err))
             except exceptions.NewGame:
                 # Trigger a new game.

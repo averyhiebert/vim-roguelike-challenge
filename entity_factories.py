@@ -305,8 +305,11 @@ def starting_class(s:str) -> Actor:
     if s == "fighter":
         pass
     elif s == "vimtutor":
-        p.inventory.insert(
-            amulet_of_vimtutor.copy(),startup=True)
+        # Tutorial is same starting class as fighter
+        pass
+    elif s == "all commands":
+        # Give them an amulet of vimtutor
+        p.inventory.insert(amulet_of_vimtutor.copy(),startup=True)
     elif s == "ranger":
         p.max_range = 3
         p.inventory.insert(crossbow,startup=True)
@@ -346,4 +349,6 @@ def starting_class(s:str) -> Actor:
             for s in ["H","L","0","$","M","m","'","f","t","e","w","yy","y","d"]]
         p.max_range=6
     return p
+
+TUTORIAL_STARTING_CLASS = "vimtutor"
 

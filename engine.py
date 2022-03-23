@@ -95,6 +95,10 @@ class Engine:
         self.event_handler = MainGameEventHandler(self)
         self.message_log.add_message(f"You are a novice {starting_class}.")
 
+        if starting_class == ef.TUTORIAL_STARTING_CLASS:
+            # TODO Make sure the player actually starts in the tutorial level.
+            pass
+
     def win_game(self) -> None:
         """ Win the game.  Trigger game over screen."""
         self.message_log.add_message(

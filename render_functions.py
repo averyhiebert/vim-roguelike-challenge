@@ -84,15 +84,16 @@ def render_main_menu(console:Console):
 
     console.print(0,13,string="Choose your starting class:".center(75),
         fg=colors.ui_fg)
+    console.print(0,17,string=f"v: {'vimtutor':<15}{'(tutorial level)':<29}".center(75),fg=colors.ui_fg)
+    console.print(0,18,string=f"a: {'all commands':<15}{'(experiment with the controls)':<29}".center(75),fg=colors.ui_fg)
 
     subwidth = 15
-    console.print(0,17,string=f"f: {'fighter':<15}{'(recommended)':<21}".center(75),fg=colors.ui_fg)
-    console.print(0,18,string=f"r: {'ranger':<15}{'(recommended)':<21}".center(75),fg=colors.ui_fg)
-    console.print(0,20,string=f"c: {'chaos wizard':<15}{'':21}".center(75),fg=colors.ui_fg)
-    console.print(0,21,string=f"p: {'pacifist':<15}{'':<21}".center(75),fg=colors.ui_fg)
-    console.print(0,22,string=f"s: {'sapper':<15}{'':<21}".center(75),fg=colors.ui_fg)
+    console.print(0,20,string=f"f: {'fighter':<15}{'(recommended)':<29}".center(75),fg=colors.ui_fg)
+    console.print(0,21,string=f"r: {'ranger':<15}{'':<29}".center(75),fg=colors.ui_fg)
+    console.print(0,22,string=f"c: {'chaos wizard':<15}{'':29}".center(75),fg=colors.ui_fg)
+    console.print(0,23,string=f"p: {'pacifist':<15}{'':<29}".center(75),fg=colors.ui_fg)
+    console.print(0,24,string=f"s: {'sapper':<15}{'':<29}".center(75),fg=colors.ui_fg)
 
-    console.print(0,24,string=f"v: {'vimtutor':<15}{'(access all commands)':<21}".center(75),fg=colors.ui_fg)
 
 
     # Left bar

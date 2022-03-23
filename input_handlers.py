@@ -110,7 +110,7 @@ class MainMenuEventHandler(EventHandler):
         usable_key = keydown_to_char(event) # i.e. an ascii char
 
         try:
-            if usable_key in "vVJ":
+            if usable_key in "vV":
                 return actions.StartGame(player,"vimtutor")
             elif usable_key in "fF":
                 return actions.StartGame(player,"fighter")
@@ -123,6 +123,8 @@ class MainMenuEventHandler(EventHandler):
                 return actions.StartGame(player,"sapper")
             elif usable_key in "cC":
                 return actions.StartGame(player,"chaos wizard")
+            elif usable_key in "aA":
+                return actions.StartGame(player,"all commands")
             elif usable_key == "q":
                 raise SystemExit()
             elif key == tcod.event.K_ESCAPE:
