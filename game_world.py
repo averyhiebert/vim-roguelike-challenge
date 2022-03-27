@@ -38,7 +38,8 @@ class GameWorld:
             map_width:int,
             map_height:int,
             current_floor:int=-1,
-            max_floors:int=13):
+            max_floors:int=13,
+            tutorial=False):
         self.engine = engine
         self.map_width = map_width
         self.map_height = map_height
@@ -49,6 +50,9 @@ class GameWorld:
         #  low priority at the moment, seeing as time is running out and I
         #  need most of the last day for UI/polish, rather than new features.
         self.floors = []
+
+        # For the special case of the tutorial level:
+        self.tutorial = tutorial
 
     @property
     def progress_summary(self) -> None:
@@ -67,9 +71,11 @@ class GameWorld:
     def generate_floor(self,level:int) -> GameMap:
         """ Generate a floor, according to the distribution of floor types."""
         # TODO Distribution of level types
-        #level_type = lf.default
-        level_type = sample_from_dist(level_chances,k=1,
-            difficulty=self.current_floor)[0]
+        if self.tutorial:
+            level_type = lf.tutorial
+        else:
+            level_type = sample_from_dist(level_chances,k=1,
+                difficulty=self.current_floor)[0]
 
         do_stairs = (self.current_floor != 0)
         return level_type.generate((self.map_width,self.map_height),

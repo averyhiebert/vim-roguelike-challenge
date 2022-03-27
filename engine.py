@@ -84,6 +84,11 @@ class Engine:
             return self.player.pos
 
     def start_game(self,starting_class:str) -> None:
+        # Special case for tutorial: reset the map to a tutorial level.
+        if starting_class == ef.TUTORIAL_STARTING_CLASS:
+            self.game_world.tutorial=True
+            self.game_world.next_floor()
+
         # Set player to given starting class.
         old_pos = self.player.pos
         self.game_map.entities.remove(self.player)
@@ -94,10 +99,6 @@ class Engine:
         self.main_menu_mode = False
         self.event_handler = MainGameEventHandler(self)
         self.message_log.add_message(f"You are a novice {starting_class}.")
-
-        if starting_class == ef.TUTORIAL_STARTING_CLASS:
-            # TODO Make sure the player actually starts in the tutorial level.
-            pass
 
     def win_game(self) -> None:
         """ Win the game.  Trigger game over screen."""

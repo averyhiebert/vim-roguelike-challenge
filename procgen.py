@@ -336,7 +336,7 @@ class TestDungeon(LevelGenerator):
 class TutorialDungeon(LevelGenerator):
     """ A manually created dungeon to serve as a tutorial."""
     def generate(self,shape:Tuple[int,int],engine:Engine,
-            difficulty:int):
+            difficulty:int,upstairs=False):
         map_width,map_height = shape
 
         player = engine.player

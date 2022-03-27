@@ -1,4 +1,4 @@
-from procgen import BasicDungeon, TestDungeon
+from procgen import BasicDungeon, TestDungeon, TutorialDungeon
 
 # Reminder: map size is 50,38
 
@@ -39,3 +39,6 @@ disconnected = BasicDungeon("Treasury",
         invert=False,
         do_tunnels=False,
         max_rooms=50)
+
+# The tutorial level
+tutorial = TutorialDungeon("Tutorial")
